@@ -1,0 +1,21 @@
+{
+	"fieldSets": [
+		{
+			"fields": [
+				{
+					"defaultValue": {"value": "#d9662b"},
+					"label": "Accent color",
+					"name": "accentColor",
+					"type": "colorPicker"
+				},
+				{
+					"defaultValue": {"value": "Order now"},
+					"label": "Call to action",
+					"name": "ctaLabel",
+					"type": "text"
+				}
+			],
+			"label": "Promo"
+		}
+	]
+}

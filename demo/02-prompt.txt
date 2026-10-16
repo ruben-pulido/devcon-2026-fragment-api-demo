@@ -1,0 +1,1 @@
+Our stores keep getting asked about their opening hours. Create a "Store Hours" fragment in the design library, with the external reference code acme-store-hours: a friendly card that lists the weekday and weekend opening hours, with a configurable accent color and a configurable "Get directions" button label. Match the look of our Seasonal Promo fragment.

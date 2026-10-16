@@ -1,0 +1,39 @@
+{
+  "externalReferenceCode": "acme-store-hours",
+  "fragmentVersions": [
+    {
+      "configuration": {
+        "fieldSets": [
+          {
+            "fields": [
+              {
+                "defaultValue": {
+                  "value": "#d9662b"
+                },
+                "label": "Accent color",
+                "name": "accentColor",
+                "type": "colorPicker"
+              },
+              {
+                "defaultValue": {
+                  "value": "Get directions"
+                },
+                "label": "Directions button label",
+                "name": "ctaLabel",
+                "type": "text"
+              }
+            ],
+            "label": "Store hours"
+          }
+        ]
+      },
+      "css": ".acme-hours {\n\talign-items: center;\n\tbackground: linear-gradient(135deg, #fff7ec, #fbe3c4);\n\tborder-radius: 24px;\n\tdisplay: flex;\n\tfont-family: Georgia, serif;\n\tgap: 32px;\n\tmargin: 24px auto;\n\tmax-width: 960px;\n\tpadding: 32px 40px;\n}\n\n.acme-hours__icon {\n\tcolor: var(--acme-accent);\n\tflex: 0 0 140px;\n\theight: 140px;\n\twidth: 140px;\n}\n\n.acme-hours__body {\n\tflex: 1;\n}\n\n.acme-hours__eyebrow {\n\tcolor: var(--acme-accent);\n\tfont-size: 14px;\n\tfont-weight: 700;\n\tletter-spacing: 0.12em;\n\tmargin: 0 0 8px;\n\ttext-transform: uppercase;\n}\n\n.acme-hours__title {\n\tcolor: #3b1f0e;\n\tfont-size: 40px;\n\tmargin: 0 0 16px;\n}\n\n.acme-hours__list {\n\tmargin: 0 0 20px;\n}\n\n.acme-hours__row {\n\tborder-bottom: 1px dashed rgba(92, 59, 36, 0.3);\n\tdisplay: flex;\n\tgap: 16px;\n\tjustify-content: space-between;\n\tpadding: 10px 0;\n}\n\n.acme-hours__day {\n\tcolor: #5c3b24;\n\tfont-size: 18px;\n\tmargin: 0;\n}\n\n.acme-hours__time {\n\tcolor: #3b1f0e;\n\tfont-family: system-ui, sans-serif;\n\tfont-size: 18px;\n\tfont-weight: 600;\n\tmargin: 0;\n}\n\n.acme-hours__cta {\n\tbackground: var(--acme-accent);\n\tborder-radius: 999px;\n\tcolor: #fff;\n\tdisplay: inline-block;\n\tfont-family: system-ui, sans-serif;\n\tfont-weight: 600;\n\tpadding: 12px 24px;\n}\n\n@media (max-width: 600px) {\n\t.acme-hours {\n\t\tflex-direction: column;\n\t\tpadding: 24px;\n\t\ttext-align: center;\n\t}\n\n\t.acme-hours__icon {\n\t\tflex-basis: 96px;\n\t\theight: 96px;\n\t\twidth: 96px;\n\t}\n\n\t.acme-hours__row {\n\t\tflex-direction: column;\n\t\tgap: 4px;\n\t}\n}",
+      "html": "<section class=\"acme-hours\" style=\"--acme-accent: ${configuration.accentColor};\">\n\t<svg aria-hidden=\"true\" class=\"acme-hours__icon\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"6\" viewBox=\"0 0 100 100\">\n\t\t<circle cx=\"50\" cy=\"50\" r=\"42\" />\n\t\t<path d=\"M50 24 V50 L68 62\" />\n\t</svg>\n\n\t<div class=\"acme-hours__body\">\n\t\t<p class=\"acme-hours__eyebrow\" data-lfr-editable-id=\"eyebrow\" data-lfr-editable-type=\"text\">Visit us</p>\n\n\t\t<h2 class=\"acme-hours__title\" data-lfr-editable-id=\"title\" data-lfr-editable-type=\"text\">Opening hours</h2>\n\n\t\t<dl class=\"acme-hours__list\">\n\t\t\t<div class=\"acme-hours__row\">\n\t\t\t\t<dt class=\"acme-hours__day\" data-lfr-editable-id=\"weekday-label\" data-lfr-editable-type=\"text\">Monday to Friday</dt>\n\t\t\t\t<dd class=\"acme-hours__time\" data-lfr-editable-id=\"weekday-hours\" data-lfr-editable-type=\"text\">7:00 AM - 8:00 PM</dd>\n\t\t\t</div>\n\n\t\t\t<div class=\"acme-hours__row\">\n\t\t\t\t<dt class=\"acme-hours__day\" data-lfr-editable-id=\"weekend-label\" data-lfr-editable-type=\"text\">Saturday and Sunday</dt>\n\t\t\t\t<dd class=\"acme-hours__time\" data-lfr-editable-id=\"weekend-hours\" data-lfr-editable-type=\"text\">8:00 AM - 6:00 PM</dd>\n\t\t\t</div>\n\t\t</dl>\n\n\t\t<span class=\"acme-hours__cta\">${configuration.ctaLabel}</span>\n\t</div>\n</section>",
+      "js": "",
+      "status": "Approved"
+    }
+  ],
+  "icon": "time",
+  "name": "Store Hours",
+  "type": "BasicFragment"
+}
