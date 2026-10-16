@@ -31,10 +31,12 @@ case "$action" in
 			api PUT "$SITE_API/sites/$site/site-pages/store-home" \
 				"$(page_payload "$PROMO_FRAGMENT_ERC")" >/dev/null
 
-			if (( i % 10 == 0 )); then
+			if (( i % 10 == 0 )) && (( i < count )); then
 				echo "  $i sites ($((SECONDS - start)) s)"
 			fi
 		done
+
+		echo "  $count sites created ($((SECONDS - start)) s)"
 		;;
 	measure)
 		LIBRARY="$FRAGMENT_API/design-libraries/$DESIGN_LIBRARY_ERC"
