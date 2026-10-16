@@ -102,27 +102,57 @@ show_sites() {
 	done
 }
 
+# fragment_instance FRAGMENT_ERC
+# The content a page element needs for a design library fragment: the HTML,
+# CSS, JS and configuration of its approved version. The Pages API stores a
+# copy of them in the page; propagation later refreshes that copy. The page
+# expects the configuration as a JSON string in the format fragments store it,
+# where a field's default is the plain value instead of {"value": ...}.
+fragment_instance() {
+	api GET "$FRAGMENT_API/design-libraries/$DESIGN_LIBRARY_ERC/fragments/$1" |
+		jq -c '
+			.fragmentVersions[] | select(.status == "Approved") |
+			{
+				configuration: (
+					.configuration |
+					.fieldSets[]?.fields[]? |= (.defaultValue |= (if type == "object" and has("value") then .value else . end)) |
+					tojson
+				),
+				css,
+				html,
+				js
+			}'
+}
+
 # page_payload FRAGMENT_ERC...
 # Builds the store-home content page with one design library fragment per
 # argument, in order, in both the published specification and its draft.
 page_payload() {
+	local erc instances="[]"
+
+	for erc in "$@"; do
+		instances=$(jq -c --arg erc "$erc" --argjson instance "$(fragment_instance "$erc")" '. + [{erc: $erc, instance: $instance}]' <<< "$instances")
+	done
+
 	jq -n \
 		--arg library "$DESIGN_LIBRARY_ERC" \
-		--args \
+		--argjson instances "$instances" \
 		'
 		def elements($suffix):
 			[
-				$ARGS.positional | to_entries[] |
+				$instances | to_entries[] |
 				{
-					externalReferenceCode: "store-home-\(.value)\($suffix)",
+					externalReferenceCode: "store-home-\(.value.erc)\($suffix)",
 					pageElementDefinition: {
-						fragmentInstance: {
-							fragmentReference: {
-								externalReferenceCode: .value,
-								fragmentReferenceType: "FragmentItemExternalReference",
-								scope: {externalReferenceCode: $library, type: "AssetLibrary"}
+						fragmentInstance: (
+							.value.instance + {
+								fragmentReference: {
+									externalReferenceCode: .value.erc,
+									fragmentReferenceType: "FragmentItemExternalReference",
+									scope: {externalReferenceCode: $library, type: "AssetLibrary"}
+								}
 							}
-						},
+						),
 						type: "BasicFragment"
 					},
 					position: .key
@@ -153,7 +183,7 @@ page_payload() {
 				specification("store-home-draft"; "Draft"; "-draft")
 			],
 			type: "ContentPage"
-		}' "$@"
+		}'
 }
 
 # library_fragment_exists FRAGMENT_ERC

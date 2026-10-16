@@ -12,7 +12,7 @@ The story: Acme Coffee runs one Liferay site per store. Every store site is conn
 
 ## Setting up the portal
 
-1. Build and deploy the branch. On a fresh checkout, the usual `ant all`. On a bundle already built from the same base, deploying the changed modules is enough:
+1. Build and deploy the branch. On a fresh checkout, the usual `ant all`. On a bundle already built from the same base, deploying the changed modules is enough (all in `fragment` and `headless-admin-fragment`):
 
 	```bash
 	cd liferay-portal
@@ -22,8 +22,7 @@ The story: Acme Coffee runs one Liferay site per store. Every store site is conn
 		modules/apps/fragment/fragment-service \
 		modules/apps/headless/headless-admin-fragment/headless-admin-fragment-api \
 		modules/apps/headless/headless-admin-fragment/headless-admin-fragment-client \
-		modules/apps/headless/headless-admin-fragment/headless-admin-fragment-impl \
-		modules/apps/headless/headless-admin-site/headless-admin-site-impl
+		modules/apps/headless/headless-admin-fragment/headless-admin-fragment-impl
 	do
 		(cd "$module" && "$OLDPWD/gradlew" deploy)
 	done
@@ -75,7 +74,7 @@ Gotchas found while preparing the links:
 | 2 | `POST` the autumn image as a resource of the set |
 | 3 | `POST` the Seasonal Promo fragment (the HTML is printed first) |
 | 4 | MCP `tools/list` (what the agent sees), the prompt, then Claude Code; `GET` of the fragment it created |
-| 5 | `PUT` the Store Home page of each store with the Pages API, then what each store renders |
+| 5 | `GET` each fragment from the library, `PUT` the Store Home page of each store with their content and a reference to them, then what each store renders |
 | 6 | `POST` the winter image, `PUT` the winter version of the fragment, then the stores still showing autumn |
 | 7 | `POST .../propagate`, then the stores showing winter |
 
@@ -118,7 +117,6 @@ Branch `devcon-2026-fragment-demo` of `liferay-portal`: master as of 2026-10-03,
 
 - `headless-admin-fragment`: design library variants of the write operations (`POST`/`PUT` fragment sets, `GET`/`POST` fragments of a set, `GET`/`PUT` fragments, `POST` resource files of a set) and `POST .../fragments/{erc}/propagate` for design libraries and sites.
 - `fragment-service`: `FragmentEntryLocalService.propagateChanges(long)` exposes the existing propagation, which already reaches every site connected to the design library. Before, it only ran on publish when "Propagate fragment changes automatically" was enabled.
-- `headless-admin-site`: a fragment instance sent to the Pages API without its own HTML starts from the latest version of the referenced fragment, like a fragment dropped in the page editor. Before, it was created empty.
 
 ## Propagation at scale
 

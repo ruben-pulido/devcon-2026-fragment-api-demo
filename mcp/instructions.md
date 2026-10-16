@@ -24,13 +24,19 @@ Adding a fragment to a store page (`putSiteSitePage` with the site's external re
 				"externalReferenceCode": "<fragment ERC>",
 				"fragmentReferenceType": "FragmentItemExternalReference",
 				"scope": {"externalReferenceCode": "acme-design-library", "type": "AssetLibrary"}
-			}
+			},
+			"html": "<the fragment's approved html>",
+			"css": "<its css>",
+			"js": "<its js>",
+			"configuration": "<its configuration, as a JSON string>"
 		},
 		"type": "BasicFragment"
 	},
 	"position": 0
 }
 ```
+
+A page keeps its own copy of each fragment, so every fragment instance carries the fragment's content: read the fragment first (`getDesignLibraryFragment`) and copy the `html`, `css` and `js` of its Approved version. Send its `configuration` as a JSON string in the format fragments are stored with: the same structure, but each field's `defaultValue` is the plain value instead of `{"value": ...}`. An instance without content renders empty.
 
 Page element external reference codes must be unique across the two specifications: suffix the draft's with `-draft`. Read the current page first (`getSiteSitePage` with `nestedFields=pageSpecifications`) and keep the elements already on it, in order, when you send the new version.
 

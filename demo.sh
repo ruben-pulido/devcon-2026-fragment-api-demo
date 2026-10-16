@@ -274,8 +274,19 @@ step5() {
 		fragments+=("$HOURS_FRAGMENT_ERC")
 	fi
 
-	point "One PUT per store creates its Store Home page with: ${fragments[*]}."
-	point "Each element references the fragment by ERC and scope (the design library). No HTML is sent: the page starts from the fragment's latest version."
+	point "A page keeps its own copy of every fragment it shows: the HTML, CSS, JS and configuration. Propagation, in step 7, is what refreshes that copy."
+	point "So first we read each fragment from the design library:"
+
+	local erc
+
+	for erc in "${fragments[@]}"; do
+		request GET "$LIBRARY/fragments/$erc" "" '{externalReferenceCode, name, approved: [.fragmentVersions[] | select(.status == "Approved") | {html: (.html[0:70] + "..."), css: (.css[0:40] + "..."), fields: [.configuration.fieldSets[]?.fields[] | .name]}]}'
+	done
+
+	say ""
+	point "Then one PUT per store creates its Store Home page with: ${fragments[*]}."
+	point "Each element carries the fragment's content plus a reference to it (ERC and scope: the design library). The reference is what lets propagation find these pages later."
+	point "The configuration goes as the JSON string fragments are stored with, where a default is the plain value instead of {\"value\": ...}."
 	point "A content page has a published specification and its draft; both list the same elements."
 
 	local site
@@ -284,7 +295,7 @@ step5() {
 		say ""
 		say "── $site"
 
-		request PUT "$SITE_API/sites/$site/site-pages/store-home" "$(page_payload "${fragments[@]}")" '{externalReferenceCode, type, friendlyUrlPath_i18n, pageSpecifications: [.pageSpecifications[] | {externalReferenceCode, status}]}' '.pageSpecifications |= [.[0], "(the draft specification store-home-draft repeats the same elements, with a -draft suffix)"]'
+		request PUT "$SITE_API/sites/$site/site-pages/store-home" "$(page_payload "${fragments[@]}")" '{externalReferenceCode, type, friendlyUrlPath_i18n, pageSpecifications: [.pageSpecifications[] | {externalReferenceCode, status}]}' '.pageSpecifications |= [.[0] | .pageExperiences[].pageElements[].pageElementDefinition.fragmentInstance |= (.html |= (.[0:60] + "...") | .css |= (.[0:40] + "...") | .configuration |= (.[0:60] + "...")), "(the draft specification store-home-draft repeats the same elements, with a -draft suffix)"]'
 	done
 
 	stores
