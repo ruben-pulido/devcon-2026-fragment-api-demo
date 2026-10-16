@@ -6,7 +6,7 @@ The story: Acme Coffee runs one Liferay site per store. Every store site is conn
 
 ## Requirements
 
-- A Liferay portal built from the `devcon-2026-fragment-demo` branch of `liferay-portal`. It is a development build with prototype endpoints: see [Portal changes](#portal-changes).
+- A Liferay portal built from the [`devcon-2026-fragment-demo`](https://github.com/ruben-pulido/liferay-portal/tree/devcon-2026-fragment-demo) branch of `liferay-portal` (`git fetch https://github.com/ruben-pulido/liferay-portal.git devcon-2026-fragment-demo`). It is a development build with prototype endpoints: see [Portal changes](#portal-changes).
 - `bash`, `curl`, `jq` and Claude Code (`claude`, signed in) for the AI step.
 - Defaults: `http://localhost:8080` and `test@liferay.com:test`. Override them with `LIFERAY_URL` and `LIFERAY_AUTH`; every script, including the agent's MCP connection, uses these two variables.
 
