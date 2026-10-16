@@ -28,7 +28,7 @@ The story: Acme Coffee runs one Liferay site per store. Every store site is conn
 	done
 	```
 
-	These bundles live in `osgi/portal`, so restart the portal afterwards; a redeploy does not hot-reload them.
+	A running portal picks the redeployed bundles up without a restart.
 
 1. Enable the features the demo uses:
 	- Append [`setup/portal/portal-ext.properties`](setup/portal/portal-ext.properties) to the bundle's `portal-ext.properties`: the Fragment Headless API (`LPD-39244`), design libraries (`LPD-57283`) and the MCP server (`LPD-63311`).
