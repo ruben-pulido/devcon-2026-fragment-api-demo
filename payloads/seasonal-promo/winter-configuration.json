@@ -3,7 +3,7 @@
 		{
 			"fields": [
 				{
-					"defaultValue": {"value": "#a2262f"},
+					"defaultValue": {"value": "#e4485a"},
 					"label": "Accent color",
 					"name": "accentColor",
 					"type": "colorPicker"

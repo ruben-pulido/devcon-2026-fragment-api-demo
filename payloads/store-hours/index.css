@@ -1,0 +1,72 @@
+.rays-hours {
+	background: #12100e;
+	border-top: 1px solid #2a221b;
+	color: #ede4dc;
+	font-family: Georgia, serif;
+	padding: 48px 24px;
+}
+
+.rays-hours__inner {
+	align-items: flex-start;
+	display: flex;
+	gap: 40px;
+	margin: 0 auto;
+	max-width: 1040px;
+}
+
+.rays-hours__icon {
+	color: var(--rays-accent);
+	flex: 0 0 120px;
+	height: 120px;
+	width: 120px;
+}
+
+.rays-hours__body {
+	flex: 1;
+}
+
+.rays-hours__eyebrow {
+	color: var(--rays-accent);
+	font-family: system-ui, sans-serif;
+	font-size: 14px;
+	font-weight: 700;
+	letter-spacing: 0.16em;
+	margin: 0 0 10px;
+	text-transform: uppercase;
+}
+
+.rays-hours__title {
+	color: #fbf6f1;
+	font-size: 36px;
+	margin: 0 0 18px;
+}
+
+.rays-hours__row {
+	border-bottom: 1px dashed #3a3029;
+	display: flex;
+	font-size: 18px;
+	justify-content: space-between;
+	padding: 12px 0;
+}
+
+.rays-hours__day {
+	color: #d6c6b8;
+	font-weight: 700;
+}
+
+.rays-hours__time {
+	color: #fbf6f1;
+	font-family: system-ui, sans-serif;
+}
+
+.rays-hours__cta {
+	background: transparent;
+	border: 2px solid var(--rays-accent);
+	border-radius: 999px;
+	color: var(--rays-accent);
+	display: inline-block;
+	font-family: system-ui, sans-serif;
+	font-weight: 700;
+	margin-top: 24px;
+	padding: 11px 26px;
+}

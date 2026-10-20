@@ -1,0 +1,21 @@
+{
+	"fieldSets": [
+		{
+			"fields": [
+				{
+					"defaultValue": {"value": "#f08a3c"},
+					"label": "Accent color",
+					"name": "accentColor",
+					"type": "colorPicker"
+				},
+				{
+					"defaultValue": {"value": "Get directions"},
+					"label": "Directions button label",
+					"name": "ctaLabel",
+					"type": "text"
+				}
+			],
+			"label": "Store hours"
+		}
+	]
+}

@@ -1,31 +1,28 @@
 #!/usr/bin/env bash
-# Pre-show setup: the design library and the store sites connected to it.
+# Pre-show setup: the Madrid store site with its own Store Header fragment.
+# London and the design library are created during the demo (step 5).
 # Idempotent: every call is a PUT by external reference code.
 
 set -euo pipefail
 
 source "$(dirname "$0")/../lib.sh"
 
-step "Design library $DESIGN_LIBRARY_ERC"
+MADRID="$FRAGMENT_API/sites/$MADRID_ERC"
 
-api PUT "$LIFERAY_URL/o/headless-asset-library/v1.0/asset-libraries/$DESIGN_LIBRARY_ERC" \
-	"{\"externalReferenceCode\": \"$DESIGN_LIBRARY_ERC\", \"name\": \"Acme Design Library\", \"settings\": {}, \"type\": \"DesignLibrary\"}" |
-	jq -c '{externalReferenceCode, name, type}'
+step "Site $MADRID_ERC"
 
-declare -A SITE_NAMES=([acme-madrid]="Acme Coffee Madrid" [acme-lisbon]="Acme Coffee Lisbon")
+api PUT "$SITE_API/sites/$MADRID_ERC" \
+	"{\"externalReferenceCode\": \"$MADRID_ERC\", \"name\": \"Ray’s Coffee Madrid\"}" |
+	jq -c '{externalReferenceCode, name, friendlyUrlPath}'
 
-for site in "${SITE_ERCS[@]}"; do
-	step "Site $site, connected to $DESIGN_LIBRARY_ERC"
+step "Madrid's own fragment set, skyline and Store Header"
 
-	api PUT "$SITE_API/sites/$site" \
-		"{\"externalReferenceCode\": \"$site\", \"name\": \"${SITE_NAMES[$site]:-$site}\"}" |
-		jq -c '{externalReferenceCode, name, friendlyUrlPath}'
+api PUT "$MADRID/fragment-sets/rays-store" '{"name": "Ray’s Store"}' | jq -c '{externalReferenceCode, name}'
 
-	api PUT "$LIFERAY_URL/o/headless-asset-library/v1.0/asset-libraries/$DESIGN_LIBRARY_ERC/connected-sites/$site" \
-		'{"searchable": true}' >/dev/null
-done
+api PUT "$MADRID/resource-files/madrid-skyline.svg" \
+	"$(resource_payload "$ROOT_DIR/assets/madrid-skyline.svg" | jq -c '. + {fragmentSetExternalReferenceCode: "rays-store"}')" |
+	jq -c '{externalReferenceCode, name}'
 
-step "Connected sites"
-
-api GET "$LIFERAY_URL/o/headless-asset-library/v1.0/asset-libraries/$DESIGN_LIBRARY_ERC/connected-sites" |
-	jq -r '.items[] | "  \(.externalReferenceCode)  \(.name)"'
+api PUT "$MADRID/fragments/rays-store-header" \
+	"$(header_payload Madrid madrid-skyline.svg '#f2b84b' 'Calle de Alcalá 42, Madrid' | jq -c '. + {fragmentSetExternalReferenceCode: "rays-store"}')" |
+	jq -c '{externalReferenceCode, name}'

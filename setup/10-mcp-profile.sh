@@ -12,7 +12,6 @@ PROFILE_ERC="devcon"
 TOOLS=(
 	headless-admin-fragment-v1.0:getDesignLibraryFragment
 	headless-admin-fragment-v1.0:getDesignLibraryFragmentSetFragmentsPage
-	headless-admin-fragment-v1.0:postDesignLibraryFragmentPropagate
 	headless-admin-fragment-v1.0:postDesignLibraryFragmentSetFragment
 	headless-admin-fragment-v1.0:putDesignLibraryFragment
 	headless-admin-site-v1.0:getSiteSitePage
@@ -28,7 +27,7 @@ profile_id="$(
 			--arg erc "$PROFILE_ERC" \
 			--rawfile instructions "$ROOT_DIR/mcp/instructions.md" \
 			'{
-				description: "Devcon 2026: fragments of the Acme design library and the store pages that use them.",
+				description: "Devcon 2026: fragments of the Ray’s Coffee design library and the store pages that use them.",
 				externalReferenceCode: $erc,
 				instructions: $instructions,
 				name: $erc,
@@ -59,6 +58,17 @@ for tool in "${TOOLS[@]}"; do
 			}')" >/dev/null
 
 	echo "  $tool_set $tool_name"
+done
+
+for erc in $(
+	api GET "$LIFERAY_URL/o/mcp/server-profile-tools?pageSize=-1" |
+		jq -r --argjson profileId "$profile_id" '.items[] | select(.r_mcpServerProfileToTools_l_mcpServerProfileId == $profileId) | .externalReferenceCode'
+); do
+	if [[ " ${TOOLS[*]##*:} " != *" ${erc#"$PROFILE_ERC-"} "* ]]; then
+		api DELETE "$LIFERAY_URL/o/mcp/server-profile-tools/by-external-reference-code/$erc" >/dev/null
+
+		echo "  removed ${erc#"$PROFILE_ERC-"}"
+	fi
 done
 
 step "Activate"

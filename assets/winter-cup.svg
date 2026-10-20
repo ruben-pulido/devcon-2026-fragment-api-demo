@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
-  <circle cx="120" cy="120" r="116" fill="#dcebf7"/>
+  <circle cx="120" cy="120" r="116" fill="#15243a"/>
   <g stroke="#ffffff" stroke-width="4" stroke-linecap="round">
     <path d="M48 52v24M36 64h24M40 56l16 16M56 56l-16 16"/>
     <path d="M190 40v20M180 50h20M183 43l14 14M197 43l-14 14"/>
     <path d="M196 170v18M187 179h18M190 173l12 12M202 173l-12 12"/>
   </g>
-  <rect x="72" y="92" width="88" height="96" rx="14" fill="#a2262f"/>
-  <path d="M160 112h12a22 22 0 0 1 0 44h-12v-12h12a10 10 0 0 0 0-20h-12z" fill="#a2262f"/>
+  <rect x="72" y="92" width="88" height="96" rx="14" fill="#e4485a"/>
+  <path d="M160 112h12a22 22 0 0 1 0 44h-12v-12h12a10 10 0 0 0 0-20h-12z" fill="#e4485a"/>
   <rect x="64" y="80" width="104" height="20" rx="10" fill="#ffffff"/>
   <path d="M100 72c-8-10 8-16 0-28M120 72c-8-10 8-16 0-28M140 72c-8-10 8-16 0-28" stroke="#9fb4c6" stroke-width="5" fill="none" stroke-linecap="round"/>
   <path d="M96 128h40M96 144h40M96 160h40" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-dasharray="2 12"/>

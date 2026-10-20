@@ -3,11 +3,13 @@
 LIFERAY_URL="${LIFERAY_URL:-http://localhost:8080}"
 LIFERAY_AUTH="${LIFERAY_AUTH:-test@liferay.com:test}"
 
-DESIGN_LIBRARY_ERC="${DESIGN_LIBRARY_ERC:-acme-design-library}"
-FRAGMENT_SET_ERC="${FRAGMENT_SET_ERC:-acme-fragments}"
-PROMO_FRAGMENT_ERC="${PROMO_FRAGMENT_ERC:-acme-seasonal-promo}"
-HOURS_FRAGMENT_ERC="${HOURS_FRAGMENT_ERC:-acme-store-hours}"
-SITE_ERCS=(${SITE_ERCS:-acme-madrid acme-lisbon})
+DESIGN_LIBRARY_ERC="${DESIGN_LIBRARY_ERC:-rays-design-library}"
+FRAGMENT_SET_ERC="${FRAGMENT_SET_ERC:-rays-fragments}"
+PROMO_FRAGMENT_ERC="${PROMO_FRAGMENT_ERC:-rays-seasonal-promo}"
+HOURS_FRAGMENT_ERC="${HOURS_FRAGMENT_ERC:-rays-store-hours}"
+MADRID_ERC="${MADRID_ERC:-rays-madrid}"
+LONDON_ERC="${LONDON_ERC:-rays-london}"
+SITE_ERCS=("$MADRID_ERC" "$LONDON_ERC")
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -93,23 +95,32 @@ site_friendly_url() {
 # Prints the promo title rendered on the store page of the site, as a guest.
 page_promo() {
 	curl -sS "$LIFERAY_URL/web$(site_friendly_url "$1")/store-home" |
-		grep -oE 'acme-promo__title"[^>]*>[^<]*' | sed -E 's/.*>//'
+		grep -oE 'rays-promo__title"[^>]*>[^<]*' | sed -E 's/.*>//'
+}
+
+site_exists() {
+	api GET "$SITE_API/sites/$1" >/dev/null 2>&1
 }
 
 show_sites() {
+	local site
+
 	for site in "${SITE_ERCS[@]}"; do
-		printf '  %-12s %s\n' "$site" "$(page_promo "$site")"
+		if site_exists "$site"; then
+			printf '  %-12s %s\n' "$site" "$(page_promo "$site")"
+		fi
 	done
 }
 
-# fragment_instance FRAGMENT_ERC
-# The content a page element needs for a design library fragment: the HTML,
-# CSS, JS and configuration of its approved version. The Pages API stores a
-# copy of them in the page; propagation later refreshes that copy. The page
-# expects the configuration as a JSON string in the format fragments store it,
-# where a field's default is the plain value instead of {"value": ...}.
+# fragment_instance FRAGMENT_URL
+# The content a page element needs for a fragment: the HTML, CSS, JS and
+# configuration of its approved version, read from FRAGMENT_URL (a site or a
+# design library fragment). The Pages API stores a copy of them in the page;
+# propagation later refreshes that copy. The page expects the configuration as
+# a JSON string in the format fragments store it, where a field's default is
+# the plain value instead of {"value": ...}.
 fragment_instance() {
-	api GET "$FRAGMENT_API/design-libraries/$DESIGN_LIBRARY_ERC/fragments/$1" |
+	api GET "$1" |
 		jq -c '
 			.fragmentVersions[] | select(.status == "Approved") |
 			{
@@ -124,35 +135,41 @@ fragment_instance() {
 			}'
 }
 
-# page_payload FRAGMENT_ERC...
-# Builds the store-home content page with one design library fragment per
-# argument, in order, in both the published specification and its draft.
+# page_payload SCOPE:FRAGMENT_ERC...
+# Builds the store-home content page with one fragment per argument, in order,
+# in both the published specification and its draft. SCOPE is "library" for a
+# design library fragment, or the ERC of the page's own site for a fragment of
+# that site (its reference then has no scope).
 page_payload() {
-	local erc instances="[]"
+	local erc item instances="[]" scope url
 
-	for erc in "$@"; do
-		instances=$(jq -c --arg erc "$erc" --argjson instance "$(fragment_instance "$erc")" '. + [{erc: $erc, instance: $instance}]' <<< "$instances")
+	for item in "$@"; do
+		scope="${item%%:*}"
+		erc="${item#*:}"
+
+		if [ "$scope" = library ]; then
+			url="$FRAGMENT_API/design-libraries/$DESIGN_LIBRARY_ERC/fragments/$erc"
+		else
+			url="$FRAGMENT_API/sites/$scope/fragments/$erc"
+		fi
+
+		instances=$(jq -c --arg erc "$erc" --arg scope "$scope" --argjson instance "$(fragment_instance "$url")" '. + [{erc: $erc, instance: $instance, scope: $scope}]' <<< "$instances")
 	done
 
 	jq -n \
 		--arg library "$DESIGN_LIBRARY_ERC" \
 		--argjson instances "$instances" \
 		'
+		def reference:
+			{externalReferenceCode: .erc, fragmentReferenceType: "FragmentItemExternalReference"} +
+			(if .scope == "library" then {scope: {externalReferenceCode: $library, type: "AssetLibrary"}} else {} end);
 		def elements($suffix):
 			[
 				$instances | to_entries[] |
 				{
 					externalReferenceCode: "store-home-\(.value.erc)\($suffix)",
 					pageElementDefinition: {
-						fragmentInstance: (
-							.value.instance + {
-								fragmentReference: {
-									externalReferenceCode: .value.erc,
-									fragmentReferenceType: "FragmentItemExternalReference",
-									scope: {externalReferenceCode: $library, type: "AssetLibrary"}
-								}
-							}
-						),
+						fragmentInstance: (.value.instance + {fragmentReference: (.value | reference)}),
 						type: "BasicFragment"
 					},
 					position: .key
@@ -189,4 +206,26 @@ page_payload() {
 # library_fragment_exists FRAGMENT_ERC
 library_fragment_exists() {
 	api GET "$FRAGMENT_API/design-libraries/$DESIGN_LIBRARY_ERC/fragments/$1" >/dev/null 2>&1
+}
+
+# library_exists
+library_exists() {
+	api GET "$LIFERAY_URL/o/headless-asset-library/v1.0/asset-libraries/$DESIGN_LIBRARY_ERC" >/dev/null 2>&1
+}
+
+# header_payload CITY IMAGE ACCENT TAGLINE
+# The Store Header fragment of one store: its city, skyline and accent color.
+header_payload() {
+	local dir="$ROOT_DIR/payloads/store-header"
+
+	jq -n \
+		--arg css "$(cat "$dir/index.css")" \
+		--arg html "$(sed -e "s|@CITY@|$1|g" -e "s|@IMAGE@|$2|g" -e "s|@ACCENT@|$3|g" -e "s|@TAGLINE@|$4|g" "$dir/index.html")" \
+		'{
+			externalReferenceCode: "rays-store-header",
+			fragmentVersions: [{css: $css, html: $html, js: "", status: "Approved"}],
+			icon: "home",
+			name: "Store Header",
+			type: "BasicFragment"
+		}'
 }
