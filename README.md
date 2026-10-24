@@ -8,6 +8,7 @@ The story: Ray’s Coffee has one store, in Madrid (DevCon 2025), with its own L
 
 - A Liferay portal built from the [`devcon-2026-fragment-demo-v2`](https://github.com/ruben-pulido/liferay-portal/tree/devcon-2026-fragment-demo-v2) branch of `liferay-portal` (`git fetch https://github.com/ruben-pulido/liferay-portal.git devcon-2026-fragment-demo-v2`). It is a development build with prototype endpoints: see [Portal changes](#portal-changes).
 - `bash`, `curl`, `jq` and Claude Code (`claude`, signed in) for the AI step.
+- Chrome or Chromium (`CHROME`, found on the `PATH` by default) to give the agent's fragment a thumbnail; without it, that step is skipped.
 - Defaults: `http://localhost:8080` and `test@liferay.com:test`. Override them with `LIFERAY_URL` and `LIFERAY_AUTH`; every script, including the agent's MCP connection, uses these two variables.
 
 ## Setting up the portal
@@ -70,7 +71,7 @@ Every screen is built to be read from far away, at any terminal size (it is desi
 | 1. Madrid opens | Ray’s Coffee opens its first store; its site exists with its Store Header | Create the Ray’s Campaigns fragment set, its `images` resource folder, the autumn image, the Seasonal Promo fragment (with a thumbnail), and Madrid's store page |
 | 2. London opens | A second store with its own site and header; campaigns must launch in all stores at the same time | Create the London site and its Store Header, the design library, and connect both sites to it |
 | 3. Share the campaigns | Move the campaigns from Madrid to the design library: copy, repoint, delete | Read and create the fragment set, its folders, files and fragments (with their thumbnails) in the library, point Madrid's page to the library's promo, create London's page, delete Madrid's set |
-| 4. An AI agent builds the next fragment | Claude Code, with only Liferay's MCP server, creates Store Hours | List the agent's tools, run the agent, list the calls it made, read its fragment, add it to both store pages |
+| 4. An AI agent builds the next fragment | Claude Code, with only Liferay's MCP server, creates Store Hours | List the agent's tools, run the agent, list the calls it made, read its fragment, give it a thumbnail (a headless Chrome screenshot of its HTML and CSS), add it to both store pages |
 | 5. A store in every DevCon city | Ray’s opens stores in Berlin (2013), Darmstadt (2014), Amsterdam (2017), Mainz (2019), Porto (2023) and Budapest (2024) | The same calls as for London, one line per city on the screen, then list the design library's eight connected sites |
 | 6. Winter campaign | One change in the library reaches all eight stores | Upload the winter image, update the Seasonal Promo, propagate from the UI (Seasonal Promo > ⋮ > View Site Usages, select all, Propagate) |
 
