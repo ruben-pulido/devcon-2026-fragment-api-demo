@@ -191,7 +191,7 @@ show_json() {
 }
 
 colorize() {
-	sed -E "s/(\"[^\"]*\")(:)/\x1b[38;5;117m\1\x1b[0m\2/; s/: (\"[^\"]*\"?)/: \x1b[32m\1\x1b[0m/"
+	sed -E "s/(\"[^\"]*\")(:)/\x1b[38;5;117m\1\x1b[0m\2/g; s/: (\"[^\"]*\"?)([,}]|$)/: \x1b[32m\1\x1b[0m\2/g"
 }
 
 LAST=""
@@ -206,7 +206,9 @@ request() {
 
 	used=$((${#STEPS[@]} + $(fold -s -w "$(($(cols) - 2))" <<< "$ACT_TEXT" | wc -l) + 12))
 
-	if [ -n "$body" ]; then
+	if [ -n "$body" ] && [[ "$body_filter" == @* ]]; then
+		jq -r "${body_filter#@}" <<< "$body" | sed 's/^/ /' | colorize
+	elif [ -n "$body" ]; then
 		show_json "$body" "$body_filter" "$(($(rows) - used - 4))" | colorize
 	fi
 
@@ -243,7 +245,7 @@ request() {
 
 	marker done "$STEP"
 
-	[ -z "$LAST" ] && return
+	[ -z "$LAST" ] || [ "$filter" = - ] && return
 
 	local shown
 
@@ -262,8 +264,43 @@ next() {
 
 FRAGMENT_BODY='{externalReferenceCode, name, fragmentVersions: [.fragmentVersions[] | {html, css} + ([.configuration.fieldSets[]?.fields[]?.name] | if length > 0 then {configuration: join(", ")} else {} end)], thumbnailURLReference}'
 FRAGMENT_RESPONSE='{externalReferenceCode, name}'
-PAGE_BODY='{externalReferenceCode, type, pageElements: [.pageSpecifications[0].pageExperiences[0].pageElements[].pageElementDefinition.fragmentInstance.fragmentReference | .externalReferenceCode + (if .scope then " (\(.scope.externalReferenceCode))" else "" end)]}'
-PAGE_RESPONSE='{externalReferenceCode, friendlyUrlPath: .friendlyUrlPath_i18n["en-US"]}'
+# The page as the Pages API receives it, with the fragment content each page
+# element also carries left out, so it fits on one screen.
+PAGE_BODY='@
+	def element($last):
+		.pageElementDefinition.fragmentInstance.fragmentReference as $reference |
+		[
+			"    {\"pageElementDefinition\": {\"fragmentInstance\": {",
+			"      \"fragmentReference\": {"
+		] +
+		if $reference.scope then
+			[
+				"        \"externalReferenceCode\": \"\($reference.externalReferenceCode)\",",
+				"        \"scope\": {\"externalReferenceCode\": \"\($reference.scope.externalReferenceCode)\"}}}}}"
+			]
+		else
+			["        \"externalReferenceCode\": \"\($reference.externalReferenceCode)\"}}}}"]
+		end |
+		if $last then . else .[length - 1] += "," end;
+	.pageSpecifications[0] as $specification |
+	$specification.pageExperiences[0].pageElements as $elements |
+	(
+		[
+			"{",
+			" \"externalReferenceCode\": \"\(.externalReferenceCode)\",",
+			" \"pageSpecifications\": [{",
+			"  \"status\": \"\($specification.status)\",",
+			"  \"pageExperiences\": [{",
+			"   \"pageElements\": ["
+		] +
+		([range(0; $elements | length) as $i | $elements[$i] | element($i == ($elements | length) - 1)] | add) +
+		[
+			"   ]}]},",
+			"  \"…and its draft, with the same elements\"",
+			" ]",
+			"}"
+		]
+	)[]'
 ITEMS='[.items[] | {externalReferenceCode, name}]'
 
 # put_store_page SITE_ERC SCOPE:FRAGMENT_ERC...
@@ -272,7 +309,9 @@ put_store_page() {
 
 	shift
 
-	request PUT "$SITE_API/sites/$site/site-pages/store-home" "$(page_payload "$@")" "$PAGE_RESPONSE" "$PAGE_BODY"
+	request PUT "$SITE_API/sites/$site/site-pages/store-home" "$(page_payload "$@")" - "$PAGE_BODY"
+
+	note "(each fragmentInstance also carries the fragment’s HTML, CSS and configuration)"
 }
 
 stores() {
@@ -345,11 +384,12 @@ act2() {
 	request PUT "$ASSET_LIBRARY_API/$DESIGN_LIBRARY_ERC" "{\"externalReferenceCode\": \"$DESIGN_LIBRARY_ERC\", \"name\": \"Ray’s Design Library\", \"settings\": {}, \"type\": \"DesignLibrary\"}" '{externalReferenceCode, name, type}'
 	next
 
+	# UI: Design Libraries > Ray’s Design Library: its Connected Sites card, empty before the request, then with Madrid.
 	step connect-madrid "Connect Madrid to the design library"
 	request PUT "$ASSET_LIBRARY_API/$DESIGN_LIBRARY_ERC/connected-sites/$MADRID_ERC" '{"searchable": true}' '{externalReferenceCode, name}'
 	next
 
-	# UI: Ray’s Design Library > Connected Sites: Madrid and London.
+	# UI: Ray’s Design Library: its Connected Sites card, with Madrid and London.
 	step connect-london "Connect London to the design library"
 	request PUT "$ASSET_LIBRARY_API/$DESIGN_LIBRARY_ERC/connected-sites/$LONDON_ERC" '{"searchable": true}' '{externalReferenceCode, name}'
 	next
