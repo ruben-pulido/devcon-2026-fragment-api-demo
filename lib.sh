@@ -10,7 +10,17 @@ PROMO_FRAGMENT_ERC="${PROMO_FRAGMENT_ERC:-rays-seasonal-promo}"
 HOURS_FRAGMENT_ERC="${HOURS_FRAGMENT_ERC:-rays-store-hours}"
 MADRID_ERC="${MADRID_ERC:-rays-madrid}"
 LONDON_ERC="${LONDON_ERC:-rays-london}"
-SITE_ERCS=("$MADRID_ERC" "$LONDON_ERC")
+# Every city that has hosted DevCon, in order: YEAR|SITE_ERC|CITY|ACCENT|ADDRESS
+DEVCON_CITIES=(
+	"2013|rays-berlin|Berlin|#ff6b6b|Unter den Linden 21, Berlin"
+	"2014|rays-darmstadt|Darmstadt|#b38cff|Luisenplatz 5, Darmstadt"
+	"2017|rays-amsterdam|Amsterdam|#4dd4ac|Damrak 70, Amsterdam"
+	"2019|rays-mainz|Mainz|#ff7eb6|Markt 12, Mainz"
+	"2023|rays-porto|Porto|#00c2d1|Rua de Santa Catarina 112, Porto"
+	"2024|rays-budapest|Budapest|#9be15d|Andrássy út 34, Budapest"
+	"2025|$MADRID_ERC|Madrid|#f2b84b|Calle de Alcalá 42, Madrid"
+	"2026|$LONDON_ERC|London|#7cc4ff|221 Baker Street, London"
+)
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -122,11 +132,13 @@ site_exists() {
 }
 
 show_sites() {
-	local site
+	local city site year
 
-	for site in "${SITE_ERCS[@]}"; do
+	for city in "${DEVCON_CITIES[@]}"; do
+		IFS='|' read -r year site city _ _ <<< "$city"
+
 		if site_exists "$site"; then
-			printf '  %-12s %s\n' "$site" "$(page_promo "$site")"
+			printf '  %s %-10s %s\n' "$year" "$city" "$(page_promo "$site")"
 		fi
 	done
 }
@@ -233,7 +245,7 @@ library_exists() {
 }
 
 # header_payload CITY IMAGE ACCENT TAGLINE
-# The Store Header fragment of one store: its city, skyline and accent color.
+# The Store Header fragment of one store: its city, image and accent color.
 header_payload() {
 	local dir="$ROOT_DIR/payloads/store-header"
 

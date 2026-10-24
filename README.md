@@ -2,7 +2,7 @@
 
 Scripts and payloads for the Devcon 2026 session "One API, Thousands of Sites: Unleashing the Fragment Headless API".
 
-The story: Ray’s Coffee has one store, in Madrid, with its own Liferay site. We build its fragments and its store page with the headless APIs alone. Then a second store opens in London: the shared campaigns move from the Madrid site to a design library connected to both stores, an AI agent adds a fragment to the library, and a new campaign reaches every store with one propagation from the UI. Each store keeps its own Store Header (city name and skyline), so Madrid and London are easy to tell apart.
+The story: Ray’s Coffee has one store, in Madrid (DevCon 2025), with its own Liferay site. We build its fragments and its store page with the headless APIs alone. Then a second store opens in London (DevCon 2026): to launch campaigns in all stores at the same time, the campaigns move from the Madrid site to a design library connected to both stores, and an AI agent adds a fragment to the library. Ray’s then opens a store in every other city that has hosted DevCon since 2013, and a new campaign reaches all eight stores with one propagation from the UI. Each store has its own Store Header, with Ray, Liferay's mascot, in front of the city's skyline, so the stores are easy to tell apart.
 
 ## Requirements
 
@@ -41,7 +41,8 @@ The story: Ray’s Coffee has one store, in Madrid, with its own Liferay site. W
 ```bash
 ./setup/00-setup.sh        # the Madrid site with its own Store Header fragment
 ./setup/10-mcp-profile.sh  # "devcon" profile of Liferay's MCP server
-./demo.sh reset            # Madrid only: no shared fragments, no store page, no London, no design library
+./demo.sh reset            # Madrid only: no campaigns, no store page, no other stores, no design library
+./demo/store-grid.py &     # the store grid at http://localhost:8090, for acts 5 and 6
 ```
 
 Both setup scripts are idempotent. Rehearse once (`./demo.sh`, including the agent in act 4), then `./demo.sh reset`, so the first real run is not the first run of the day and Claude Code already trusts `stage/`.
@@ -52,8 +53,8 @@ One API call per step, one key press at a time:
 
 ```bash
 ./demo.sh reset         # back to the starting point
-./demo.sh               # all five acts
-./demo.sh act3          # a single act (act1 ... act5)
+./demo.sh               # all six acts
+./demo.sh act3          # a single act (act1 ... act6)
 NO_PAUSE=1 ./demo.sh    # no key presses
 AI_FALLBACK=1 ./demo.sh # act 4 uses the cached agent run instead of launching Claude Code
 ```
@@ -67,12 +68,17 @@ Every screen is built to be read from far away, at any terminal size (it is desi
 | Act | Use case | Steps |
 | --- | --- | --- |
 | 1. Madrid opens | Ray’s Coffee opens its first store; its site exists with its Store Header | Create the Ray’s Campaigns fragment set, its `images` resource folder, the autumn image, the Seasonal Promo fragment (with a thumbnail), and Madrid's store page |
-| 2. London opens | A second store with its own site and header; the campaigns must be shared | Create the London site and its Store Header, the design library, and connect both sites to it |
+| 2. London opens | A second store with its own site and header; campaigns must launch in all stores at the same time | Create the London site and its Store Header, the design library, and connect both sites to it |
 | 3. Share the campaigns | Move the campaigns from Madrid to the design library: copy, repoint, delete | Read and create the fragment set, its folders, files and fragments (with their thumbnails) in the library, point Madrid's page to the library's promo, create London's page, delete Madrid's set |
 | 4. An AI agent builds the next fragment | Claude Code, with only Liferay's MCP server, creates Store Hours | List the agent's tools, run the agent, list the calls it made, read its fragment, add it to both store pages |
-| 5. Winter campaign | One change in the library reaches every store | Upload the winter image, update the Seasonal Promo, propagate from the UI (Seasonal Promo > ⋮ > View Site Usages, select both, Propagate) |
+| 5. A store in every DevCon city | Ray’s opens stores in Berlin (2013), Darmstadt (2014), Amsterdam (2017), Mainz (2019), Porto (2023) and Budapest (2024) | The same calls as for London, one line per city on the screen, then list the design library's eight connected sites |
+| 6. Winter campaign | One change in the library reaches all eight stores | Upload the winter image, update the Seasonal Promo, propagate from the UI (Seasonal Promo > ⋮ > View Site Usages, select all, Propagate) |
 
 Act 4 adds Store Hours to the pages only if it exists, so a failed agent run does not break the rest of the demo.
+
+### The store grid
+
+`demo/store-grid.py` serves every store page in a 2 × 4 grid at http://localhost:8090 (`GRID_PORT`). Start it before the show and keep it open in a browser window for acts 5 and 6: a tile appears as soon as its store page exists, and reloads when the page changes, so the grid fills while the stores open and turns to winter after the propagation. It proxies the portal so the store pages can be framed (Liferay sends `X-Frame-Options: SAMEORIGIN`).
 
 Gotchas:
 
@@ -96,11 +102,12 @@ Gotchas:
 | `lib.sh` | `api` (curl with errors on stderr), payload builders, `show_sites` |
 | `setup/` | Pre-show setup, idempotent |
 | `setup/portal/` | Feature flags and MCP server configuration for the portal |
-| `demo/` | The agent runner (`02-ai-fragment.sh`), its prompt and its fallback |
+| `demo/` | The agent runner (`02-ai-fragment.sh`), its prompt and its fallback, and the store grid (`store-grid.py`) |
 | `payloads/seasonal-promo/` | HTML, CSS and configuration of the Seasonal Promo fragment, autumn and winter |
-| `payloads/store-header/` | The Store Header template (city, skyline, accent color) |
+| `payloads/store-header/` | The Store Header template (city, image, accent color) |
 | `payloads/store-hours/`, `payloads/store-hours.json` | The cached Store Hours fragment for the AI fallback |
-| `assets/` | Campaign images and the Madrid and London skylines, uploaded as fragment resources |
+| `assets/` | Campaign images and each store's header image (Ray in front of the city's skyline), uploaded as fragment resources |
+| `assets/skylines/` | The city skylines the header images are drawn on |
 | `assets/thumbnails/` | The fragments' thumbnails, shown in the fragments admin |
 | `mcp/instructions.md` | Instructions of the `devcon` MCP profile |
 | `stage/` | Empty working directory of the agent; `.mcp.json` (its connection to `$LIFERAY_URL/o/mcp/devcon`) is generated on each run |

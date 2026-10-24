@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Ray’s Coffee stores</title>
+<style>
+	html, body {
+		background: #0b0d12;
+		color: #f4f1ec;
+		font-family: system-ui, sans-serif;
+		height: 100%;
+		margin: 0;
+	}
+
+	body {
+		box-sizing: border-box;
+		display: grid;
+		gap: 8px;
+		grid-template-columns: repeat(2, 1fr);
+		grid-template-rows: repeat(4, 1fr);
+		padding: 8px;
+	}
+
+	.tile {
+		background: #15181f;
+		border: 1px solid #2a2f3a;
+		border-radius: 10px;
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+		overflow: hidden;
+	}
+
+	.label {
+		background: #1f2430;
+		font-size: 16px;
+		padding: 4px 10px;
+	}
+
+	.label b {
+		color: #9aa4b5;
+		margin-right: 6px;
+	}
+
+	.frame {
+		flex: 1;
+		overflow: hidden;
+		position: relative;
+	}
+
+	.frame iframe {
+		border: 0;
+		height: 2000px;
+		left: 0;
+		position: absolute;
+		top: 0;
+		transform-origin: 0 0;
+		width: 1000px;
+	}
+
+	.empty {
+		align-items: center;
+		color: #5c6475;
+		display: flex;
+		font-size: 18px;
+		height: 100%;
+		justify-content: center;
+	}
+</style>
+</head>
+<body>
+<!-- tiles -->
+<script>
+	const PAGE_WIDTH = 1000;
+
+	const place = (tile) => {
+		const frame = tile.querySelector('.frame');
+		const iframe = frame.querySelector('iframe');
+
+		if (!iframe || !iframe.contentDocument) {
+			return;
+		}
+
+		const scale = frame.clientWidth / PAGE_WIDTH;
+		const header = iframe.contentDocument.querySelector('.rays-header');
+		const top = header ? header.getBoundingClientRect().top + iframe.contentWindow.scrollY : 0;
+
+		iframe.style.transform = `scale(${scale}) translateY(${-top}px)`;
+	};
+
+	const show = (tile, path) => {
+		const frame = tile.querySelector('.frame');
+		const iframe = document.createElement('iframe');
+
+		iframe.scrolling = 'no';
+		iframe.style.visibility = 'hidden';
+		iframe.src = `${path}?t=${Date.now()}`;
+
+		iframe.addEventListener('load', () => {
+			place(tile);
+
+			iframe.style.visibility = 'visible';
+
+			for (const old of frame.querySelectorAll('iframe, .empty')) {
+				if (old !== iframe) {
+					old.remove();
+				}
+			}
+		});
+
+		frame.appendChild(iframe);
+	};
+
+	const key = (html) => (html.match(/rays-(header__city|promo__title|hours)[^>]*>[^<]*/g) || []).join('|');
+
+	const poll = async () => {
+		for (const tile of document.querySelectorAll('.tile')) {
+			const path = tile.dataset.path;
+
+			try {
+				const response = await fetch(path, {cache: 'no-store', credentials: 'omit'});
+
+				if (!response.ok) {
+					continue;
+				}
+
+				const current = key(await response.text());
+
+				if (current && current !== tile.dataset.key) {
+					tile.dataset.key = current;
+
+					show(tile, path);
+				}
+			}
+			catch (error) {
+				// The portal is busy; try again on the next round.
+			}
+		}
+
+		setTimeout(poll, 1500);
+	};
+
+	addEventListener('resize', () => document.querySelectorAll('.tile').forEach(place));
+
+	poll();
+</script>
+</body>
+</html>

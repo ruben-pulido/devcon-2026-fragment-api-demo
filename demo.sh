@@ -3,7 +3,7 @@
 # One API, Thousands of Sites: step-by-step demo
 #
 #   ./demo.sh            run every act, pausing before each request
-#   ./demo.sh act3       run a single act (act1 ... act5)
+#   ./demo.sh act3       run a single act (act1 ... act6)
 #   ./demo.sh reset      back to the starting point: Madrid with its store header
 #
 # NO_PAUSE=1 ./demo.sh   run without waiting for key presses
@@ -110,45 +110,71 @@ wait_key() {
 	printf '\r\033[K\033[1A\033[K'
 }
 
+PATH_COLOR=$'\033[1;37m'
+ERC_COLOR=$'\033[1;38;5;214m'
+
+# Collections whose next path segment is an external reference code.
+ERC_COLLECTIONS=" asset-libraries connected-sites design-libraries fragment-sets fragments mcp resource-folders resource-files site-pages sites "
+
 # show_path METHOD PATH: the endpoint, wrapped after a slash, continuation
-# lines indented.
+# lines indented, with external reference codes in their own color.
 show_path() {
-	local method="$1" path="$2" width indent line="" part first=1 limit
+	local method="$1" path="$2" width indent plain="" colored="" part previous="" first=1 limit query=""
 	local parts=()
 
 	width=$(($(cols) - 2))
 	indent=$((${#method} + 4))
 
+	if [[ "$path" == *"?"* ]]; then
+		query="?${path#*\?}"
+		path="${path%%\?*}"
+	fi
+
 	IFS='/' read -ra parts <<< "${path#/}"
 
 	printf ' \033[1;33m%s\033[0m ' "$method"
 
-	line="/"
+	plain="/"
+	colored="${PATH_COLOR}/"
 
 	for part in "${parts[@]}"; do
 		limit=$((first ? width - ${#method} - 1 : width - indent))
 
-		if [ "$line" != "/" ] && [ -n "$line" ] && [ $((${#line} + ${#part} + 1)) -gt "$limit" ]; then
-			if [ $first -eq 1 ]; then
-				printf '\033[1;37m%s\033[0m\n' "$line"
-				first=0
-			else
-				printf '%*s\033[1;37m%s\033[0m\n' "$indent" '' "$line"
-			fi
+		if [ "$plain" != "/" ] && [ -n "$plain" ] && [ $((${#plain} + ${#part} + 1)) -gt "$limit" ]; then
+			[ $first -eq 1 ] || printf '%*s' "$indent" ''
+			printf '%s%s\n' "$colored" "$R"
 
-			line=""
+			first=0
+			plain=""
+			colored="$PATH_COLOR"
 		fi
 
-		line="$line$part/"
+		if [[ "$ERC_COLLECTIONS" == *" $previous "* ]]; then
+			colored="$colored$ERC_COLOR$part$PATH_COLOR/"
+		else
+			colored="$colored$part/"
+		fi
+
+		plain="$plain$part/"
+		previous="$part"
 	done
 
-	line="${line%/}"
+	colored="${colored%/}"
 
-	if [ $first -eq 1 ]; then
-		printf '\033[1;37m%s\033[0m\n' "$line"
-	else
-		printf '%*s\033[1;37m%s\033[0m\n' "$indent" '' "$line"
+	if [ -n "$query" ]; then
+		if [ $((${#plain} + ${#query})) -gt "$((first ? width - ${#method} - 1 : width - indent))" ]; then
+			[ $first -eq 1 ] || printf '%*s' "$indent" ''
+			printf '%s%s\n' "$colored" "$R"
+
+			first=0
+			colored="$PATH_COLOR"
+		fi
+
+		colored="$colored$query"
 	fi
+
+	[ $first -eq 1 ] || printf '%*s' "$indent" ''
+	printf '%s%s\n' "$colored" "$R"
 }
 
 # show_json JSON FILTER MAX_LINES: pretty JSON whose lines never wrap.
@@ -165,7 +191,7 @@ show_json() {
 }
 
 colorize() {
-	sed -E "s/(\"[^\"]*\")(:)/\x1b[34m\1\x1b[0m\2/; s/: (\"[^\"]*\"?)/: \x1b[32m\1\x1b[0m/"
+	sed -E "s/(\"[^\"]*\")(:)/\x1b[38;5;117m\1\x1b[0m\2/; s/: (\"[^\"]*\"?)/: \x1b[32m\1\x1b[0m/"
 }
 
 LAST=""
@@ -221,7 +247,7 @@ request() {
 
 	local shown
 
-	shown=$(show_json "$LAST" "$filter" 9)
+	shown=$(show_json "$LAST" "$filter" 12)
 
 	if [ -n "$shown" ]; then
 		colorize <<< "$shown"
@@ -297,7 +323,7 @@ act1() {
 }
 
 act2() {
-	act "London opens" "A second store opens in London. It gets its own site and Store Header. The campaigns must be shared by both stores, so we create a design library and connect both sites to it."
+	act "London opens" "A second store opens in London, with its own site and Store Header. We want to launch campaigns in all stores at the same time, so we create a design library and connect both sites to it."
 
 	# UI: Applications Menu > Sites: Ray’s Coffee London appears.
 	step london "Create the London site"
@@ -305,12 +331,12 @@ act2() {
 	next
 
 	api PUT "$LONDON/fragment-sets/$STORE_SET_ERC" '{"name": "Ray’s Store"}' > /dev/null
-	api POST "$LONDON/fragment-sets/$STORE_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/london-skyline.svg")" > /dev/null
+	api POST "$LONDON/fragment-sets/$STORE_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/london-ray.png")" > /dev/null
 
 	# UI: London > Design > Fragments > Ray’s Store: the London Store Header, with its thumbnail.
 	step header "Create London’s Store Header"
-	request POST "$LONDON/fragment-sets/$STORE_SET_ERC/fragments" "$(header_payload London london-skyline.svg '#7cc4ff' '221 Baker Street, London')" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
-	note "(its fragment set and skyline image were created the same way as Madrid’s)"
+	request POST "$LONDON/fragment-sets/$STORE_SET_ERC/fragments" "$(header_payload London london-ray.png '#7cc4ff' '221 Baker Street, London')" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
+	note "(its fragment set and header image were created the same way as Madrid’s)"
 	next
 
 	# UI: Applications Menu > Design Libraries: Ray’s Design Library appears.
@@ -330,7 +356,7 @@ act2() {
 }
 
 act3() {
-	act "Share the campaigns" "The campaigns move from Madrid’s site to the design library, so both stores use the same fragments. There is no move operation: we copy, repoint the pages and delete the originals."
+	act "Share the campaigns" "The campaigns move from Madrid’s site to the design library, so both stores can use the same fragments. There is no move operation: we copy, repoint the pages and delete the originals."
 
 	step read-set "Read the fragment set from Madrid"
 	request GET "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" "" '{externalReferenceCode, name, description}'
@@ -484,8 +510,71 @@ act4() {
 	fi
 }
 
+# open_store YEAR SITE_ERC CITY ACCENT ADDRESS: a new store, the way London
+# opened, on one line of the screen.
+open_store() {
+	local year="$1" site="$2" city="$3" accent="$4" address="$5" image="${3,,}-ray.png"
+	local fragments=("$site:$HEADER_FRAGMENT_ERC" "library:$PROMO_FRAGMENT_ERC")
+
+	printf '  %s %-10s' "$year" "$city"
+
+	api PUT "$SITE_API/sites/$site" "{\"externalReferenceCode\": \"$site\", \"name\": \"Ray’s Coffee $city\"}" > /dev/null &&
+		printf ' site \033[32m✓\033[0m' &&
+		api PUT "$FRAGMENT_API/sites/$site/fragment-sets/$STORE_SET_ERC" '{"name": "Ray’s Store"}' > /dev/null &&
+		api POST "$FRAGMENT_API/sites/$site/fragment-sets/$STORE_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/$image")" > /dev/null &&
+		api POST "$FRAGMENT_API/sites/$site/fragment-sets/$STORE_SET_ERC/fragments" "$(header_payload "$city" "$image" "$accent" "$address")" > /dev/null &&
+		printf '  header \033[32m✓\033[0m' &&
+		api PUT "$ASSET_LIBRARY_API/$DESIGN_LIBRARY_ERC/connected-sites/$site" '{"searchable": true}' > /dev/null &&
+		printf '  library \033[32m✓\033[0m' || { printf '  \033[31m✗\033[0m\n'; return 1; }
+
+	library_fragment_exists "$HOURS_FRAGMENT_ERC" && fragments+=("library:$HOURS_FRAGMENT_ERC")
+
+	api PUT "$SITE_API/sites/$site/site-pages/store-home" "$(page_payload "${fragments[@]}")" > /dev/null &&
+		printf '  page \033[32m✓\033[0m\n' || printf '  \033[31m✗\033[0m\n'
+
+	marker store "$site"
+}
+
 act5() {
-	act "Winter campaign" "Winter arrives. Marketing updates the Seasonal Promo once, in the design library, and every store gets it with one propagation."
+	act "A store in every DevCon city" "Ray’s Coffee follows DevCon: Madrid hosted it in 2025 and London hosts it now. Ray’s opens a store in every city that has hosted DevCon since 2013, each with its own site and header, all sharing the design library."
+
+	# UI: the store grid (demo/store-grid.py, http://localhost:8090): one tile per DevCon city, filled as each store opens.
+	step stores "Open the stores of the other six DevCon cities"
+	say "${B}For each city, the same calls as for London:${R}"
+	say ""
+	local e="$ERC_COLOR" p="$PATH_COLOR"
+
+	printf ' %s\n' "  ${B}PUT${R}  ${p}…/headless-admin-site/v1.0/sites/${e}{city}${R}"
+	printf ' %s\n' "  ${B}PUT${R}  ${p}…/sites/${e}{city}${p}/fragment-sets/${e}rays-store${R}"
+	printf ' %s\n' "  ${B}POST${R} ${p}…/fragment-sets/${e}rays-store${p}/resource-files${R}"
+	printf ' %s\n' "  ${B}POST${R} ${p}…/fragment-sets/${e}rays-store${p}/fragments${R}"
+	printf ' %s\n' "  ${B}PUT${R}  ${p}…/asset-libraries/${e}rays-design-library${p}/${R}"
+	printf ' %s\n' "         ${p}connected-sites/${e}{city}${R}"
+	printf ' %s\n' "  ${B}PUT${R}  ${p}…/sites/${e}{city}${p}/site-pages/${e}store-home${R}"
+	wait_key "open the stores"
+	say ""
+
+	local city year site name accent address
+
+	for city in "${DEVCON_CITIES[@]}"; do
+		IFS='|' read -r year site name accent address <<< "$city"
+
+		[ "$site" = "$MADRID_ERC" ] || [ "$site" = "$LONDON_ERC" ] && continue
+
+		open_store "$year" "$site" "$name" "$accent" "$address"
+	done
+
+	marker done stores
+	next
+
+	# UI: the design library's connected sites: all eight stores.
+	step connected "List the stores connected to the design library"
+	request GET "$ASSET_LIBRARY_API/$DESIGN_LIBRARY_ERC/connected-sites?pageSize=20" "" '{totalCount, items: [.items[].name | sub("Ray’s Coffee "; "")]}'
+	next
+}
+
+act6() {
+	act "Winter campaign" "Winter arrives. Marketing updates the Seasonal Promo once, in the design library, and all eight stores get it with one propagation."
 
 	step winter-file "Upload the winter image to the library"
 	request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/winter-cup.svg" "$RESOURCE_FOLDER_ERC")" '{externalReferenceCode, resourceFolderExternalReferenceCode}'
@@ -502,24 +591,31 @@ act5() {
 	# UI: the library's Ray’s Campaigns: Seasonal Promo > ⋮ > View Site Usages, select Madrid and London, Propagate.
 	# Then both store pages.
 	step propagate "Propagate to every store, from the UI"
-	say "Seasonal Promo > ⋮ > View Site Usages: select Madrid and London, then Propagate."
+	say "Seasonal Promo > ⋮ > View Site Usages: select all the stores, then Propagate."
 	wait_key "continue once you have propagated in the UI"
 	stores
 	next
 }
 
 reset() {
-	local site
+	local city site
 
-	for site in "$MADRID_ERC" "$LONDON_ERC"; do
+	for city in "${DEVCON_CITIES[@]}"; do
+		IFS='|' read -r _ site _ _ _ <<< "$city"
+
 		api DELETE "$SITE_API/sites/$site/site-pages/store-home" > /dev/null 2>&1
 	done
 
 	api DELETE "$ASSET_LIBRARY_API/$DESIGN_LIBRARY_ERC" > /dev/null 2>&1
-	api DELETE "$SITE_API/sites/$LONDON_ERC" > /dev/null 2>&1
+
+	for city in "${DEVCON_CITIES[@]}"; do
+		IFS='|' read -r _ site _ _ _ <<< "$city"
+
+		[ "$site" = "$MADRID_ERC" ] || api DELETE "$SITE_API/sites/$site" > /dev/null 2>&1
+	done
 	api DELETE "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" > /dev/null 2>&1
 
-	echo "reset done: Madrid has $(api GET "$MADRID/fragment-sets" | jq -r .totalCount) fragment set(s), no store page; no London, no design library"
+	echo "reset done: Madrid has $(api GET "$MADRID/fragment-sets" | jq -r .totalCount) fragment set(s), no store page; no other stores, no design library"
 }
 
 if [ -t 1 ]; then
@@ -530,7 +626,7 @@ fi
 if [ $# -gt 0 ]; then
 	"$1"
 else
-	for a in act1 act2 act3 act4 act5; do
+	for a in act1 act2 act3 act4 act5 act6; do
 		"$a"
 	done
 
