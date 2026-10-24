@@ -77,6 +77,30 @@ thumbnail() {
 	jq -n --arg base64 "$(base64 -w0 "$ROOT_DIR/assets/thumbnails/$1")" '{fileBase64: $base64}'
 }
 
+CHROME="${CHROME:-$(command -v google-chrome || command -v chromium || command -v chromium-browser)}"
+
+# render_thumbnail FRAGMENT_JSON OUT_FILE
+# Renders the approved version of a fragment, with its configuration's
+# default values, to a PNG with headless Chrome.
+render_thumbnail() {
+	local html
+
+	html=$(mktemp --suffix=.html)
+
+	jq -r '
+		.fragmentVersions[] | select(.status == "Approved") |
+		([.configuration.fieldSets[]?.fields[]? | {key: .name, value: (.defaultValue.value? // .defaultValue | tostring)}] | from_entries) as $defaults |
+		"<!doctype html><meta charset=\"utf-8\"><body style=\"margin: 0; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; background: #0b0d12;\"><style>\(.css)</style>" +
+		(.html | gsub("\\$\\{configuration\\.(?<name>[A-Za-z0-9]+)[^}]*\\}"; $defaults[.name] // "")) +
+		"</body>"' <<< "$1" > "$html"
+
+	"$CHROME" --headless=new --disable-gpu --hide-scrollbars --screenshot="$2" --window-size=1000,360 "file://$html" > /dev/null 2>&1
+
+	rm -f "$html"
+
+	[ -s "$2" ]
+}
+
 # fragment_payload SEASON CONFIGURATION_FILE
 # Builds the Fragment JSON from the files under payloads/seasonal-promo.
 fragment_payload() {

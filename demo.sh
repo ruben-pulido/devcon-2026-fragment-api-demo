@@ -493,10 +493,25 @@ act4() {
 
 	next
 
-	# UI: the library's Ray’s Campaigns > Fragments: Store Hours; then open it in the fragment editor.
+	# UI: the library's Ray’s Campaigns > Fragments: Store Hours, still without a thumbnail.
 	step read-hours "Read what the agent created"
 	request GET "$LIBRARY/fragments/$HOURS_FRAGMENT_ERC" "" '{externalReferenceCode, name, fields: [.fragmentVersions[0].configuration.fieldSets[]?.fields[]? | "\(.name): \(.type)"]}'
 	next
+
+	local hours="$LAST" thumbnail_file
+
+	thumbnail_file=$(mktemp --suffix=.png)
+
+	if [ -n "$CHROME" ] && render_thumbnail "$hours" "$thumbnail_file"; then
+
+		# UI: the library's Ray’s Campaigns > Fragments: Store Hours with its thumbnail; then open it in the fragment editor.
+		step hours-thumbnail "Give Store Hours a thumbnail"
+		note "(a screenshot of the agent's HTML and CSS, taken with headless Chrome)"
+		request PUT "$LIBRARY/fragments/$HOURS_FRAGMENT_ERC" "$(jq -c --arg base64 "$(base64 -w0 "$thumbnail_file")" '{externalReferenceCode, fragmentVersions: [.fragmentVersions[] | select(.status == "Approved") | {configuration, css, html, js, status}], icon, name, thumbnailURLReference: {fileBase64: $base64}, type}' <<< "$hours")" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
+		next
+	fi
+
+	rm -f "$thumbnail_file"
 
 	if library_fragment_exists "$HOURS_FRAGMENT_ERC"; then
 		step hours-madrid "Add Store Hours to Madrid’s page"
@@ -597,6 +612,34 @@ act6() {
 	next
 }
 
+# the_end: Ray, Liferay's mascot (demo/ray.ans), beside the closing words
+# (demo/the-end.ans), or the words alone in a terminal too small for them.
+the_end() {
+	local i lines=() text=()
+
+	printf '\033[2J\033[3J\033[H'
+
+	if [ "$(cols)" -lt 72 ] || [ "$(rows)" -lt 38 ]; then
+		printf '\n %sThe end%s\n\n %sThank you!%s\n' "$B" "$R" "$B" "$R"
+
+		return
+	fi
+
+	mapfile -t lines < "$DIR/demo/ray.ans"
+	mapfile -t -O 6 text < "$DIR/demo/the-end.ans"
+
+	text[23]="${B}Thank you!${R}"
+	text[26]="Ray’s Coffee:"
+	text[27]="8 stores, 1 design library,"
+	text[28]="1 Fragment Headless API."
+
+	for i in "${!lines[@]}"; do
+		printf '%s' "${lines[$i]}"
+		[ -n "${text[$i]:-}" ] && printf '\033[42G%s' "${text[$i]}"
+		printf '\n'
+	done
+}
+
 reset() {
 	local city site
 
@@ -630,6 +673,6 @@ else
 		"$a"
 	done
 
+	the_end
 	marker act done
-	printf '\033[2J\033[H\n %sThe end%s\n' "$B" "$R"
 fi
