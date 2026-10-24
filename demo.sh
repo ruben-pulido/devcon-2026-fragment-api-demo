@@ -507,7 +507,7 @@ act4() {
 		# UI: the library's Ray’s Campaigns > Fragments: Store Hours with its thumbnail; then open it in the fragment editor.
 		step hours-thumbnail "Give Store Hours a thumbnail"
 		note "(a screenshot of the agent's HTML and CSS, taken with headless Chrome)"
-		request PUT "$LIBRARY/fragments/$HOURS_FRAGMENT_ERC" "$(jq -c --arg base64 "$(base64 -w0 "$thumbnail_file")" '{externalReferenceCode, fragmentVersions: [.fragmentVersions[] | select(.status == "Approved") | {configuration, css, html, js, status}], icon, name, thumbnailURLReference: {fileBase64: $base64}, type}' <<< "$hours")" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
+		request PUT "$LIBRARY/fragments/$HOURS_FRAGMENT_ERC" "$(jq -c --rawfile base64 <(base64 -w0 "$thumbnail_file") '{externalReferenceCode, fragmentVersions: [.fragmentVersions[] | select(.status == "Approved") | {configuration, css, html, js, status}], icon, name, thumbnailURLReference: {fileBase64: $base64}, type}' <<< "$hours")" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
 		next
 	fi
 
