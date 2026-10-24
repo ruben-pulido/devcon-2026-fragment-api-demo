@@ -403,7 +403,8 @@ act3() {
 	local set="$LAST"
 	next
 
-	# UI: the design library's fragment sets: Ray’s Campaigns appears.
+	# UI: before the request, Design Libraries > Ray’s Design Library: no design resources yet.
+	# After it, the library's fragment sets: Ray’s Campaigns.
 	step put-set "Create it in the design library"
 	request PUT "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC" "$(jq -c '{description, name}' <<< "$set")" '{externalReferenceCode, name}'
 	next
