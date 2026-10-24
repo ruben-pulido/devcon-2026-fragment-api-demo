@@ -520,8 +520,10 @@ reset() {
 	echo "reset done: Madrid has $(api GET "$MADRID/fragment-sets" | jq -r .totalCount) fragment set(s), no store page; no London, no design library"
 }
 
-tput civis 2> /dev/null
-trap 'tput cnorm 2> /dev/null' EXIT
+if [ -t 1 ]; then
+	tput civis 2> /dev/null
+	trap 'tput cnorm 2> /dev/null' EXIT
+fi
 
 if [ $# -gt 0 ]; then
 	"$1"
