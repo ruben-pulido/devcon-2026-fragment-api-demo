@@ -15,7 +15,7 @@ Creating a fragment (`postDesignLibraryFragmentSetFragment`, design library `ray
 
 Updating a fragment (`putDesignLibraryFragment`) does not change the pages that already use it: pages keep their copy until someone propagates the changes from the design library's UI.
 
-Adding a fragment to a store page (`putSiteSitePage` with the site's external reference code and `sitePageExternalReferenceCode` = `store-home`): the page is a content page with a published specification `store-home` and its draft `store-home-draft`. Each specification has one page experience with `key` = `DEFAULT`, `name_i18n` = `{"en_US": "Default"}`, and `externalReferenceCode` = `<specification ERC>-default-experience`. Each fragment on the page is a page element:
+Adding a fragment to a store page (`putSiteSitePage` with the site's external reference code and `sitePageExternalReferenceCode` = `store-home`): the page is a content page with a published specification `store-home` and its draft `store-home-draft`, both with `status` = `Approved` (a draft with `Draft` status shows the page as a draft in the admin). Each specification has one page experience with `key` = `DEFAULT`, `name_i18n` = `{"en_US": "Default"}`, and `externalReferenceCode` = `<specification ERC>-default-experience`. Each fragment on the page is a page element:
 
 ```json
 {

@@ -216,7 +216,7 @@ page_payload() {
 			pageSpecifications: [
 				specification("store-home"; "Approved"; "") +
 					{draftContentPageSpecificationExternalReferenceCode: "store-home-draft"},
-				specification("store-home-draft"; "Draft"; "-draft")
+				specification("store-home-draft"; "Approved"; "-draft")
 			],
 			type: "ContentPage"
 		}'

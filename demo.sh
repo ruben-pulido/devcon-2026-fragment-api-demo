@@ -287,7 +287,9 @@ act1() {
 	request POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$(fragment_payload autumn configuration.json)" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
 	next
 
-	# UI: the Madrid store page.
+	# UI: before the request, Madrid > Site Builder > Pages: no pages yet.
+	#   /group/<madrid>/~/control_panel/manage?p_p_id=com_liferay_layout_admin_web_portlet_GroupPagesPortlet
+	# After it, the same list with Store Home, then the Madrid store page.
 	#   /web/<madrid>/store-home
 	step page "Create Madrid’s store page"
 	put_store_page "$MADRID_ERC" "$MADRID_ERC:$HEADER_FRAGMENT_ERC" "$MADRID_ERC:$PROMO_FRAGMENT_ERC"
