@@ -44,43 +44,41 @@ The story: Ray’s Coffee has one store, in Madrid, with its own Liferay site. W
 ./demo.sh reset            # Madrid only: no shared fragments, no store page, no London, no design library
 ```
 
-Both setup scripts are idempotent. Warm up the agent once (`./demo/02-ai-fragment.sh --rehearse` needs the design library, so run it after step 6 of a rehearsal), then `./demo.sh reset`, so the first real run is not the first run of the day.
+Both setup scripts are idempotent. Rehearse once (`./demo.sh`, including the agent in act 4), then `./demo.sh reset`, so the first real run is not the first run of the day and Claude Code already trusts `stage/`.
 
 ## Running the demo: `demo.sh`
 
-Every request and response, one key press at a time:
+One API call per step, one key press at a time:
 
 ```bash
 ./demo.sh reset         # back to the starting point
-./demo.sh               # all steps: explains each one, shows the request, waits for a key, shows the response
-./demo.sh step6         # a single step (step0 ... step9)
+./demo.sh               # all five acts
+./demo.sh act3          # a single act (act1 ... act5)
 NO_PAUSE=1 ./demo.sh    # no key presses
-AI_FALLBACK=1 ./demo.sh # step 7 uses the cached agent run instead of launching Claude Code
+AI_FALLBACK=1 ./demo.sh # act 4 uses the cached agent run instead of launching Claude Code
 ```
 
-Each request prints its method, path and JSON body (long HTML, CSS and Base64 shortened). Press any key to send it. The response shows the HTTP status (green for 2xx, red otherwise), the time it took and the relevant fields.
+Every screen is built to be read from far away, at any terminal size (it is designed for 73 × 41, a 22 px font on half of a 1920 × 1080 screen):
 
-Each step starts with "In the UI" lines: what to open and what to look for after the requests, with links to the screen (sign in first).
+- At the top, the act's use case, from the business side, and its steps so far, the current one highlighted. A new step starts on a clean screen.
+- Then the call: the endpoint, wrapped after a slash, and the request body, then the status, time and response. Bodies are summarized so they fit on the screen without wrapping: long values are cut, and a page shows only the fragments it references.
+- What to show in the browser at each step is in the `# UI:` comments of `demo.sh`.
 
-| Step | What happens |
-| --- | --- |
-| 0 | The starting point: Madrid with its own Store Header, no shared fragments, no store page |
-| 1 | `PUT` the Ray’s Campaigns fragment set in the Madrid site |
-| 2 | `POST` the autumn image as a resource of the set |
-| 3 | `POST` the Seasonal Promo fragment (the HTML is printed first) |
-| 4 | `GET` the fragments, `PUT` Madrid's store page with the Pages API: its header and the promo |
-| 5 | London opens: `PUT` the London site, its own set, skyline and Store Header; `PUT` the design library; `PUT` each store's connection to it |
-| 6 | Move the campaigns: copy the set, its images (read with `nestedFields=fileURLReference.fileBase64`) and its fragments into the library, `PUT` both store pages to reference the library's promo, `DELETE` Madrid's set |
-| 7 | MCP `tools/list` (what the agent sees), the prompt, then Claude Code creates Store Hours in the library; both store pages get it |
-| 8 | `POST` the winter image, `PUT` the winter version of the promo in the library, then the stores still showing autumn |
-| 9 | In the UI: Seasonal Promo > ⋮ > View Site Usages, select Madrid and London, Propagate; then the stores showing winter |
+| Act | Use case | Steps |
+| --- | --- | --- |
+| 1. Madrid opens | Ray’s Coffee opens its first store; its site exists with its Store Header | Create the Ray’s Campaigns fragment set, its `images` resource folder, the autumn image, the Seasonal Promo fragment (with a thumbnail), and Madrid's store page |
+| 2. London opens | A second store with its own site and header; the campaigns must be shared | Create the London site and its Store Header, the design library, and connect both sites to it |
+| 3. Share the campaigns | Move the campaigns from Madrid to the design library: copy, repoint, delete | Read and create the fragment set, its folders, files and fragments (with their thumbnails) in the library, point Madrid's page to the library's promo, create London's page, delete Madrid's set |
+| 4. An AI agent builds the next fragment | Claude Code, with only Liferay's MCP server, creates Store Hours | List the agent's tools, run the agent, list the calls it made, read its fragment, add it to both store pages |
+| 5. Winter campaign | One change in the library reaches every store | Upload the winter image, update the Seasonal Promo, propagate from the UI (Seasonal Promo > ⋮ > View Site Usages, select both, Propagate) |
 
-Step 7 adds Store Hours to the pages only if it exists, so a failed agent run does not break the rest of the demo.
+Act 4 adds Store Hours to the pages only if it exists, so a failed agent run does not break the rest of the demo.
 
 Gotchas:
 
-- If another portal build ran on the same host and port in the same browser, the browser can serve its cached JavaScript modules and the admin screens render blank, with "does not provide an export named ..." errors in the console. Hard-reload with Ctrl+Shift+R, or use a separate browser profile for the demo.
+- If another portal build ran on the same host and port in the same browser, the browser can serve its cached JavaScript modules and the admin screens render blank or menus do not open. Hard-reload with Ctrl+Shift+R, or use a separate browser profile for the demo.
 - The Design Libraries list (and `GET /asset-libraries`) is search-backed. If it shows "No Design Libraries Yet" while the library exists, reindex: Control Panel > Search > Index Actions > All Search Indexes > Reindex.
+- Claude Code asks whether to trust the `stage/` folder the first time it starts there. Rehearse act 4 once on the presentation machine so the question does not come up on stage.
 
 ### The AI step
 
@@ -103,11 +101,12 @@ Gotchas:
 | `payloads/store-header/` | The Store Header template (city, skyline, accent color) |
 | `payloads/store-hours/`, `payloads/store-hours.json` | The cached Store Hours fragment for the AI fallback |
 | `assets/` | Campaign images and the Madrid and London skylines, uploaded as fragment resources |
+| `assets/thumbnails/` | The fragments' thumbnails, shown in the fragments admin |
 | `mcp/instructions.md` | Instructions of the `devcon` MCP profile |
 | `stage/` | Empty working directory of the agent; `.mcp.json` (its connection to `$LIFERAY_URL/o/mcp/devcon`) is generated on each run |
 
 ## Portal changes
 
-Branch `devcon-2026-fragment-demo-v2` of `liferay-portal`, on master as of 2026-10-02: design library variants of the fragment write operations in `headless-admin-fragment` (`POST`/`PUT` fragment sets, `GET`/`POST` fragments of a set, `GET`/`PUT` fragments, `POST` resource files of a set). They reuse the site endpoints' code.
+Branch `devcon-2026-fragment-demo-v2` of `liferay-portal`, on master as of 2026-10-02: design library variants of the fragment write operations in `headless-admin-fragment` (`POST`/`PUT` fragment sets, `GET`/`POST` fragments of a set, `GET`/`PUT` fragments, `POST` resource folders and resource files of a set). They reuse the site endpoints' code.
 
 An earlier version of the demo propagated through the API; those endpoints are kept in the draft PR [ruben-pulido/liferay-portal#640](https://github.com/ruben-pulido/liferay-portal/pull/640), with a measurement at scale (102 sites: 7 to 8 s per propagation, synchronous).

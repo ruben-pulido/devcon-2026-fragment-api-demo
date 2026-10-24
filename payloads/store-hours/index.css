@@ -3,22 +3,22 @@
 	border-top: 1px solid #2a221b;
 	color: #ede4dc;
 	font-family: Georgia, serif;
-	padding: 48px 24px;
+	padding: 28px 32px;
 }
 
 .rays-hours__inner {
-	align-items: flex-start;
+	align-items: center;
 	display: flex;
-	gap: 40px;
+	gap: 32px;
 	margin: 0 auto;
 	max-width: 1040px;
 }
 
 .rays-hours__icon {
 	color: var(--rays-accent);
-	flex: 0 0 120px;
-	height: 120px;
-	width: 120px;
+	flex: 0 0 150px;
+	height: 150px;
+	width: 150px;
 }
 
 .rays-hours__body {
@@ -28,25 +28,25 @@
 .rays-hours__eyebrow {
 	color: var(--rays-accent);
 	font-family: system-ui, sans-serif;
-	font-size: 14px;
+	font-size: 22px;
 	font-weight: 700;
 	letter-spacing: 0.16em;
-	margin: 0 0 10px;
+	margin: 0 0 6px;
 	text-transform: uppercase;
 }
 
 .rays-hours__title {
 	color: #fbf6f1;
-	font-size: 36px;
-	margin: 0 0 18px;
+	font-size: 46px;
+	margin: 0 0 8px;
 }
 
 .rays-hours__row {
 	border-bottom: 1px dashed #3a3029;
 	display: flex;
-	font-size: 18px;
+	font-size: 28px;
 	justify-content: space-between;
-	padding: 12px 0;
+	padding: 8px 0;
 }
 
 .rays-hours__day {
@@ -67,6 +67,7 @@
 	display: inline-block;
 	font-family: system-ui, sans-serif;
 	font-weight: 700;
-	margin-top: 24px;
-	padding: 11px 26px;
+	font-size: 24px;
+	margin-top: 16px;
+	padding: 10px 30px;
 }

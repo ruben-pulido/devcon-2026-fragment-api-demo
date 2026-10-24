@@ -4,7 +4,8 @@ LIFERAY_URL="${LIFERAY_URL:-http://localhost:8080}"
 LIFERAY_AUTH="${LIFERAY_AUTH:-test@liferay.com:test}"
 
 DESIGN_LIBRARY_ERC="${DESIGN_LIBRARY_ERC:-rays-design-library}"
-FRAGMENT_SET_ERC="${FRAGMENT_SET_ERC:-rays-fragments}"
+FRAGMENT_SET_ERC="${FRAGMENT_SET_ERC:-rays-campaigns}"
+RESOURCE_FOLDER_ERC="${RESOURCE_FOLDER_ERC:-images}"
 PROMO_FRAGMENT_ERC="${PROMO_FRAGMENT_ERC:-rays-seasonal-promo}"
 HOURS_FRAGMENT_ERC="${HOURS_FRAGMENT_ERC:-rays-store-hours}"
 MADRID_ERC="${MADRID_ERC:-rays-madrid}"
@@ -20,21 +21,30 @@ SITE_API="$LIFERAY_URL/o/headless-admin-site/v1.0"
 # Prints the response body. On HTTP errors prints the status and body to
 # stderr and returns 1, so scripts fail loudly on stage instead of silently.
 api() {
-	local method="$1" url="$2" body="${3:-}"
+	local method="$1" url="$2" body="${3:-}" body_file=""
 	local args=(-sS -u "$LIFERAY_AUTH" -X "$method" -H 'Accept: application/json' -w '\n%{http_code}')
 
 	if [ -n "$body" ]; then
 		if [ -f "$body" ]; then
 			args+=(-H 'Content-Type: application/json' --data-binary "@$body")
 		else
-			args+=(-H 'Content-Type: application/json' --data-binary "$body")
+			body_file=$(mktemp)
+			printf '%s' "$body" > "$body_file"
+			args+=(-H 'Content-Type: application/json' --data-binary "@$body_file")
 		fi
 	elif [ "$method" = POST ] || [ "$method" = PUT ] || [ "$method" = PATCH ]; then
 		args+=(-H 'Content-Type: application/json' --data-binary '{}')
 	fi
 
 	local response status
-	response="$(curl "${args[@]}" "$url")" || return 1
+	response="$(curl "${args[@]}" "$url")"
+
+	local curl_status=$?
+
+	[ -n "$body_file" ] && rm -f "$body_file"
+
+	[ $curl_status -eq 0 ] || return 1
+
 	status="${response##*$'\n'}"
 	response="${response%$'\n'*}"
 
@@ -51,6 +61,12 @@ step() {
 	printf '\n\033[1;36m==> %s\033[0m\n' "$*"
 }
 
+# thumbnail FILE
+# A fragment thumbnail, as the thumbnailURLReference of a Fragment.
+thumbnail() {
+	jq -n --arg base64 "$(base64 -w0 "$ROOT_DIR/assets/thumbnails/$1")" '{fileBase64: $base64}'
+}
+
 # fragment_payload SEASON CONFIGURATION_FILE
 # Builds the Fragment JSON from the files under payloads/seasonal-promo.
 fragment_payload() {
@@ -61,6 +77,7 @@ fragment_payload() {
 		--arg erc "$PROMO_FRAGMENT_ERC" \
 		--arg html "$(cat "$dir/$1/index.html")" \
 		--slurpfile configuration "$dir/$2" \
+		--argjson thumbnail "$(thumbnail "seasonal-promo-$1.jpg")" \
 		'{
 			externalReferenceCode: $erc,
 			fragmentVersions: [
@@ -74,16 +91,18 @@ fragment_payload() {
 			],
 			icon: "megaphone",
 			name: "Seasonal Promo",
+			thumbnailURLReference: $thumbnail,
 			type: "BasicFragment"
 		}'
 }
 
-# resource_payload FILE
+# resource_payload FILE [RESOURCE_FOLDER_ERC]
 resource_payload() {
 	jq -n \
 		--arg base64 "$(base64 -w0 "$1")" \
+		--arg folder "${2:-}" \
 		--arg name "$(basename "$1")" \
-		'{externalReferenceCode: $name, fileURLReference: {fileBase64: $base64}, name: $name}'
+		'{externalReferenceCode: $name, fileURLReference: {fileBase64: $base64}, name: $name} + (if $folder == "" then {} else {resourceFolderExternalReferenceCode: $folder} end)'
 }
 
 # site_friendly_url SITE_ERC
@@ -221,11 +240,13 @@ header_payload() {
 	jq -n \
 		--arg css "$(cat "$dir/index.css")" \
 		--arg html "$(sed -e "s|@CITY@|$1|g" -e "s|@IMAGE@|$2|g" -e "s|@ACCENT@|$3|g" -e "s|@TAGLINE@|$4|g" "$dir/index.html")" \
+		--argjson thumbnail "$(thumbnail "store-header-${1,,}.jpg")" \
 		'{
 			externalReferenceCode: "rays-store-header",
 			fragmentVersions: [{css: $css, html: $html, js: "", status: "Approved"}],
 			icon: "home",
 			name: "Store Header",
+			thumbnailURLReference: $thumbnail,
 			type: "BasicFragment"
 		}'
 }

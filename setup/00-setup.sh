@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Pre-show setup: the Madrid store site with its own Store Header fragment.
-# London and the design library are created during the demo (step 5).
+# London and the design library are created during the demo (act 2).
 # Idempotent: every call is a PUT by external reference code.
 
 set -euo pipefail

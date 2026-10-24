@@ -3,13 +3,13 @@
 	border-bottom: 4px solid var(--rays-accent);
 	color: #f4f1ec;
 	font-family: system-ui, sans-serif;
-	padding: 40px 24px;
+	padding: 28px 32px;
 }
 
 .rays-header__inner {
 	align-items: center;
 	display: flex;
-	gap: 40px;
+	gap: 32px;
 	justify-content: space-between;
 	margin: 0 auto;
 	max-width: 1040px;
@@ -17,9 +17,9 @@
 
 .rays-header__brand {
 	color: var(--rays-accent);
-	font-size: 16px;
+	font-size: 22px;
 	font-weight: 700;
-	letter-spacing: 0.3em;
+	letter-spacing: 0.25em;
 	margin: 0 0 6px;
 	text-transform: uppercase;
 }
@@ -27,21 +27,21 @@
 .rays-header__city {
 	color: #ffffff;
 	font-family: Georgia, serif;
-	font-size: 72px;
+	font-size: 84px;
 	line-height: 1;
-	margin: 0 0 12px;
+	margin: 0 0 10px;
 }
 
 .rays-header__tagline {
 	color: #b9b3ab;
-	font-size: 18px;
+	font-size: 26px;
 	margin: 0;
 }
 
 .rays-header__skyline {
 	border-radius: 18px;
-	flex: 0 0 420px;
-	width: 420px;
+	flex: 0 0 340px;
+	width: 340px;
 }
 
 @media (max-width: 760px) {
