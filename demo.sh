@@ -456,13 +456,12 @@ act3() {
 	put_store_page "$MADRID_ERC" "$MADRID_ERC:$HEADER_FRAGMENT_ERC" "library:$PROMO_FRAGMENT_ERC"
 	next
 
-	# UI: the London store page.
-	#   /web/<london>/store-home
+	# UI: Madrid and London, one under the other: http://localhost:8090/?cities=Madrid,London
 	step london-page "Create London’s store page"
 	put_store_page "$LONDON_ERC" "$LONDON_ERC:$HEADER_FRAGMENT_ERC" "library:$PROMO_FRAGMENT_ERC"
 	next
 
-	# UI: Madrid > Design > Fragments: only Ray’s Store is left.
+	# UI: Madrid > Design > Fragments: only Ray’s Store is left. Then Madrid and London (?cities=Madrid,London).
 	step delete-set "Delete the fragment set from Madrid"
 	request DELETE "$MADRID/fragment-sets/$FRAGMENT_SET_ERC"
 	stores
@@ -559,7 +558,7 @@ act4() {
 		put_store_page "$MADRID_ERC" "$MADRID_ERC:$HEADER_FRAGMENT_ERC" "library:$PROMO_FRAGMENT_ERC" "library:$HOURS_FRAGMENT_ERC"
 		next
 
-		# UI: both store pages.
+		# UI: Madrid and London, one under the other (?cities=Madrid,London).
 		step hours-london "Add Store Hours to London’s page"
 		put_store_page "$LONDON_ERC" "$LONDON_ERC:$HEADER_FRAGMENT_ERC" "library:$PROMO_FRAGMENT_ERC" "library:$HOURS_FRAGMENT_ERC"
 		next

@@ -79,7 +79,7 @@ Act 4 adds Store Hours to the pages only if it exists, so a failed agent run doe
 
 ### The store grid
 
-`demo/store-grid.py` serves every store page in a 2 × 4 grid at http://localhost:8090 (`GRID_PORT`). Start it before the show and keep it open in a browser window for acts 5 and 6: a tile appears as soon as its store page exists, and reloads when the page changes, so the grid fills while the stores open and turns to winter after the propagation. It proxies the portal so the store pages can be framed (Liferay sends `X-Frame-Options: SAMEORIGIN`).
+`demo/store-grid.py` serves every store page in a 2 × 4 grid at http://localhost:8090 (`GRID_PORT`). Start it before the show and keep it open in a browser window for acts 5 and 6: a tile appears as soon as its store page exists, and reloads when the page changes, so the grid fills while the stores open and turns to winter after the propagation. `?cities=Madrid,London` shows only those stores, one under the other, each page whole. It proxies the portal so the store pages can be framed (Liferay sends `X-Frame-Options: SAMEORIGIN`).
 
 Gotchas:
 

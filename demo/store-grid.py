@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # The store grid: every DevCon city's store page, in a 2 x 4 grid, at
-# http://localhost:8090 (GRID_PORT). A tile shows up as soon as its store page
-# exists and reloads when the page changes, so act 5 fills the grid and the
-# propagation in act 6 turns every tile to winter.
+# http://localhost:8090 (GRID_PORT), or only some of them, one under another, as in
+# http://localhost:8090/?cities=Madrid,London. A tile shows up as soon as its
+# store page exists and reloads when the page changes, so act 5 fills the
+# grid and the propagation in act 6 turns every tile to winter.
 #
 #   demo/store-grid.py
 #
@@ -15,6 +16,7 @@ import os
 import re
 import subprocess
 import urllib.error
+import urllib.parse
 import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -32,22 +34,29 @@ def cities():
 	return [line.split('|') for line in output.splitlines() if line]
 
 
-def grid_page():
+def grid_page(query):
+	selected = [name for name in urllib.parse.parse_qs(query).get('cities', [''])[0].split(',') if name]
+	shown = [city for city in cities() if not selected or city[2] in selected]
+
 	tiles = ''.join(
 		f'<div class="tile" data-path="/web/ray-s-coffee-{re.sub("[^a-z]", "-", city.lower())}/store-home">'
 		f'<div class="label"><b>{year}</b> {city}</div>'
 		f'<div class="frame"><div class="empty">Opening soon</div></div></div>'
-		for year, _, city, _, _ in cities())
+		for year, _, city, _, _ in shown)
 
 	with open(os.path.join(ROOT, 'demo', 'store-grid.html'), encoding='utf-8') as file:
-		return file.read().replace('<!-- tiles -->', tiles).encode('utf-8')
+		columns = 1 if selected else 2
+
+		return file.read().replace('<!-- tiles -->', tiles).replace('--columns: 2', f'--columns: {columns}').replace('--rows: 4', f'--rows: {(len(shown) + columns - 1) // columns}').encode('utf-8')
 
 
 class Handler(http.server.BaseHTTPRequestHandler):
 
 	def do_GET(self):
-		if self.path in ('/', '/index.html'):
-			body = grid_page()
+		path, _, query = self.path.partition('?')
+
+		if path in ('/', '/index.html'):
+			body = grid_page(query)
 
 			self.send_response(200)
 			self.send_header('Cache-Control', 'no-store')
