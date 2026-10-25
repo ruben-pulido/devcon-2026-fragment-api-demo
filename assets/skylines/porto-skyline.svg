@@ -6,7 +6,7 @@
     </linearGradient>
   </defs>
   <rect width="480" height="200" rx="18" fill="url(#sky)"/>
-  <circle cx="412" cy="50" r="20" fill="#00c2d1"/>
+  <circle cx="240" cy="40" r="20" fill="#00c2d1"/>
   <g fill="#04121a">
     <rect x="70" y="40" width="20" height="130"/>
     <path d="M66 40 L80 12 L94 40 Z"/>
