@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 200" width="480" height="200">
+<defs><clipPath id="c"><rect width="480" height="200" rx="18"/></clipPath></defs>
+<g clip-path="url(#c)">
+<rect width="480" height="200" fill="#20150f"/>
+<svg x="44" y="10" width="392" height="163" viewBox="0 0 480 200" preserveAspectRatio="xMidYMax slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2e0f22"/>
+      <stop offset="1" stop-color="#8a2f63"/>
+    </linearGradient>
+  </defs>
+  <rect width="480" height="200" fill="url(#sky)"/>
+  <circle cx="80" cy="56" r="22" fill="#ff7eb6"/>
+  <g fill="#16060f">
+    <rect x="180" y="110" width="160" height="90"/>
+    <rect x="200" y="60" width="44" height="60"/>
+    <path d="M200 60 L222 22 L244 60 Z"/>
+    <rect x="276" y="70" width="40" height="50"/>
+    <path d="M276 70 Q296 40 316 70 Z"/>
+    <rect x="294" y="30" width="4" height="22"/>
+    <path d="M180 110 L260 84 L340 110 Z"/>
+    <rect x="30" y="140" width="110" height="60"/>
+    <rect x="380" y="130" width="80" height="70"/>
+    <path d="M380 130 L420 104 L460 130 Z"/>
+  </g>
+  <g fill="#8a2f63">
+    <path d="M214 200 v-40 a8 8 0 0 1 16 0 v40 z"/>
+    <path d="M288 200 v-40 a8 8 0 0 1 16 0 v40 z"/>
+    <circle cx="222" cy="84" r="7"/>
+  </g>
+
+</svg>
+<rect x="44" y="10" width="392" height="163" fill="none" stroke="#3a2618" stroke-width="6"/>
+<path d="M0 0h52c-8 50-10 110 4 173H0z" fill="#ff7eb6"/>
+<path d="M480 0h-52c8 50 10 110-4 173h56z" fill="#ff7eb6"/>
+<path d="M14 0c-4 60-2 120 6 173M30 0c-6 60-6 120 6 173M466 0c4 60 2 120-6 173M450 0c6 60 6 120-6 173" stroke="#00000030" stroke-width="3" fill="none"/>
+<rect x="0" y="173" width="480" height="27" fill="#2c1d14"/>
+<rect x="36" y="168" width="408" height="8" rx="3" fill="#4a3322"/>
+<rect x="150" y="160" width="180" height="20" rx="8" fill="#f4f1ec"/>
+<rect x="130" y="172" width="220" height="28" rx="8" fill="#ff7eb6" opacity=".85"/>
+<path d="M66 160h20l-4-16h-12z" fill="#f6e7a8"/><rect x="74" y="160" width="4" height="14" fill="#f6e7a8"/>
+</g></svg>

@@ -15,6 +15,16 @@
 	max-width: 1040px;
 }
 
+.rays-header__ray {
+	flex: 0 0 auto;
+	height: 150px;
+	margin-right: -8px;
+}
+
+.rays-header__body {
+	flex: 1;
+}
+
 .rays-header__brand {
 	color: var(--rays-accent);
 	font-size: 22px;

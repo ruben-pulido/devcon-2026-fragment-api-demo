@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 200" width="480" height="200">
+<defs><clipPath id="c"><rect width="480" height="200" rx="18"/></clipPath></defs>
+<g clip-path="url(#c)">
+<rect width="480" height="200" fill="#20150f"/>
+<svg x="44" y="10" width="392" height="163" viewBox="0 0 480 200" preserveAspectRatio="xMidYMax slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b2230"/>
+      <stop offset="1" stop-color="#1d5f78"/>
+    </linearGradient>
+  </defs>
+  <rect width="480" height="200" fill="url(#sky)"/>
+  <circle cx="240" cy="40" r="20" fill="#00c2d1"/>
+  <g fill="#04121a">
+    <rect x="70" y="40" width="20" height="130"/>
+    <path d="M66 40 L80 12 L94 40 Z"/>
+    <rect x="40" y="110" width="80" height="60"/>
+    <rect x="150" y="96" width="320" height="10"/>
+    <path d="M160 170 Q310 30 460 170 L452 170 Q310 46 168 170 Z"/>
+    <rect x="300" y="106" width="6" height="64"/>
+    <rect x="250" y="112" width="5" height="58"/>
+    <rect x="352" y="112" width="5" height="58"/>
+    <rect x="0" y="150" width="40" height="20"/>
+  </g>
+  <rect x="0" y="170" width="480" height="30" fill="#0f3a4c"/>
+  <path d="M0 182 q20 -6 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" stroke="#1d5f78" stroke-width="3" fill="none"/>
+
+</svg>
+<rect x="44" y="10" width="392" height="163" fill="none" stroke="#3a2618" stroke-width="6"/>
+<path d="M0 0h52c-8 50-10 110 4 173H0z" fill="#00c2d1"/>
+<path d="M480 0h-52c8 50 10 110-4 173h56z" fill="#00c2d1"/>
+<path d="M14 0c-4 60-2 120 6 173M30 0c-6 60-6 120 6 173M466 0c4 60 2 120-6 173M450 0c6 60 6 120-6 173" stroke="#00000030" stroke-width="3" fill="none"/>
+<rect x="0" y="173" width="480" height="27" fill="#2c1d14"/>
+<rect x="36" y="168" width="408" height="8" rx="3" fill="#4a3322"/>
+<rect x="150" y="160" width="180" height="20" rx="8" fill="#f4f1ec"/>
+<rect x="130" y="172" width="220" height="28" rx="8" fill="#00c2d1" opacity=".85"/>
+<path d="M66 160h20l-4-16h-12z" fill="#f6e7a8"/><rect x="74" y="160" width="4" height="14" fill="#f6e7a8"/>
+</g></svg>

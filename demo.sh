@@ -486,15 +486,20 @@ act1() {
 	request PUT "$MADRID/fragment-sets/$HOTEL_SET_ERC" '{"name": "Ray’s Hotel"}' '{externalReferenceCode, name}'
 	next
 
-	# UI: Ray’s Hotel > Resources tab: madrid-ray.png appears.
-	step header-image "Upload Madrid’s header image"
+	# UI: Ray’s Hotel > Resources tab: madrid-room.svg appears.
+	step view-image "Upload the view from a Madrid room"
+	request POST "$MADRID/fragment-sets/$HOTEL_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/madrid-room.svg")" '{externalReferenceCode, name}'
+	next
+
+	# UI: Ray’s Hotel > Resources tab: madrid-ray.png appears too.
+	step ray-image "Upload Ray, in Madrid’s colors"
 	request POST "$MADRID/fragment-sets/$HOTEL_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/madrid-ray.png")" '{externalReferenceCode, name}'
 	next
 
 	# UI: Ray’s Hotel > Fragments: the Madrid Hotel Header, with its thumbnail.
 	#   /group/<madrid>/~/control_panel/manage/-/fragments/fragment_collections?_com_liferay_fragment_web_portlet_FragmentPortlet_fragmentCollectionExternalReferenceCode=rays-hotel
 	step header "Create Madrid’s Hotel Header"
-	request POST "$MADRID/fragment-sets/$HOTEL_SET_ERC/fragments" "$(header_payload Madrid madrid-ray.png '#f2b84b' 'Calle de Alcalá 42, Madrid')" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
+	request POST "$MADRID/fragment-sets/$HOTEL_SET_ERC/fragments" "$(header_payload Madrid madrid-room.svg '#f2b84b' 'Calle de Alcalá 42, Madrid')" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
 	next
 
 	# UI: Madrid > Design > Fragments: the Ray’s Campaigns set appears.
@@ -533,7 +538,7 @@ site_calls() {
 
 	printf ' %s\n' "  ${B}PUT${R}  ${p}…/headless-admin-site/v1.0/sites/${e}{city}${R}"
 	printf ' %s\n' "  ${B}PUT${R}  ${p}…/sites/${e}{city}${p}/fragment-sets/${e}rays-hotel${R}"
-	printf ' %s\n' "  ${B}POST${R} ${p}…/fragment-sets/${e}rays-hotel${p}/resource-files${R}"
+	printf ' %s\n' "  ${B}POST${R} ${p}…/fragment-sets/${e}rays-hotel${p}/resource-files${R} ×2"
 	printf ' %s\n' "  ${B}POST${R} ${p}…/fragment-sets/${e}rays-hotel${p}/fragments${R}"
 }
 
@@ -791,7 +796,7 @@ act5() {
 # open_site YEAR SITE_ERC CITY ACCENT ADDRESS: a hotel's site, fragment set,
 # header image and Hotel Header, on one line of ticks.
 open_site() {
-	local year="$1" site="$2" city="$3" accent="$4" address="$5" image="${3,,}-ray.png"
+	local year="$1" site="$2" city="$3" accent="$4" address="$5" image="${3,,}-room.svg"
 
 	printf '  %s %-10s' "$year" "$city"
 
@@ -799,6 +804,7 @@ open_site() {
 		printf ' site \033[32m✓\033[0m' &&
 		api PUT "$FRAGMENT_API/sites/$site/fragment-sets/$HOTEL_SET_ERC" '{"name": "Ray’s Hotel"}' > /dev/null &&
 		api POST "$FRAGMENT_API/sites/$site/fragment-sets/$HOTEL_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/$image")" > /dev/null &&
+		api POST "$FRAGMENT_API/sites/$site/fragment-sets/$HOTEL_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/${city,,}-ray.png")" > /dev/null &&
 		api POST "$FRAGMENT_API/sites/$site/fragment-sets/$HOTEL_SET_ERC/fragments" "$(header_payload "$city" "$image" "$accent" "$address")" > /dev/null &&
 		printf '  header \033[32m✓\033[0m' || { printf '  \033[31m✗\033[0m\n'; return 1; }
 }
@@ -879,32 +885,18 @@ act7() {
 	next
 }
 
-# the_end: Ray, Liferay's mascot (demo/ray.ans), beside the closing words
-# (demo/the-end.ans), or the words alone in a terminal too small for them.
+# the_end: Ray in front of a hotel (demo/the-end.ans, in octant block
+# characters), or the words alone in a terminal too small for it.
 the_end() {
-	local i lines=() text=()
-
 	printf '\033[2J\033[3J\033[H'
 
-	if [ "$(cols)" -lt 72 ] || [ "$(rows)" -lt 38 ]; then
-		printf '\n %sThe end%s\n\n %sThank you!%s\n' "$B" "$R" "$B" "$R"
+	if [ "$(cols)" -lt 73 ] || [ "$(rows)" -lt 37 ]; then
+		printf '\n %sThe end%s\n' "$B" "$R"
 
 		return
 	fi
 
-	mapfile -t lines < "$DIR/demo/ray.ans"
-	mapfile -t -O 6 text < "$DIR/demo/the-end.ans"
-
-	text[23]="${B}Thank you!${R}"
-	text[26]="Ray’s Hotels:"
-	text[27]="8 hotels, 1 design library,"
-	text[28]="1 Fragment Headless API."
-
-	for i in "${!lines[@]}"; do
-		printf '%s' "${lines[$i]}"
-		[ -n "${text[$i]:-}" ] && printf '\033[42G%s' "${text[$i]}"
-		printf '\n'
-	done
+	cat "$DIR/demo/the-end.ans"
 }
 
 reset() {

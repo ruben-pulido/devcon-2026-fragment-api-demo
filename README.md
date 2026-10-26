@@ -2,7 +2,7 @@
 
 Scripts and payloads for the Devcon 2026 session "One API, Thousands of Sites: Unleashing the Fragment Headless API".
 
-The story: Ray’s Hotels opens its first hotel, in Madrid (DevCon 2025). We build its Liferay site, its fragments and its hotel page from an empty portal, with the headless APIs alone. Then a second hotel opens in London (DevCon 2026): to launch campaigns in all hotels at the same time, the campaigns move from the Madrid site to a design library connected to both hotels, and an AI agent adds a fragment to the library. Ray’s then opens a hotel in every other city that has hosted DevCon since 2013, and a new campaign reaches all eight hotels with one propagation from the UI. Each hotel has its own Hotel Header, with Ray, Liferay's mascot, in front of the city's skyline, so the hotels are easy to tell apart.
+The story: Ray’s Hotels opens its first hotel, in Madrid (DevCon 2025). We build its Liferay site, its fragments and its hotel page from an empty portal, with the headless APIs alone. Then a second hotel opens in London (DevCon 2026): to launch campaigns in all hotels at the same time, the campaigns move from the Madrid site to a design library connected to both hotels, and an AI agent adds a fragment to the library. Ray’s then opens a hotel in every other city that has hosted DevCon since 2013, and a new campaign reaches all eight hotels with one propagation from the UI. Each hotel has its own Hotel Header, with Ray, Liferay's mascot, in the hotel's colors next to the city's name, and the city's skyline seen from a room, so the hotels are easy to tell apart.
 
 ## Requirements
 
@@ -63,14 +63,15 @@ What it runs, step by step:
 | 0.1 Sign in | Sign in |
 | 1.1 Sites | Sites (Madrid appears) |
 | 1.2 Hotel set | Madrid: Ray’s Hotel fragments (the set appears) |
-| 1.3 Header image | Madrid: Ray’s Hotel resources (madrid-ray.png) |
-| 1.4 Header | Madrid: Ray’s Hotel fragments (Hotel Header) |
-| 1.5 Campaigns | Madrid: Ray’s Campaigns fragments |
-| 1.6 Resources | Madrid: Ray’s Campaigns resources (the images folder) |
-| 1.7 Images folder | Madrid: Ray’s Campaigns resources, then open the images folder |
-| 1.8 Offer | Madrid: Ray’s Campaigns fragments (Seasonal Offer) |
-| 1.9a Pages | Madrid: pages (before and after the request) |
-| 1.9b Madrid hotel | Madrid hotel page |
+| 1.3 View image | Madrid: Ray’s Hotel resources (madrid-room.svg) |
+| 1.4 Ray image | Madrid: Ray’s Hotel resources (madrid-ray.png) |
+| 1.5 Header | Madrid: Ray’s Hotel fragments (Hotel Header) |
+| 1.6 Campaigns | Madrid: Ray’s Campaigns fragments |
+| 1.7 Resources | Madrid: Ray’s Campaigns resources (the images folder) |
+| 1.8 Images folder | Madrid: Ray’s Campaigns resources, then open the images folder |
+| 1.9 Offer | Madrid: Ray’s Campaigns fragments (Seasonal Offer) |
+| 1.10a Pages | Madrid: pages (before and after the request) |
+| 1.10b Madrid hotel | Madrid hotel page |
 | 2.1a Sites | Sites (London appears) |
 | 2.1b London header | London: Ray’s Hotel fragments (London's Hotel Header) |
 | 2.2 Libraries | Design Libraries (Ray’s Design Library appears) |
@@ -122,8 +123,8 @@ Every screen is built to be read from far away, at any terminal size (it needs a
 
 | Act | Use case | Steps |
 | --- | --- | --- |
-| 1. Madrid opens | Ray’s Hotels opens its first hotel, from an empty portal | Create the Madrid site, its Ray’s Hotel fragment set, header image and Hotel Header (with a thumbnail), then the Ray’s Campaigns fragment set, its `images` resource folder, the autumn image, the Seasonal Offer fragment (with a thumbnail), and Madrid's hotel page |
-| 2. London opens | A second hotel; campaigns must launch in all hotels at the same time | Open the London site with the same calls as Madrid (site, fragment set, header image, Hotel Header), one line on the screen; create the design library and connect both sites to it |
+| 1. Madrid opens | Ray’s Hotels opens its first hotel, from an empty portal | Create the Madrid site, its Ray’s Hotel fragment set, the view from a room, Ray in Madrid's colors and the Hotel Header (with a thumbnail), then the Ray’s Campaigns fragment set, its `images` resource folder, the autumn image, the Seasonal Offer fragment (with a thumbnail), and Madrid's hotel page |
+| 2. London opens | A second hotel; campaigns must launch in all hotels at the same time | Open the London site with the same calls as Madrid (site, fragment set, view and Ray images, Hotel Header), one line on the screen; create the design library and connect both sites to it |
 | 3. Share the campaigns | Move the campaigns from Madrid to the design library: copy, repoint, delete | Read and create the fragment set, its folders, files and fragments (with their thumbnails) in the library, point Madrid's page to the library's offer, create London's page, delete Madrid's set |
 | 4. The agent’s toolbox | Before an AI agent can help, it needs a profile on Liferay’s MCP server: a briefing and the only tools it may use | Create the `devcon` profile with its instructions, give it seven tools from three headless APIs, activate it, list what the agent sees |
 | 5. An AI agent builds the next fragment | Claude Code, with only its MCP profile's tools, creates Breakfast Hours | Run the agent, list the calls it made, read its fragment, give it a thumbnail (a headless Chrome screenshot of its HTML and CSS), add it to both hotel pages |

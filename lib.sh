@@ -313,13 +313,14 @@ library_exists() {
 }
 
 # header_payload CITY IMAGE ACCENT TAGLINE
-# The Hotel Header fragment of one hotel: its city, image and accent color.
+# The Hotel Header fragment of one hotel: Ray in its color (CITY-ray.png),
+# its city, the view from a room (IMAGE) and its accent color.
 header_payload() {
 	local dir="$ROOT_DIR/payloads/hotel-header"
 
 	jq -n \
 		--arg css "$(cat "$dir/index.css")" \
-		--arg html "$(sed -e "s|@CITY@|$1|g" -e "s|@IMAGE@|$2|g" -e "s|@ACCENT@|$3|g" -e "s|@TAGLINE@|$4|g" "$dir/index.html")" \
+		--arg html "$(sed -e "s|@CITY@|$1|g" -e "s|@IMAGE@|$2|g" -e "s|@RAY@|${1,,}-ray.png|g" -e "s|@ACCENT@|$3|g" -e "s|@TAGLINE@|$4|g" "$dir/index.html")" \
 		--argjson thumbnail "$(thumbnail "hotel-header-${1,,}.jpg")" \
 		'{
 			externalReferenceCode: "rays-hotel-header",
