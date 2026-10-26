@@ -47,7 +47,7 @@ mkdir -p "$config/zsh"
 cat > "$config/zsh/.zshrc" << 'EOF'
 export PATH="$HOME/.local/bin:$PATH"
 
-PROMPT='%~ '
+PROMPT=$'%~>\n'
 RPROMPT=''
 EOF
 
