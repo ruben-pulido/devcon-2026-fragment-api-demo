@@ -916,7 +916,7 @@ act3() {
 
 	# UI: Madrid and London, one under the other: http://localhost:8090/?cities=Madrid,London
 	step london-page "Create London’s hotel page"
-	show_still "$GRID_URL/?cities=Madrid,London"
+	show_still "$GRID_URL/?cities=London"
 	put_hotel_page "$LONDON_ERC" "$LONDON_ERC:$HEADER_FRAGMENT_ERC" "library:$OFFER_FRAGMENT_ERC"
 	next
 
