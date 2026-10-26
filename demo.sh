@@ -4,8 +4,9 @@
 #
 #   ./demo.sh            run every act, pausing before each request
 #   ./demo.sh act3       run a single act (act1 ... act7)
-#   ./demo.sh from act5  run from the start of an act to the end, to go on
-#                        after the demo stopped
+#   ./demo.sh resume     go on from the first step not done yet, after the
+#                        demo stopped
+#   ./demo.sh from act5  run from the start of an act to the end
 #   ./demo.sh reset      back to the starting point: Madrid with its store header
 #
 # NO_PAUSE=1 ./demo.sh   run without waiting for key presses
@@ -42,6 +43,16 @@ ACT_TEXT=""
 STEP=""
 STEPS=()
 
+# What the demo has done, for ./demo.sh resume: STATE_DIR/done lists the
+# steps done (ACT.STEP), and STATE_DIR/ACT.STEP.json keeps each step's
+# response, so the steps skipped on resume leave LAST as it was.
+STATE_DIR="$HOME/.cache/devcon-demo-state"
+RESUMING=""
+SKIPPING=""
+CURRENT=""
+
+exec 3>&1
+
 # The acts' short names on the progress bar, the same as the browser's
 # bookmark folders.
 ACT_NAMES=(Madrid London Move MCP Agent Cities Winter)
@@ -67,10 +78,17 @@ marker() {
 
 # act TITLE TEXT, called from actN.
 act() {
+	step_done
 	ACT="$1"
 	ACT_NUMBER="${FUNCNAME[1]#act}"
 	ACT_TEXT="$2"
 	STEPS=()
+
+	if [ -n "$RESUMING" ]; then
+		skip_if_done "$ACT_NUMBER.1"
+	else
+		forget_from "$ACT_NUMBER"
+	fi
 
 	marker act "$ACT"
 }
@@ -146,14 +164,52 @@ header() {
 	printf '%s%s%s\n' "$DIM" "$(printf '─%.0s' $(seq 1 "$width"))" "$R"
 }
 
-# step ID TEXT: a new step, on a clean screen.
+# step ID TEXT: a new step, on a clean screen, or skipped when resuming and
+# done already.
 step() {
+	step_done
 	STEP="$1"
 	STEPS+=("$2")
+	CURRENT="$ACT_NUMBER.${#STEPS[@]}"
+
+	[ -n "$RESUMING" ] && skip_if_done "$CURRENT"
 
 	marker step "$STEP"
 
 	header
+}
+
+# step_done: the step on screen is done once the demo moves past it.
+step_done() {
+	[ -z "$CURRENT" ] || [ -n "$SKIPPING" ] && return
+
+	grep -qxF "$CURRENT" "$STATE_DIR/done" 2> /dev/null || echo "$CURRENT" >> "$STATE_DIR/done"
+}
+
+# skip_if_done KEY: skips, with no output, while the steps are done already;
+# shows the screen again from the first one that is not.
+skip_if_done() {
+	if grep -qxF "$1" "$STATE_DIR/done" 2> /dev/null; then
+		SKIPPING=1
+		exec > /dev/null
+	else
+		SKIPPING=""
+		RESUMING=""
+		exec >&3
+	fi
+}
+
+# forget_from ACT: a new run of an act forgets it and the acts after it.
+forget_from() {
+	mkdir -p "$STATE_DIR"
+	touch "$STATE_DIR/done"
+	awk -F. -v act="$1" '$1 < act' "$STATE_DIR/done" > "$STATE_DIR/done.new"
+	mv "$STATE_DIR/done.new" "$STATE_DIR/done"
+}
+
+# live: true unless the step is being skipped.
+live() {
+	[ -z "$SKIPPING" ]
 }
 
 say() {
@@ -165,7 +221,7 @@ note() {
 }
 
 wait_key() {
-	[ -n "${NO_PAUSE:-}" ] && return
+	[ -n "${NO_PAUSE:-}" ] || [ -n "$SKIPPING" ] && return
 
 	printf '\n%s[ press any key to %s ]%s' "$DIM" "$1" "$R"
 	until read -rsn1 _ < /dev/tty; do :; done
@@ -299,6 +355,12 @@ request() {
 
 	wait_key "send the request"
 
+	if [ -n "$SKIPPING" ]; then
+		LAST=$(cat "$STATE_DIR/$CURRENT.json" 2> /dev/null)
+
+		return
+	fi
+
 	local args=(--silent --write-out '\n%{http_code}' --user "$LIFERAY_AUTH" --request "$method" --header 'Accept: application/json, text/event-stream')
 	local body_file=""
 
@@ -321,6 +383,9 @@ request() {
 	local status="${output##*$'\n'}"
 
 	LAST="${output%$'\n'*}"
+
+	printf '%s' "$LAST" > "$STATE_DIR/$CURRENT.json"
+	echo "$CURRENT" >> "$STATE_DIR/done"
 
 	compact || printf '\n'
 
@@ -607,7 +672,7 @@ act4() {
 	wait_key "add the tools"
 	say ""
 
-	for tool in "${MCP_TOOLS[@]}"; do
+	live && for tool in "${MCP_TOOLS[@]}"; do
 		if api PUT "$MCP_API/server-profile-tools/by-external-reference-code/$MCP_PROFILE_ERC-${tool##*:}" "$(mcp_tool_payload "$profile_id" "$tool")" > /dev/null; then
 			printf '  %-27s %s \033[32m✓\033[0m\n' "${tool%%:*}" "${tool##*:}"
 		else
@@ -643,13 +708,13 @@ act5() {
 		say ""
 		note "AI_FALLBACK: creating the fragment from the cached agent run instead."
 
-		api POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$DIR/payloads/store-hours.json" > /dev/null
+		live && api POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$DIR/payloads/store-hours.json" > /dev/null
 	else
 		wait_key "launch Claude Code"
 
 		trap : INT
 
-		"$DIR/demo/02-ai-fragment.sh"
+		live && "$DIR/demo/02-ai-fragment.sh"
 
 		step agent-calls "Check the agent’s calls"
 		say "${B}Every call the agent made went through Liferay’s MCP server:${R}"
@@ -670,7 +735,7 @@ act5() {
 
 	thumbnail_file=$(mktemp --suffix=.png)
 
-	if [ -n "$CHROME" ] && render_thumbnail "$hours" "$thumbnail_file"; then
+	if [ -n "$CHROME" ] && { ! live || render_thumbnail "$hours" "$thumbnail_file"; }; then
 
 		# UI: the library's Ray’s Campaigns > Fragments: Store Hours with its thumbnail; then open it in the fragment editor.
 		step hours-thumbnail "Give Store Hours a thumbnail"
@@ -744,7 +809,7 @@ act6() {
 
 		[ "$site" = "$MADRID_ERC" ] || [ "$site" = "$LONDON_ERC" ] && continue
 
-		open_store "$year" "$site" "$name" "$accent" "$address"
+		live && open_store "$year" "$site" "$name" "$accent" "$address"
 	done
 
 	marker done stores
@@ -811,6 +876,8 @@ the_end() {
 reset() {
 	local city site
 
+	rm -rf "$STATE_DIR"
+
 	for city in "${DEVCON_CITIES[@]}"; do
 		IFS='|' read -r _ site _ _ _ <<< "$city"
 
@@ -843,7 +910,7 @@ stopped() {
 
 	[ -n "$FINISHED" ] || [ "$ACT_NUMBER" = 0 ] && return
 
-	printf '\n\n%sStopped in act %s. To go on from its start: ./demo.sh from act%s%s\n' "$DIM" "$ACT_NUMBER" "$ACT_NUMBER" "$R"
+	printf '\n\n%sStopped in act %s. To go on from where it stopped: ./demo.sh resume%s\n' "$DIM" "$ACT_NUMBER" "$R"
 }
 
 FINISHED=""
@@ -852,7 +919,26 @@ FINISHED=""
 
 trap stopped EXIT
 
-if [ "${1:-}" = from ]; then
+if [ "${1:-}" = resume ]; then
+	last=$(sort -t. -k1,1n -k2,2n "$STATE_DIR/done" 2> /dev/null | tail -1)
+
+	if [ -z "$last" ]; then
+		echo "Nothing to resume: run ./demo.sh"
+
+		exit 1
+	fi
+
+	RESUMING=1
+
+	for ((a = ${last%%.*}; a <= ${#ACT_NAMES[@]}; a++)); do
+		"act$a"
+	done
+
+	step_done
+	exec >&3
+	the_end
+	marker act done
+elif [ "${1:-}" = from ]; then
 	for ((a = ${2#act}; a <= ${#ACT_NAMES[@]}; a++)); do
 		"act$a"
 	done

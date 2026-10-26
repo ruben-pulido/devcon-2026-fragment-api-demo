@@ -104,6 +104,7 @@ One API call per step, one key press at a time:
 ./demo.sh reset         # back to the starting point
 ./demo.sh               # all seven acts
 ./demo.sh act3          # a single act (act1 ... act7)
+./demo.sh resume        # go on from where the demo stopped
 ./demo.sh from act5     # from the start of an act to the end
 NO_PAUSE=1 ./demo.sh    # no key presses
 AI_FALLBACK=1 ./demo.sh # act 5 uses the cached agent run instead of launching Claude Code
@@ -113,7 +114,7 @@ Every screen is built to be read from far away, at any terminal size (it needs a
 
 - At the top, the act's use case, from the business side, and its steps so far, the current one highlighted. A new step starts on a clean screen.
 - Then the call: the endpoint, wrapped after a slash, and the request body, then the status, time and response. In the steps that make a point, the value that makes it is yellow. Bodies are summarized so they fit on the screen without wrapping: long values are cut, and a page shows only the fragments it references.
-- Ctrl+C while the agent runs in act 5 (to leave Claude Code) only stops the agent: the demo goes on, and one more stray Ctrl+C at the next key press is ignored too. If the demo stops anyway, it says how to go on: `./demo.sh from actN` runs that act again from its start, then the rest. Acts 4 to 6 can run again as they are; acts 1, 2, 3 and 7 create things with POST, so after one of them stopped halfway, `./demo.sh reset` and start over.
+- Ctrl+C while the agent runs in act 5 (to leave Claude Code) only stops the agent: the demo goes on, and one more stray Ctrl+C at the next key press is ignored too. If the demo stops anyway, `./demo.sh resume` goes on from the first step not done yet, even in the middle of an act: it runs through the steps done already without showing them or calling the portal (it keeps every step's response in `~/.cache/devcon-demo-state`), so the screen and the progress bar are where they were. A step that had sent its request counts as done; one that had not is shown again. `./demo.sh reset` forgets it all.
 - What to show in the browser at each step is in the `# UI:` comments of `demo.sh`.
 
 | Act | Use case | Steps |
