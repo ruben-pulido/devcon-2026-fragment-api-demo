@@ -47,7 +47,7 @@ The story: Ray’s Coffee has one store, in Madrid (DevCon 2025), with its own L
 ./demo/windows.sh          # both demo windows, side by side: the terminal and the browser
 ```
 
-`demo/windows.sh` runs `demo/terminal.sh` (a Ptyxis window with the demo font, 73 x 41, at the left edge; `demo/windows.sh ./demo.sh` starts the demo in it) and `demo/browser.sh` (a Chrome window filling the rest of the screen, with the sign-in and both store grid views); each also works alone. The two windows are laid out for the presentation screen, 1920 x 1080 like the slides, whatever screen you rehearse on (`DEMO_SCREEN`, `DEMO_FONT_SIZE` for another one).
+`demo/windows.sh` runs `demo/terminal.sh` (a Ptyxis window with the demo font on the left half of the screen, 41 rows by about 95 columns; `demo/windows.sh ./demo.sh` starts the demo in it) and `demo/browser.sh` (a Chrome window on the right half, with the sign-in and both store grid views); each also works alone. The two windows are laid out for the presentation screen, 1920 x 1080 like the slides, whatever screen you rehearse on (`DEMO_SCREEN`, `DEMO_FONT_SIZE` for another one).
 
 Both setup scripts are idempotent. Rehearse once (`./demo.sh`, including the agent in act 4), then `./demo.sh reset`, so the first real run is not the first run of the day and Claude Code already trusts `stage/`.
 
@@ -63,7 +63,7 @@ NO_PAUSE=1 ./demo.sh    # no key presses
 AI_FALLBACK=1 ./demo.sh # act 4 uses the cached agent run instead of launching Claude Code
 ```
 
-Every screen is built to be read from far away, at any terminal size (it is designed for 73 × 41, a 22 px font on half of a 1920 × 1080 screen):
+Every screen is built to be read from far away, at any terminal size (it needs 41 rows and at least 73 columns; `demo/windows.sh` gives it 41 × 95 on half of a 1920 × 1080 screen):
 
 - At the top, the act's use case, from the business side, and its steps so far, the current one highlighted. A new step starts on a clean screen.
 - Then the call: the endpoint, wrapped after a slash, and the request body, then the status, time and response. Bodies are summarized so they fit on the screen without wrapping: long values are cut, and a page shows only the fragments it references.

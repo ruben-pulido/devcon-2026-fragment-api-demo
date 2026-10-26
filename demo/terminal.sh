@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 #
-# Opens a terminal window sized for the demo: Source Code Pro Medium in a
-# large size, 73 columns by 41 rows, in the demo kit's directory, on the left
-# edge of the screen (DEMO_TERMINAL_X, DEMO_TERMINAL_Y), next to
-# demo/browser.sh.
+# Opens a terminal window sized for the demo: Source Code Pro Medium, 41 rows,
+# the left half of the screen (DEMO_TERMINAL_WIDTH, default half of
+# DEMO_SCREEN's width; about 95 columns), in the demo kit's directory, under
+# GNOME's top bar (DEMO_TOP_BAR, default 32 pixels), next to demo/browser.sh.
 #
 #   demo/terminal.sh             a shell, ready for ./demo.sh
 #   demo/terminal.sh ./demo.sh   the demo, straight away
 #
 # The size is for the presentation screen, not the one you rehearse on:
-# the demo's screens need 73 x 41, which at DEMO_FONT_SIZE 13 (points, the
-# default) just fits the height of a 1920 x 1080 screen under GNOME's top bar,
+# the demo's screens need 41 rows, which at DEMO_FONT_SIZE 13 (points, the
+# default) just fit the height of a 1920 x 1080 screen under GNOME's top bar,
 # at 100% scaling. For a taller presentation screen, go bigger.
 #
 # Ptyxis keeps one font for all its windows, so this starts a separate
@@ -27,7 +27,7 @@ FONT="${DEMO_FONT:-Source Code Pro Medium}"
 SIZE="${DEMO_FONT_SIZE:-13}"
 
 if ! command -v ptyxis > /dev/null; then
-	echo "Ptyxis not found. Set your terminal to \"$FONT $SIZE\" (73 x 41) by hand."
+	echo "Ptyxis not found. Set your terminal to \"$FONT $SIZE\" with 41 rows on half the screen, by hand."
 
 	exit 1
 fi
@@ -70,12 +70,23 @@ env -u TMUX -u TMUX_PANE DEMO_COMMAND="$*" GDK_BACKEND=x11 GSETTINGS_BACKEND=key
 
 pid=$!
 
-if command -v wmctrl > /dev/null; then
+# A window's X geometry includes the shadow it draws around itself
+# (_GTK_FRAME_EXTENTS: left, right, top, bottom), so the visible frame is
+# placed by offsetting the window by its shadow.
+if command -v wmctrl > /dev/null && command -v xprop > /dev/null; then
 	for _ in $(seq 1 40); do
 		window=$(wmctrl -lp | awk -v pid="$pid" '$3 == pid { print $1; exit }')
 
 		if [ -n "$window" ]; then
-			wmctrl -i -r "$window" -e "0,${DEMO_TERMINAL_X:-0},${DEMO_TERMINAL_Y:-0},-1,-1"
+			sleep 0.5
+
+			read -r left _ top _ < <(xprop -id "$window" _GTK_FRAME_EXTENTS | tr -d ',' | awk '{ print $3, $4, $5, $6 }')
+
+			read -r _ right _ _ < <(xprop -id "$window" _GTK_FRAME_EXTENTS | tr -d ',' | awk '{ print $3, $4, $5, $6 }')
+
+			screen="${DEMO_SCREEN:-1920x1080}"
+
+			wmctrl -i -r "$window" -e "0,$(( ${DEMO_TERMINAL_X:-0} - ${left:-0} )),$(( ${DEMO_TOP_BAR:-32} - ${top:-0} )),$(( ${DEMO_TERMINAL_WIDTH:-$(( ${screen%x*} / 2 ))} + ${left:-0} + ${right:-0} )),-1"
 			wmctrl -i -a "$window"
 
 			break

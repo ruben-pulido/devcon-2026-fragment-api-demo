@@ -10,9 +10,8 @@
 # like the slides), whatever screen you rehearse on: GNOME's top bar takes the
 # first DEMO_TOP_BAR pixels (default 32), and the browser fills the rest of
 # the screen to the right of the demo terminal (DEMO_BROWSER_X, default: the
-# terminal's right edge, or 782). DEMO_BROWSER_SCALE (default 1) zooms it; the
-# fragments admin shows the fragment sets beside their fragments only when
-# the page is at least 992 CSS pixels wide.
+# terminal's right edge, or half the screen). DEMO_BROWSER_SCALE zooms it; by
+# default, pages lay out at 1000 CSS pixels or more.
 #
 # It uses its own Chrome profile (~/.cache/devcon-demo-browser), so another
 # portal's cached JavaScript never gets in the way and the sign-in is kept
@@ -46,15 +45,34 @@ fi
 screen="${DEMO_SCREEN:-1920x1080}"
 top_bar="${DEMO_TOP_BAR:-32}"
 
-terminal=$(xdotool search --name 'Ray’s Coffee demo' getwindowgeometry 2> /dev/null | awk '/Geometry/ { split($2, size, "x"); print size[1]; exit }')
+# A window's X geometry includes the shadow it draws around itself
+# (_GTK_FRAME_EXTENTS: left, right, top, bottom), so this works with the
+# visible frames: the browser's starts where the terminal's ends.
+extents() {
+	xprop -id "$1" _GTK_FRAME_EXTENTS 2> /dev/null | tr -d ',' | awk '{ print ($3 == "" ? 0 : $3), ($4 == "" ? 0 : $4), ($5 == "" ? 0 : $5), ($6 == "" ? 0 : $6) }'
+}
 
-x="${DEMO_BROWSER_X:-${terminal:-782}}"
+terminal_right=""
+terminal=$(wmctrl -l 2> /dev/null | awk '/Ray’s Coffee demo/ { print $1 }' | tail -1)
+
+if [ -n "$terminal" ]; then
+	read -r terminal_x terminal_width < <(xdotool getwindowgeometry "$((terminal))" | awk '/Position/ { split($2, p, ","); x = p[1] } /Geometry/ { split($2, s, "x"); print x, s[1] }')
+	read -r _ terminal_shadow_right _ _ < <(extents "$terminal")
+
+	terminal_right=$(( terminal_x + terminal_width - terminal_shadow_right ))
+fi
+
+x="${DEMO_BROWSER_X:-${terminal_right:-$(( ${screen%x*} / 2 ))}}"
 y="$top_bar"
 width=$(( ${screen%x*} - x ))
 height=$(( ${screen#*x} - top_bar ))
 
+# Pages lay out at no less than 1000 CSS pixels, as in the video: the
+# fragments admin needs 992 to show the fragment sets beside their fragments.
+scale="${DEMO_BROWSER_SCALE:-$(awk -v width="$width" 'BEGIN { print (width < 1000 ? width / 1000 : 1) }')}"
+
 setsid "$CHROME" \
-	--force-device-scale-factor="${DEMO_BROWSER_SCALE:-1}" \
+	--force-device-scale-factor="$scale" \
 	--new-window \
 	--no-default-browser-check \
 	--no-first-run \
@@ -73,7 +91,11 @@ if command -v wmctrl > /dev/null; then
 		window=$(wmctrl -lp | awk -v pid="$pid" '$3 == pid { print $1 }' | tail -1)
 
 		if [ -n "$window" ]; then
-			wmctrl -i -r "$window" -e "0,$x,$y,$width,$height"
+			sleep 0.5
+
+			read -r left right top bottom < <(extents "$window")
+
+			wmctrl -i -r "$window" -e "0,$(( x - left )),$(( y - top )),$(( width + left + right )),$(( height + top + bottom ))"
 
 			break
 		fi
