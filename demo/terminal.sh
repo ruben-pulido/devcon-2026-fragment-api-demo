@@ -11,7 +11,9 @@
 #
 # Ptyxis keeps one font for all its windows, so this starts a separate
 # Ptyxis with its own settings (the keyfile settings backend, in
-# ~/.cache/devcon-demo-terminal), leaving your usual terminal untouched.
+# ~/.cache/devcon-demo-terminal), leaving your usual terminal untouched. Its
+# zsh skips your own configuration: the prompt shows only the path, and no
+# tmux or theme gets in the way.
 
 set -euo pipefail
 
@@ -40,11 +42,22 @@ restore-window-size=false
 use-system-font=false
 EOF
 
+mkdir -p "$config/zsh"
+
+cat > "$config/zsh/.zshrc" << 'EOF'
+export PATH="$HOME/.local/bin:$PATH"
+
+PROMPT='%~ '
+RPROMPT=''
+EOF
+
+touch "$config/zsh/.zprofile"
+
 command=()
 
 if [ $# -gt 0 ]; then
 	command=(-x "$*")
 fi
 
-GSETTINGS_BACKEND=keyfile XDG_CONFIG_HOME="$config" \
+env -u TMUX -u TMUX_PANE GSETTINGS_BACKEND=keyfile XDG_CONFIG_HOME="$config" ZDOTDIR="$config/zsh" \
 	setsid ptyxis --standalone --new-window --working-directory="$ROOT_DIR" --title="Ray’s Coffee demo" "${command[@]}" > /dev/null 2>&1 &
