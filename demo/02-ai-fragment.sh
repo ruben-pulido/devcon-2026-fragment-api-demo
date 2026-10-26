@@ -14,8 +14,6 @@ source "$(dirname "$0")/../lib.sh"
 
 PROMPT="$(cat "$ROOT_DIR/demo/02-prompt.txt")"
 
-DISALLOWED_TOOLS="Agent Bash Edit Glob Grep NotebookEdit Read Skill Task WebFetch WebSearch Write"
-
 cd "$ROOT_DIR/stage"
 
 jq -n \
@@ -31,8 +29,8 @@ if [ "${1:-}" = "--rehearse" ]; then
 	transcript="$transcript_dir/devcon-rehearsal-$(date +%Y%m%d-%H%M%S).jsonl"
 
 	claude -p "$PROMPT" \
-		--allowedTools mcp__liferay \
-		--disallowedTools $DISALLOWED_TOOLS \
+		--allowedTools "$AGENT_ALLOWED_TOOLS" \
+		--disallowedTools $AGENT_DISALLOWED_TOOLS \
 		--mcp-config .mcp.json \
 		--output-format stream-json \
 		--strict-mcp-config \
@@ -43,8 +41,8 @@ if [ "${1:-}" = "--rehearse" ]; then
 	echo "  transcript: $transcript"
 else
 	exec claude "$PROMPT" \
-		--allowedTools mcp__liferay \
-		--disallowedTools $DISALLOWED_TOOLS \
+		--allowedTools "$AGENT_ALLOWED_TOOLS" \
+		--disallowedTools $AGENT_DISALLOWED_TOOLS \
 		--mcp-config .mcp.json \
 		--strict-mcp-config
 fi

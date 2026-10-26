@@ -13,6 +13,10 @@ LONDON_ERC="${LONDON_ERC:-rays-london}"
 MCP_PROFILE_ERC="${MCP_PROFILE_ERC:-devcon}"
 MCP_API="$LIFERAY_URL/o/mcp"
 
+# The agent's Claude Code tools: only the MCP server's, none of its own.
+AGENT_ALLOWED_TOOLS="mcp__liferay"
+AGENT_DISALLOWED_TOOLS="Agent Bash Edit Glob Grep NotebookEdit Read Skill Task WebFetch WebSearch Write"
+
 # The tools of the agent's MCP profile: TOOL_SET:TOOL.
 MCP_TOOLS=(
 	headless-admin-fragment-v1.0:getDesignLibraryFragment

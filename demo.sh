@@ -978,9 +978,12 @@ act5() {
 	say "${B}The prompt:${R}"
 	fold -s -w "$(($(cols) - 4))" "$DIR/demo/02-prompt.txt" | sed 's/^/   /'
 	say ""
-	say "${B}The agent:${R} Claude Code, started with"
-	say "  --mcp-config         Liferay’s MCP server only"
-	say "  --disallowedTools    no shell, files or web"
+	say "${B}The agent:${R} Claude Code, in an empty folder:"
+	printf '   %sclaude%s "<the prompt>" \\\n' "$B" "$R"
+	printf '     --mcp-config .mcp.json --strict-mcp-config \\\n'
+	printf '     --allowedTools %s \\\n' "$AGENT_ALLOWED_TOOLS"
+	fold -s -w "$(( $(cols) - 26 ))" <<< "$AGENT_DISALLOWED_TOOLS" | sed 's/ *$//' | awk 'NR == 1 { printf "     --disallowedTools %s", $0; next } { printf " \\\n                       %s", $0 } END { print "" }'
+	note "   (.mcp.json: only Liferay’s MCP server, ${MCP_API#$LIFERAY_URL}/$MCP_PROFILE_ERC)"
 
 	if [ -n "${AI_FALLBACK:-}" ]; then
 		say ""
