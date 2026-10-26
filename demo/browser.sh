@@ -43,6 +43,19 @@ MCP_PORTLET=com_liferay_mcp_server_web_internal_portlet_MCPServerPortlet
 # names the bookmark, and the titles are printed as a legend. The design
 # library's own screens have no fixed URL (it is created anew in every run),
 # so their bookmarks open the Design Libraries list.
+# One bookmarks folder per act, short enough for all of them to fit on the
+# bookmarks bar.
+ACT_FOLDERS=(
+	"0. Start"
+	"1. Madrid"
+	"2. London"
+	"3. Move"
+	"4. MCP"
+	"5. Agent"
+	"6. Cities"
+	"7. Winter"
+)
+
 MADRID_ADMIN="$LIFERAY_URL/group/ray-s-coffee-madrid"
 LONDON_ADMIN="$LIFERAY_URL/group/ray-s-coffee-london"
 LIBRARIES="$LIFERAY_URL/group/control_panel/manage?p_p_id=com_liferay_design_library_web_internal_portlet_DesignLibraryAdminPortlet"
@@ -115,8 +128,10 @@ if ! pgrep -f -- "--user-data-dir=$profile" > /dev/null; then
 	mkdir -p "$profile/Default"
 
 	printf '%s\n' "${bookmarks[@]}" |
-		jq -R -n '
-			[inputs | split("|") | {name: .[0], type: "url", url: (.[2:] | join("|"))}] as $bar |
+		jq -R -n --argjson folders "$(printf '%s\n' "${ACT_FOLDERS[@]}" | jq -R -s 'split("\n") | map(select(. != ""))')" '
+			[inputs | split("|") | {act: (.[0] | split(".")[0] | tonumber), name: .[0], type: "url", url: (.[2:] | join("|"))}] |
+			group_by(.act) |
+			map({children: map(del(.act)), name: $folders[.[0].act], type: "folder"}) as $bar |
 			{
 				roots: {
 					bookmark_bar: {children: $bar, name: "Bookmarks bar", type: "folder"},
@@ -130,7 +145,7 @@ if ! pgrep -f -- "--user-data-dir=$profile" > /dev/null; then
 
 	[ -s "$preferences" ] || echo '{}' > "$preferences"
 
-	jq '.bookmark_bar.show_on_all_tabs = true' "$preferences" > "$preferences.new" && mv "$preferences.new" "$preferences"
+	jq '.bookmark_bar.show_on_all_tabs = true | .bookmark_bar.show_apps_shortcut = false | .bookmark_bar.show_tab_groups = false' "$preferences" > "$preferences.new" && mv "$preferences.new" "$preferences"
 fi
 
 if [ -z "$CHROME" ]; then
