@@ -92,7 +92,8 @@ What it runs, step by step:
 | 5.5 Madrid | Hotel grid: Madrid alone (Breakfast Hours appears) |
 | 5.6 London | Hotel grid: London alone (Breakfast Hours appears) |
 | 6.1 All hotels | Hotel grid: all eight hotels (they appear as they open) |
-| 7.2 Autumn | Hotel grid: all eight hotels (still autumn) |
+| 7.2a Offer | Design Libraries > Ray’s Design Library > Ray’s Campaigns fragments (Seasonal Offer turns winter) |
+| 7.2b Autumn | Hotel grid: all eight hotels (still autumn) |
 | 7.3a Propagate | Design Libraries > Ray’s Design Library > Ray’s Campaigns: Seasonal Offer > View Site Usages > select all > Propagate |
 | 7.3b Winter | Hotel grid: all eight hotels (winter) |
 

@@ -81,7 +81,8 @@ bookmarks=(
 	"5.5|Madrid|Hotel grid: Madrid alone (Breakfast Hours appears)|$GRID_URL/?cities=Madrid"
 	"5.6|London|Hotel grid: London alone (Breakfast Hours appears)|$GRID_URL/?cities=London"
 	"6.1|All hotels|Hotel grid: all eight hotels (they appear as they open)|$GRID_URL/"
-	"7.2|Autumn|Hotel grid: all eight hotels (still autumn)|$GRID_URL/"
+	"7.2a|Offer|Design Libraries > Ray’s Design Library > Ray’s Campaigns fragments (Seasonal Offer turns winter)|$LIBRARIES"
+	"7.2b|Autumn|Hotel grid: all eight hotels (still autumn)|$GRID_URL/"
 	"7.3a|Propagate|Design Libraries > Ray’s Design Library > Ray’s Campaigns: Seasonal Offer > View Site Usages > select all > Propagate|$LIBRARIES"
 	"7.3b|Winter|Hotel grid: all eight hotels (winter)|$GRID_URL/"
 )

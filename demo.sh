@@ -1156,7 +1156,9 @@ act7() {
 
 	# UI: the Madrid hotel page: still autumn.
 	step winter-offer "Update the Seasonal Offer in the library"
-	show_still "$GRID_URL/"
+	library_urls
+	show "$LIBRARY_SET"
+	show_after "$GRID_URL/"
 	request PUT "$LIBRARY/fragments/$OFFER_FRAGMENT_ERC" "$(fragment_payload winter winter-configuration.json)" - "$FRAGMENT_BODY"
 	compact || say ""
 	say "Pages keep their copy of each fragment: the hotels still show autumn."
