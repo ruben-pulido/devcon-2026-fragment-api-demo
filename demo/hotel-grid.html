@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Ray’s Coffee stores</title>
+<title>Ray’s Hotels</title>
 <style>
 	:root {
 		--columns: 2;
@@ -86,7 +86,7 @@
 			return;
 		}
 
-		const sections = [...iframe.contentDocument.querySelectorAll('.rays-header, .rays-promo, [class*="rays-hours"]')].map((section) => section.getBoundingClientRect());
+		const sections = [...iframe.contentDocument.querySelectorAll('.rays-header, .rays-offer, [class*="rays-breakfast"]')].map((section) => section.getBoundingClientRect());
 
 		const top = sections.length ? Math.min(...sections.map((section) => section.top)) + iframe.contentWindow.scrollY : 0;
 		const bottom = sections.length ? Math.max(...sections.map((section) => section.bottom)) + iframe.contentWindow.scrollY : frame.clientHeight;
@@ -121,7 +121,7 @@
 		frame.appendChild(iframe);
 	};
 
-	const key = (html) => (html.match(/rays-(header__city|promo__title|hours)[^>]*>[^<]*/g) || []).join('|');
+	const key = (html) => (html.match(/rays-(header__city|offer__title|breakfast)[^>]*>[^<]*/g) || []).join('|');
 
 	const poll = async () => {
 		for (const tile of document.querySelectorAll('.tile')) {

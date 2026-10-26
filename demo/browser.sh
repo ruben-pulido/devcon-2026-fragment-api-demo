@@ -2,7 +2,7 @@
 #
 # Opens the browser for the demo: a Chrome window filling the screen to the
 # right of demo/terminal.sh's window, with one tab: the portal's sign-in. It
-# also starts the store grid if it is not running.
+# also starts the hotel grid if it is not running.
 #
 #   demo/browser.sh         the sign-in
 #   demo/browser.sh --all   one tab for every screen the demo shows, in order,
@@ -39,9 +39,8 @@ MCP_PORTLET=com_liferay_mcp_server_web_internal_portlet_MCPServerPortlet
 
 # The browser screen of every step that shows one, in order:
 # NUMBER|LABEL|TITLE|URL. The number is the step's act and number on the
-# terminal (a, b... when a step shows several screens; 1.0 is the starting
-# point); with the label it names the bookmark, and the titles are printed as a
-# legend. The design
+# terminal (a, b... when a step shows several screens); with the label it
+# names the bookmark, and the titles are printed as a legend. The design
 # library's own screens have no fixed URL (it is created anew in every run),
 # so their bookmarks open the Design Libraries list.
 # One bookmarks folder per act, short enough for all of them to fit on the
@@ -57,42 +56,46 @@ ACT_FOLDERS=(
 	"7. Winter"
 )
 
-MADRID_ADMIN="$LIFERAY_URL/group/ray-s-coffee-madrid"
-LONDON_ADMIN="$LIFERAY_URL/group/ray-s-coffee-london"
+MADRID_ADMIN="$LIFERAY_URL/group/ray-s-hotel-madrid"
+LONDON_ADMIN="$LIFERAY_URL/group/ray-s-hotel-london"
+SITES="$LIFERAY_URL/group/control_panel/manage?p_p_id=com_liferay_site_admin_web_portlet_SiteAdminPortlet"
 LIBRARIES="$LIFERAY_URL/group/control_panel/manage?p_p_id=com_liferay_design_library_web_internal_portlet_DesignLibraryAdminPortlet"
 MCP_TOOLS_URL="$LIFERAY_URL/group/control_panel/manage?p_p_id=$MCP_PORTLET&p_p_lifecycle=0&p_p_state=maximized&_${MCP_PORTLET}_mvcRenderCommandName=%2Fmcp_server%2Fedit_profile&_${MCP_PORTLET}_profileERC=devcon&_${MCP_PORTLET}_tab=tools"
 
 bookmarks=(
 	"0.1|Sign in|Sign in|$LIFERAY_URL/c/portal/login"
-	"1.0|Store fragments|Madrid: Ray’s Store fragments (only the Store Header)|$MADRID_ADMIN$FRAGMENTS=rays-store"
-	"1.1|Campaigns|Madrid: Ray’s Campaigns fragments|$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC"
-	"1.2|Resources|Madrid: Ray’s Campaigns resources (the images folder)|$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES"
-	"1.3|Images folder|Madrid: Ray’s Campaigns resources, then open the images folder|$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES"
-	"1.4|Promo|Madrid: Ray’s Campaigns fragments (Seasonal Promo)|$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC"
-	"1.5a|Pages|Madrid: pages (before and after the request)|$MADRID_ADMIN$PAGES"
-	"1.5b|Madrid store|Madrid store page|$LIFERAY_URL/web/ray-s-coffee-madrid/store-home"
-	"2.1|Sites|Sites (London appears)|$LIFERAY_URL/group/control_panel/manage?p_p_id=com_liferay_site_admin_web_portlet_SiteAdminPortlet"
-	"2.2|London header|London: Ray’s Store fragments (London's Store Header)|$LONDON_ADMIN$FRAGMENTS=rays-store"
-	"2.3|Libraries|Design Libraries (Ray’s Design Library appears)|$LIBRARIES"
-	"2.4|Connect Madrid|Design Libraries > Ray’s Design Library: Connected Sites (before and after)|$LIBRARIES"
-	"2.5|Connect London|Design Libraries > Ray’s Design Library: Connected Sites|$LIBRARIES"
+	"1.1|Sites|Sites (Madrid appears)|$SITES"
+	"1.2|Hotel set|Madrid: Ray’s Hotel fragments (the set appears)|$MADRID_ADMIN$FRAGMENTS=rays-hotel"
+	"1.3|Header image|Madrid: Ray’s Hotel resources (madrid-ray.png)|$MADRID_ADMIN$FRAGMENTS=rays-hotel$RESOURCES"
+	"1.4|Header|Madrid: Ray’s Hotel fragments (Hotel Header)|$MADRID_ADMIN$FRAGMENTS=rays-hotel"
+	"1.5|Campaigns|Madrid: Ray’s Campaigns fragments|$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC"
+	"1.6|Resources|Madrid: Ray’s Campaigns resources (the images folder)|$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES"
+	"1.7|Images folder|Madrid: Ray’s Campaigns resources, then open the images folder|$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES"
+	"1.8|Offer|Madrid: Ray’s Campaigns fragments (Seasonal Offer)|$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC"
+	"1.9a|Pages|Madrid: pages (before and after the request)|$MADRID_ADMIN$PAGES"
+	"1.9b|Madrid hotel|Madrid hotel page|$LIFERAY_URL/web/ray-s-hotel-madrid/hotel-home"
+	"2.1a|Sites|Sites (London appears)|$SITES"
+	"2.1b|London header|London: Ray’s Hotel fragments (London's Hotel Header)|$LONDON_ADMIN$FRAGMENTS=rays-hotel"
+	"2.2|Libraries|Design Libraries (Ray’s Design Library appears)|$LIBRARIES"
+	"2.3|Connect Madrid|Design Libraries > Ray’s Design Library: Connected Sites (before and after)|$LIBRARIES"
+	"2.4|Connect London|Design Libraries > Ray’s Design Library: Connected Sites|$LIBRARIES"
 	"3.2|Library set|Design Libraries > Ray’s Design Library (empty), then its Ray’s Campaigns|$LIBRARIES"
 	"3.4|Resources|Design Libraries > Ray’s Design Library > Ray’s Campaigns > Resources|$LIBRARIES"
 	"3.6|Images|Design Libraries > Ray’s Design Library > Ray’s Campaigns > Resources > images|$LIBRARIES"
 	"3.8|Fragments|Design Libraries > Ray’s Design Library > Ray’s Campaigns fragments|$LIBRARIES"
-	"3.9|Madrid store|Madrid store page|$LIFERAY_URL/web/ray-s-coffee-madrid/store-home"
-	"3.10|Grid|Store grid: Madrid and London|$GRID_URL/?cities=Madrid,London"
-	"3.11a|Set gone|Madrid: Ray’s Store fragments (Ray’s Campaigns is gone)|$MADRID_ADMIN$FRAGMENTS=rays-store"
-	"3.11b|Grid|Store grid: Madrid and London|$GRID_URL/?cities=Madrid,London"
+	"3.9|Madrid hotel|Madrid hotel page|$LIFERAY_URL/web/ray-s-hotel-madrid/hotel-home"
+	"3.10|Grid|Hotel grid: Madrid and London|$GRID_URL/?cities=Madrid,London"
+	"3.11a|Set gone|Madrid: Ray’s Hotel fragments (Ray’s Campaigns is gone)|$MADRID_ADMIN$FRAGMENTS=rays-hotel"
+	"3.11b|Grid|Hotel grid: Madrid and London|$GRID_URL/?cities=Madrid,London"
 	"4.1|Profile|MCP Server: profiles (devcon appears)|$LIFERAY_URL/group/control_panel/manage?p_p_id=$MCP_PORTLET"
 	"4.2|Tools|MCP Server: the devcon profile's tools|$MCP_TOOLS_URL"
-	"5.3|Store Hours|Design Libraries > Ray’s Design Library > Ray’s Campaigns fragments (Store Hours)|$LIBRARIES"
-	"5.4|Thumbnail|Design Libraries > Ray’s Design Library > Ray’s Campaigns: Store Hours with its thumbnail, then open it|$LIBRARIES"
-	"5.6|Grid|Store grid: Madrid and London (with Store Hours)|$GRID_URL/?cities=Madrid,London"
-	"6.1|All stores|Store grid: all eight stores (they appear as they open)|$GRID_URL/"
-	"7.2|Autumn|Store grid: all eight stores (still autumn)|$GRID_URL/"
-	"7.3a|Propagate|Design Libraries > Ray’s Design Library > Ray’s Campaigns: Seasonal Promo > View Site Usages > select all > Propagate|$LIBRARIES"
-	"7.3b|Winter|Store grid: all eight stores (winter)|$GRID_URL/"
+	"5.3|Breakfast Hours|Design Libraries > Ray’s Design Library > Ray’s Campaigns fragments (Breakfast Hours)|$LIBRARIES"
+	"5.4|Thumbnail|Design Libraries > Ray’s Design Library > Ray’s Campaigns: Breakfast Hours with its thumbnail, then open it|$LIBRARIES"
+	"5.6|Grid|Hotel grid: Madrid and London (with Breakfast Hours)|$GRID_URL/?cities=Madrid,London"
+	"6.1|All hotels|Hotel grid: all eight hotels (they appear as they open)|$GRID_URL/"
+	"7.2|Autumn|Hotel grid: all eight hotels (still autumn)|$GRID_URL/"
+	"7.3a|Propagate|Design Libraries > Ray’s Design Library > Ray’s Campaigns: Seasonal Offer > View Site Usages > select all > Propagate|$LIBRARIES"
+	"7.3b|Winter|Hotel grid: all eight hotels (winter)|$GRID_URL/"
 )
 
 urls=("$LIFERAY_URL/c/portal/login")
@@ -156,7 +159,7 @@ if [ -z "$CHROME" ]; then
 fi
 
 if ! curl -s -o /dev/null "$GRID_URL/"; then
-	setsid "$ROOT_DIR/demo/store-grid.py" > "$HOME/.cache/devcon-store-grid.log" 2>&1 &
+	setsid "$ROOT_DIR/demo/hotel-grid.py" > "$HOME/.cache/devcon-hotel-grid.log" 2>&1 &
 
 	for _ in $(seq 1 20); do
 		curl -s -o /dev/null "$GRID_URL/" && break
@@ -176,7 +179,7 @@ extents() {
 }
 
 terminal_right=""
-terminal=$(wmctrl -l 2> /dev/null | awk '/Ray’s Coffee demo/ { print $1 }' | tail -1)
+terminal=$(wmctrl -l 2> /dev/null | awk '/Ray’s Hotels demo/ { print $1 }' | tail -1)
 
 if [ -n "$terminal" ]; then
 	read -r terminal_x terminal_width < <(xdotool getwindowgeometry "$((terminal))" | awk '/Position/ { split($2, p, ","); x = p[1] } /Geometry/ { split($2, s, "x"); print x, s[1] }')

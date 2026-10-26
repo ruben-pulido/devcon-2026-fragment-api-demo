@@ -9,13 +9,13 @@
 					"type": "colorPicker"
 				},
 				{
-					"defaultValue": {"value": "Order now"},
+					"defaultValue": {"value": "Book now"},
 					"label": "Call to action",
 					"name": "ctaLabel",
 					"type": "text"
 				}
 			],
-			"label": "Promo"
+			"label": "Offer"
 		}
 	]
 }

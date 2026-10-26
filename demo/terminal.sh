@@ -66,7 +66,7 @@ touch "$config/zsh/.zprofile"
 
 
 env -u TMUX -u TMUX_PANE DEMO_COMMAND="$*" GDK_BACKEND=x11 GSETTINGS_BACKEND=keyfile XDG_CONFIG_HOME="$config" ZDOTDIR="$config/zsh" \
-	setsid ptyxis --standalone --new-window --working-directory="$ROOT_DIR" --title="Ray’s Coffee demo" > /dev/null 2>&1 &
+	setsid ptyxis --standalone --new-window --working-directory="$ROOT_DIR" --title="Ray’s Hotels demo" > /dev/null 2>&1 &
 
 pid=$!
 

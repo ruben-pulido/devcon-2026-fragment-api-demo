@@ -6,8 +6,8 @@ LIFERAY_AUTH="${LIFERAY_AUTH:-test@liferay.com:test}"
 DESIGN_LIBRARY_ERC="${DESIGN_LIBRARY_ERC:-rays-design-library}"
 FRAGMENT_SET_ERC="${FRAGMENT_SET_ERC:-rays-campaigns}"
 RESOURCE_FOLDER_ERC="${RESOURCE_FOLDER_ERC:-images}"
-PROMO_FRAGMENT_ERC="${PROMO_FRAGMENT_ERC:-rays-seasonal-promo}"
-HOURS_FRAGMENT_ERC="${HOURS_FRAGMENT_ERC:-rays-store-hours}"
+OFFER_FRAGMENT_ERC="${OFFER_FRAGMENT_ERC:-rays-seasonal-offer}"
+BREAKFAST_FRAGMENT_ERC="${BREAKFAST_FRAGMENT_ERC:-rays-breakfast-hours}"
 MADRID_ERC="${MADRID_ERC:-rays-madrid}"
 LONDON_ERC="${LONDON_ERC:-rays-london}"
 MCP_PROFILE_ERC="${MCP_PROFILE_ERC:-devcon}"
@@ -31,7 +31,7 @@ mcp_profile_payload() {
 		--arg erc "$MCP_PROFILE_ERC" \
 		--rawfile instructions "$ROOT_DIR/mcp/instructions.md" \
 		'{
-			description: "Devcon 2026: fragments of the Ray’s Coffee design library and the store pages that use them.",
+			description: "Devcon 2026: fragments of the Ray’s Hotels design library and the hotel pages that use them.",
 			externalReferenceCode: $erc,
 			instructions: $instructions,
 			name: $erc,
@@ -146,16 +146,16 @@ render_thumbnail() {
 }
 
 # fragment_payload SEASON CONFIGURATION_FILE
-# Builds the Fragment JSON from the files under payloads/seasonal-promo.
+# Builds the Fragment JSON from the files under payloads/seasonal-offer.
 fragment_payload() {
-	local dir="$ROOT_DIR/payloads/seasonal-promo"
+	local dir="$ROOT_DIR/payloads/seasonal-offer"
 
 	jq -n \
 		--arg css "$(cat "$dir/$1/index.css")" \
-		--arg erc "$PROMO_FRAGMENT_ERC" \
+		--arg erc "$OFFER_FRAGMENT_ERC" \
 		--arg html "$(cat "$dir/$1/index.html")" \
 		--slurpfile configuration "$dir/$2" \
-		--argjson thumbnail "$(thumbnail "seasonal-promo-$1.jpg")" \
+		--argjson thumbnail "$(thumbnail "seasonal-offer-$1.jpg")" \
 		'{
 			externalReferenceCode: $erc,
 			fragmentVersions: [
@@ -168,7 +168,7 @@ fragment_payload() {
 				}
 			],
 			icon: "megaphone",
-			name: "Seasonal Promo",
+			name: "Seasonal Offer",
 			thumbnailURLReference: $thumbnail,
 			type: "BasicFragment"
 		}'
@@ -188,11 +188,11 @@ site_friendly_url() {
 	api GET "$SITE_API/sites/$1" | jq -r '.friendlyUrlPath'
 }
 
-# page_promo SITE_ERC
-# Prints the promo title rendered on the store page of the site, as a guest.
-page_promo() {
-	curl -sS "$LIFERAY_URL/web$(site_friendly_url "$1")/store-home" |
-		grep -oE 'rays-promo__title"[^>]*>[^<]*' | sed -E 's/.*>//'
+# page_offer SITE_ERC
+# Prints the offer title rendered on the hotel page of the site, as a guest.
+page_offer() {
+	curl -sS "$LIFERAY_URL/web$(site_friendly_url "$1")/hotel-home" |
+		grep -oE 'rays-offer__title"[^>]*>[^<]*' | sed -E 's/.*>//'
 }
 
 site_exists() {
@@ -206,7 +206,7 @@ show_sites() {
 		IFS='|' read -r year site city _ _ <<< "$city"
 
 		if site_exists "$site"; then
-			printf '  %s %-10s %s\n' "$year" "$city" "$(page_promo "$site")"
+			printf '  %s %-10s %s\n' "$year" "$city" "$(page_offer "$site")"
 		fi
 	done
 }
@@ -214,9 +214,9 @@ show_sites() {
 # fragment_instance FRAGMENT_URL
 # The content a page element needs for a fragment: the HTML, CSS, JS and
 # configuration of its approved version, read from FRAGMENT_URL (a site or a
-# design library fragment). The Pages API stores a copy of them in the page;
+# design library fragment). The Pages API hotels a copy of them in the page;
 # propagation later refreshes that copy. The page expects the configuration as
-# a JSON string in the format fragments store it, where a field's default is
+# a JSON string in the format fragments hotel it, where a field's default is
 # the plain value instead of {"value": ...}.
 fragment_instance() {
 	api GET "$1" |
@@ -235,7 +235,7 @@ fragment_instance() {
 }
 
 # page_payload SCOPE:FRAGMENT_ERC...
-# Builds the store-home content page with one fragment per argument, in order,
+# Builds the hotel-home content page with one fragment per argument, in order,
 # in both the published specification and its draft. SCOPE is "library" for a
 # design library fragment, or the ERC of the page's own site for a fragment of
 # that site (its reference then has no scope).
@@ -266,7 +266,7 @@ page_payload() {
 			[
 				$instances | to_entries[] |
 				{
-					externalReferenceCode: "store-home-\(.value.erc)\($suffix)",
+					externalReferenceCode: "hotel-home-\(.value.erc)\($suffix)",
 					pageElementDefinition: {
 						fragmentInstance: (.value.instance + {fragmentReference: (.value | reference)}),
 						type: "BasicFragment"
@@ -289,14 +289,14 @@ page_payload() {
 				type: "ContentPageSpecification"
 			};
 		{
-			externalReferenceCode: "store-home",
-			friendlyUrlPath_i18n: {en_US: "/store-home"},
-			name_i18n: {en_US: "Store Home"},
+			externalReferenceCode: "hotel-home",
+			friendlyUrlPath_i18n: {en_US: "/hotel-home"},
+			name_i18n: {en_US: "Hotel Home"},
 			pageSettings: {type: "ContentPageSettings"},
 			pageSpecifications: [
-				specification("store-home"; "Approved"; "") +
-					{draftContentPageSpecificationExternalReferenceCode: "store-home-draft"},
-				specification("store-home-draft"; "Approved"; "-draft")
+				specification("hotel-home"; "Approved"; "") +
+					{draftContentPageSpecificationExternalReferenceCode: "hotel-home-draft"},
+				specification("hotel-home-draft"; "Approved"; "-draft")
 			],
 			type: "ContentPage"
 		}'
@@ -313,19 +313,19 @@ library_exists() {
 }
 
 # header_payload CITY IMAGE ACCENT TAGLINE
-# The Store Header fragment of one store: its city, image and accent color.
+# The Hotel Header fragment of one hotel: its city, image and accent color.
 header_payload() {
-	local dir="$ROOT_DIR/payloads/store-header"
+	local dir="$ROOT_DIR/payloads/hotel-header"
 
 	jq -n \
 		--arg css "$(cat "$dir/index.css")" \
 		--arg html "$(sed -e "s|@CITY@|$1|g" -e "s|@IMAGE@|$2|g" -e "s|@ACCENT@|$3|g" -e "s|@TAGLINE@|$4|g" "$dir/index.html")" \
-		--argjson thumbnail "$(thumbnail "store-header-${1,,}.jpg")" \
+		--argjson thumbnail "$(thumbnail "hotel-header-${1,,}.jpg")" \
 		'{
-			externalReferenceCode: "rays-store-header",
+			externalReferenceCode: "rays-hotel-header",
 			fragmentVersions: [{css: $css, html: $html, js: "", status: "Approved"}],
 			icon: "home",
-			name: "Store Header",
+			name: "Hotel Header",
 			thumbnailURLReference: $thumbnail,
 			type: "BasicFragment"
 		}'

@@ -1,4 +1,4 @@
-.rays-hours {
+.rays-breakfast {
 	background: #12100e;
 	border-top: 1px solid #2a221b;
 	color: #ede4dc;
@@ -6,7 +6,7 @@
 	padding: 28px 32px;
 }
 
-.rays-hours__inner {
+.rays-breakfast__inner {
 	align-items: center;
 	display: flex;
 	gap: 32px;
@@ -14,18 +14,18 @@
 	max-width: 1040px;
 }
 
-.rays-hours__icon {
+.rays-breakfast__icon {
 	color: var(--rays-accent);
 	flex: 0 0 150px;
 	height: 150px;
 	width: 150px;
 }
 
-.rays-hours__body {
+.rays-breakfast__body {
 	flex: 1;
 }
 
-.rays-hours__eyebrow {
+.rays-breakfast__eyebrow {
 	color: var(--rays-accent);
 	font-family: system-ui, sans-serif;
 	font-size: 22px;
@@ -35,13 +35,13 @@
 	text-transform: uppercase;
 }
 
-.rays-hours__title {
+.rays-breakfast__title {
 	color: #fbf6f1;
 	font-size: 46px;
 	margin: 0 0 8px;
 }
 
-.rays-hours__row {
+.rays-breakfast__row {
 	border-bottom: 1px dashed #3a3029;
 	display: flex;
 	font-size: 28px;
@@ -49,17 +49,17 @@
 	padding: 8px 0;
 }
 
-.rays-hours__day {
+.rays-breakfast__day {
 	color: #d6c6b8;
 	font-weight: 700;
 }
 
-.rays-hours__time {
+.rays-breakfast__time {
 	color: #fbf6f1;
 	font-family: system-ui, sans-serif;
 }
 
-.rays-hours__cta {
+.rays-breakfast__cta {
 	background: transparent;
 	border: 2px solid var(--rays-accent);
 	border-radius: 999px;

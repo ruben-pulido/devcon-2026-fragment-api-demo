@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-# The store grid: every DevCon city's store page, in a 2 x 4 grid, at
+# The hotel grid: every DevCon city's hotel page, in a 2 x 4 grid, at
 # http://localhost:8090 (GRID_PORT), or only some of them, one under another, as in
 # http://localhost:8090/?cities=Madrid,London. A tile shows up as soon as its
-# store page exists and reloads when the page changes, so act 6 fills the
+# hotel page exists and reloads when the page changes, so act 6 fills the
 # grid and the propagation in act 7 turns every tile to winter.
 #
-#   demo/store-grid.py
+#   demo/hotel-grid.py
 #
 # Liferay only lets its own pages frame its pages, so this server proxies the
 # portal (LIFERAY_URL) next to the grid page, without the X-Frame-Options
@@ -39,12 +39,12 @@ def grid_page(query):
 	shown = [city for city in cities() if not selected or city[2] in selected]
 
 	tiles = ''.join(
-		f'<div class="tile" data-path="/web/ray-s-coffee-{re.sub("[^a-z]", "-", city.lower())}/store-home">'
+		f'<div class="tile" data-path="/web/ray-s-hotel-{re.sub("[^a-z]", "-", city.lower())}/hotel-home">'
 		f'<div class="label"><b>{year}</b> {city}</div>'
 		f'<div class="frame"><div class="empty">Opening soon</div></div></div>'
 		for year, _, city, _, _ in shown)
 
-	with open(os.path.join(ROOT, 'demo', 'store-grid.html'), encoding='utf-8') as file:
+	with open(os.path.join(ROOT, 'demo', 'hotel-grid.html'), encoding='utf-8') as file:
 		columns = 1 if selected else 2
 
 		return file.read().replace('<!-- tiles -->', tiles).replace('--columns: 2', f'--columns: {columns}').replace('--rows: 4', f'--rows: {(len(shown) + columns - 1) // columns}').encode('utf-8')
@@ -92,6 +92,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
 		pass
 
 
-print(f'Store grid at http://localhost:{PORT}')
+print(f'Hotel grid at http://localhost:{PORT}')
 
 http.server.ThreadingHTTPServer(('', PORT), Handler).serve_forever()

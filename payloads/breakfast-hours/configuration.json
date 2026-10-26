@@ -3,19 +3,19 @@
 		{
 			"fields": [
 				{
-					"defaultValue": {"value": "#e4485a"},
+					"defaultValue": {"value": "#f08a3c"},
 					"label": "Accent color",
 					"name": "accentColor",
 					"type": "colorPicker"
 				},
 				{
-					"defaultValue": {"value": "Order now"},
-					"label": "Call to action",
+					"defaultValue": {"value": "See the menu"},
+					"label": "Menu button label",
 					"name": "ctaLabel",
 					"type": "text"
 				}
 			],
-			"label": "Promo"
+			"label": "Breakfast hours"
 		}
 	]
 }

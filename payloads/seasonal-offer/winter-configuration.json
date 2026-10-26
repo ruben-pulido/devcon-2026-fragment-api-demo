@@ -3,19 +3,19 @@
 		{
 			"fields": [
 				{
-					"defaultValue": {"value": "#f08a3c"},
+					"defaultValue": {"value": "#e4485a"},
 					"label": "Accent color",
 					"name": "accentColor",
 					"type": "colorPicker"
 				},
 				{
-					"defaultValue": {"value": "Get directions"},
-					"label": "Directions button label",
+					"defaultValue": {"value": "Book now"},
+					"label": "Call to action",
 					"name": "ctaLabel",
 					"type": "text"
 				}
 			],
-			"label": "Store hours"
+			"label": "Offer"
 		}
 	]
 }

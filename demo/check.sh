@@ -2,7 +2,7 @@
 #
 # Gets everything ready for the demo, and says what is not: the tools, the
 # portal and its demo endpoints, the MCP profile, the starting point (it runs
-# the setup scripts and ./demo.sh reset), the store grid, and what the AI
+# the MCP setup script and ./demo.sh reset), the hotel grid, and what the AI
 # agent needs. It needs no AI and no internet itself.
 #
 #   demo/check.sh
@@ -88,13 +88,7 @@ else
 	fail "The design library endpoints are missing" "The portal must be built from the devcon-2026-fragment-demo-v2 branch (see the README), with the Fragment Headless API and design library feature flags on."
 fi
 
-section "Setup"
-
-if ./setup/00-setup.sh > /dev/null 2>&1; then
-	ok "Madrid's site and Store Header (setup/00-setup.sh)"
-else
-	fail "setup/00-setup.sh failed" "Run it by hand to see why."
-fi
+section "MCP server"
 
 if ./setup/10-mcp-profile.sh > /dev/null 2>&1; then
 	tools=$(curl -s -u "$LIFERAY_AUTH" -X POST -H 'Accept: application/json, text/event-stream' -H 'Content-Type: application/json' \
@@ -114,22 +108,16 @@ section "Starting point"
 # leftovers: the demo data that is not part of the starting point, one item
 # per line as DESCRIPTION|COMMAND THAT DELETES IT.
 leftovers() {
-	local city name set site
-
-	for set in $(api GET "$FRAGMENT_API/sites/$MADRID_ERC/fragment-sets" 2> /dev/null | jq -r '.items[].externalReferenceCode'); do
-		[ "$set" = rays-store ] && continue
-
-		echo "Madrid's $set fragment set|curl -u '$LIFERAY_AUTH' -X DELETE $FRAGMENT_API/sites/$MADRID_ERC/fragment-sets/$set"
-	done
+	local city name site
 
 	for city in "${DEVCON_CITIES[@]}"; do
 		IFS='|' read -r _ site name _ _ <<< "$city"
 
-		if api GET "$SITE_API/sites/$site/site-pages/store-home" > /dev/null 2>&1; then
-			echo "$name's store page|curl -u '$LIFERAY_AUTH' -X DELETE $SITE_API/sites/$site/site-pages/store-home"
+		if api GET "$SITE_API/sites/$site/site-pages/hotel-home" > /dev/null 2>&1; then
+			echo "$name's hotel page|curl -u '$LIFERAY_AUTH' -X DELETE $SITE_API/sites/$site/site-pages/hotel-home"
 		fi
 
-		if [ "$site" != "$MADRID_ERC" ] && site_exists "$site"; then
+		if site_exists "$site"; then
 			echo "the $name site|curl -u '$LIFERAY_AUTH' -X DELETE $SITE_API/sites/$site"
 		fi
 	done
@@ -152,7 +140,7 @@ if [ -n "$cleaned" ]; then
 fi
 
 if [ -z "$after" ]; then
-	ok "Starting point: Madrid with only its Store Header, no other stores, no design library"
+	ok "Starting point: no hotel sites, no design library, no MCP profile"
 else
 	fail "./demo.sh reset could not remove all of a previous run. Delete these, then run this again:"
 
@@ -161,10 +149,10 @@ else
 	done <<< "$after"
 fi
 
-section "Store grid ($GRID_URL)"
+section "Hotel grid ($GRID_URL)"
 
 if ! curl -s -o /dev/null "$GRID_URL/"; then
-	setsid "$ROOT_DIR/demo/store-grid.py" > "$HOME/.cache/devcon-store-grid.log" 2>&1 &
+	setsid "$ROOT_DIR/demo/hotel-grid.py" > "$HOME/.cache/devcon-hotel-grid.log" 2>&1 &
 
 	for _ in $(seq 1 20); do
 		curl -s -o /dev/null "$GRID_URL/" && break
@@ -176,7 +164,7 @@ fi
 if curl -s "$GRID_URL/" | grep -q 'class="tile"'; then
 	ok "It is running"
 else
-	fail "It does not start" "Run ./demo/store-grid.py by hand to see why."
+	fail "It does not start" "Run ./demo/hotel-grid.py by hand to see why."
 fi
 
 section "The AI agent (act 5)"
@@ -201,10 +189,10 @@ else
 	warn "No internet: the agent cannot run" "Run the demo with AI_FALLBACK=1 ./demo.sh: act 5 then uses the cached agent run."
 fi
 
-if [ -s "$ROOT_DIR/payloads/store-hours.json" ]; then
-	ok "The cached agent run is there (payloads/store-hours.json)"
+if [ -s "$ROOT_DIR/payloads/breakfast-hours.json" ]; then
+	ok "The cached agent run is there (payloads/breakfast-hours.json)"
 else
-	fail "payloads/store-hours.json is missing" "AI_FALLBACK=1 needs it."
+	fail "payloads/breakfast-hours.json is missing" "AI_FALLBACK=1 needs it."
 fi
 
 printf '\n'

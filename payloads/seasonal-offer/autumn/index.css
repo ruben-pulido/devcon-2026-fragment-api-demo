@@ -1,11 +1,11 @@
-.rays-promo {
+.rays-offer {
 	background: radial-gradient(circle at 15% 20%, #3a2416 0%, #1a120d 55%, #0f0b08 100%);
 	color: #f5ede6;
 	font-family: Georgia, serif;
 	padding: 32px 32px;
 }
 
-.rays-promo__inner {
+.rays-offer__inner {
 	align-items: center;
 	display: flex;
 	gap: 32px;
@@ -13,13 +13,13 @@
 	max-width: 1040px;
 }
 
-.rays-promo__image {
+.rays-offer__image {
 	flex: 0 0 180px;
 	height: 180px;
 	width: 180px;
 }
 
-.rays-promo__eyebrow {
+.rays-offer__eyebrow {
 	color: var(--rays-accent);
 	font-family: system-ui, sans-serif;
 	font-size: 22px;
@@ -29,21 +29,21 @@
 	text-transform: uppercase;
 }
 
-.rays-promo__title {
+.rays-offer__title {
 	color: #fff8f1;
 	font-size: 50px;
 	line-height: 1.05;
 	margin: 0 0 12px;
 }
 
-.rays-promo__text {
+.rays-offer__text {
 	color: #d9c8b8;
 	font-size: 28px;
 	line-height: 1.25;
 	margin: 0 0 18px;
 }
 
-.rays-promo__cta {
+.rays-offer__cta {
 	background: var(--rays-accent);
 	border-radius: 999px;
 	color: #120d09;
@@ -55,7 +55,7 @@
 }
 
 @media (max-width: 640px) {
-	.rays-promo__inner {
+	.rays-offer__inner {
 		flex-direction: column;
 		text-align: center;
 	}
