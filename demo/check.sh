@@ -95,9 +95,9 @@ if ./setup/10-mcp-profile.sh > /dev/null 2>&1; then
 		-d '{"id": 1, "jsonrpc": "2.0", "method": "tools/list"}' "$LIFERAY_URL/o/mcp/devcon" | jq -r '.result.tools | length' 2> /dev/null)
 
 	if [ "${tools:-0}" = 7 ]; then
-		ok "The devcon MCP profile, with its 7 tools"
+		ok "It works: a trial devcon profile gave the agent its 7 tools (the reset below removes it; act 4 creates it on stage)"
 	else
-		fail "The devcon MCP profile has ${tools:-no} tools instead of 7" "Check the MCP server's feature flag and configuration (setup/portal)."
+		fail "A trial devcon profile gave the agent ${tools:-no} tools instead of 7" "Check the MCP server's feature flag and configuration (setup/portal)."
 	fi
 else
 	fail "setup/10-mcp-profile.sh failed" "Run it by hand to see why."
