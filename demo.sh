@@ -146,6 +146,8 @@ header() {
 
 	width=$(cols)
 
+	SCREEN_START=$(log_size)
+
 	printf '\033[2J\033[3J\033[H'
 	progress
 	printf '\033[1;97;44m %-*s\033[0m\n' "$((width - 1))" "Ray’s Hotels · $ACT_NUMBER. $ACT"
@@ -221,11 +223,104 @@ note() {
 	fold -s -w "$(($(cols) - 2))" <<< "$*" | sed "s/^/ ${DIM}/; s/\$/${R}/"
 }
 
+# Every screen the demo shows is also written to SCREEN_LOG. Each key press
+# keeps where the screen on display starts and ends in it, so the left and
+# right arrow keys can show the earlier screens again, as they were, without
+# running anything.
+SCREEN_LOG=""
+SCREEN_START=0
+SNAP_START=()
+SNAP_END=()
+
+# log_screens: from here on, the output also goes to SCREEN_LOG.
+log_screens() {
+	SCREEN_LOG=$(mktemp)
+
+	exec > >(tee -a "$SCREEN_LOG")
+	exec 3>&1
+}
+
+# log_size: the size of SCREEN_LOG, once tee has written everything so far.
+log_size() {
+	local before now
+
+	[ -n "$SCREEN_LOG" ] || { echo 0; return; }
+
+	now=$(stat -c %s "$SCREEN_LOG")
+
+	for _ in 1 2 3 4 5 6 7 8 9 10; do
+		before=$now
+		sleep 0.02
+		now=$(stat -c %s "$SCREEN_LOG")
+		[ "$now" = "$before" ] && break
+	done
+
+	echo "$now"
+}
+
+# replay N [NOTE]: shows the Nth screen kept, straight on the terminal.
+replay() {
+	{
+		printf '\033[2J\033[3J\033[H'
+		tail -c +$(( SNAP_START[$1] + 1 )) "$SCREEN_LOG" | head -c $(( SNAP_END[$1] - SNAP_START[$1] ))
+		[ -n "${2:-}" ] && printf '\n%s[ %s ]%s' "$DIM" "$2" "$R"
+	} > /dev/tty
+}
+
 wait_key() {
 	[ -n "${NO_PAUSE:-}" ] || [ -n "$SKIPPING" ] && return
 
-	printf '\n%s[ press any key to %s ]%s' "$DIM" "$1" "$R"
-	until read -rsn1 _ < /dev/tty; do :; done
+	local i key live rest prompt
+
+	prompt=$(printf '\n%s[ press any key to %s ]%s' "$DIM" "$1" "$R")
+
+	if [ -n "$SCREEN_LOG" ]; then
+		SNAP_START+=("$SCREEN_START")
+		SNAP_END+=("$(log_size)")
+	fi
+
+	printf '%s' "$prompt"
+
+	live=$(( ${#SNAP_END[@]} - 1 ))
+	i=$live
+
+	while :; do
+		read -rsn1 key < /dev/tty || continue
+
+		if [ "$key" = $'\e' ]; then
+			read -rsn2 -t 0.05 rest < /dev/tty
+			key+="$rest"
+		fi
+
+		case "$key" in
+			$'\e[D')
+				if [ "$i" -gt 0 ]; then
+					i=$(( i - 1 ))
+					replay "$i" "an earlier screen · ← → to browse · any other key: back to now"
+				fi
+				;;
+			$'\e[C')
+				if [ "$i" -lt "$live" ]; then
+					i=$(( i + 1 ))
+
+					if [ "$i" -eq "$live" ]; then
+						replay "$i"
+						printf '%s' "$prompt" > /dev/tty
+					else
+						replay "$i" "an earlier screen · ← → to browse · any other key: back to now"
+					fi
+				fi
+				;;
+			*)
+				[ "$i" -eq "$live" ] && break
+
+				i=$live
+				replay "$i"
+				printf '%s' "$prompt" > /dev/tty
+				;;
+		esac
+	done
+
 	printf '\r\033[K\033[1A\033[K'
 }
 
@@ -747,7 +842,7 @@ act5() {
 
 		trap : INT
 
-		live && "$DIR/demo/02-ai-fragment.sh"
+		live && "$DIR/demo/02-ai-fragment.sh" > /dev/tty
 
 		step agent-calls "Check the agent’s calls"
 		say "${B}Every call the agent made went through Liferay’s MCP server:${R}"
@@ -961,7 +1056,8 @@ help() {
 
 # stopped: on an exit before the end, how to go on from the act it stopped in.
 stopped() {
-	[ -t 1 ] && tput cnorm 2> /dev/null
+	{ tput cnorm > /dev/tty; } 2> /dev/null
+	[ -n "$SCREEN_LOG" ] && rm -f "$SCREEN_LOG"
 
 	[ -n "$FINISHED" ] || [ "$ACT_NUMBER" = 0 ] && return
 
@@ -973,6 +1069,11 @@ FINISHED=""
 [ -t 1 ] && tput civis 2> /dev/null
 
 trap stopped EXIT
+
+case "${1:-}" in
+	help | -h | --help | reset) ;;
+	*) [ -t 1 ] && [ -z "${NO_PAUSE:-}" ] && log_screens ;;
+esac
 
 if [ "${1:-}" = resume ]; then
 	last=$(sort -t. -k1,1n -k2,2n "$STATE_DIR/done" 2> /dev/null | tail -1)

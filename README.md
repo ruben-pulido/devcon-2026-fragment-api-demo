@@ -119,6 +119,7 @@ Every screen is built to be read from far away, at any terminal size (it needs a
 - At the top, the act's use case, from the business side, and its steps so far, the current one highlighted. A new step starts on a clean screen.
 - Then the call: the endpoint, wrapped after a slash, and the request body, then the status, time and response. In the steps that make a point, the value that makes it is yellow. Bodies are summarized so they fit on the screen without wrapping: long values are cut, and a page shows only the fragments it references.
 - Ctrl+C while the agent runs in act 5 (to leave Claude Code) only stops the agent: the demo goes on, and one more stray Ctrl+C at the next key press is ignored too. If the demo stops anyway, `./demo.sh resume` goes on from the first step not done yet, even in the middle of an act: it runs through the steps done already without showing them or calling the portal (it keeps every step's response in `~/.cache/devcon-demo-state`), so the screen and the progress bar are where they were. A step that had sent its request counts as done; one that had not is shown again. `./demo.sh reset` forgets it all.
+- At any key prompt, ← and → browse the screens shown so far, exactly as they were, without calling anything again; any other key goes back to the current screen.
 - What to show in the browser at each step is in the `# UI:` comments of `demo.sh`.
 
 | Act | Use case | Steps |
