@@ -59,6 +59,19 @@ fi
 
 profile="$HOME/.cache/devcon-demo-browser"
 
+# A Chrome already running on the demo's profile would only open one more
+# window, where it last was; closing it starts one in the right place (the
+# sign-in is kept in the profile).
+if pgrep -f -- "--user-data-dir=$profile" > /dev/null; then
+	pkill -f -- "--user-data-dir=$profile"
+
+	for _ in $(seq 1 20); do
+		pgrep -f -- "--user-data-dir=$profile" > /dev/null || break
+
+		sleep 0.25
+	done
+fi
+
 # Chrome reads its bookmarks when it starts, and the profile is the demo's
 # alone, so they are written while it is not running: the bookmarks bar holds
 # the demo's screens, and is shown.
@@ -140,11 +153,9 @@ setsid "$CHROME" \
 	--window-size="$width,$height" \
 	"${urls[@]}" > /dev/null 2>&1 &
 
-pid=$!
-
 if command -v wmctrl > /dev/null; then
 	for _ in $(seq 1 40); do
-		window=$(wmctrl -lp | awk -v pid="$pid" '$3 == pid { print $1 }' | tail -1)
+		window=$(wmctrl -lx | awk -v profile="($profile)" 'index($0, profile) { print $1 }' | tail -1)
 
 		if [ -n "$window" ]; then
 			sleep 0.5
