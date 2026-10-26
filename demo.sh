@@ -612,7 +612,7 @@ library_urls() {
 }
 
 # profile_body: the MCP profile as sent, with the start of its instructions
-# wrapped to the screen, in yellow, as raw lines for request.
+# wrapped to the screen, as raw lines for request.
 profile_body() {
 	printf '@def width: %d; ' "$(( $(cols) - 9 ))"
 	cat << 'EOF'
@@ -625,8 +625,8 @@ def wrap($w): reduce (split(" ")[] | select(. != "")) as $word ([""];
 "  \"externalReferenceCode\": \"\(.externalReferenceCode)\",",
 "  \"name\": \"\(.name)\",",
 "  \"instructions\":",
-($lines | to_entries[] | "    \u001b[1;33m" + (if .key == 0 then "\"" else " " end) + .value + "\u001b[0m"),
-"     \u001b[1;33m…\"\u001b[0m,",
+($lines | to_entries[] | "    \u001b[32m" + (if .key == 0 then "\"" else " " end) + .value + "\u001b[0m"),
+"     \u001b[32m…\"\u001b[0m,",
 "  \"profileStatus\": \"\(.profileStatus)\"",
 "}"
 EOF
