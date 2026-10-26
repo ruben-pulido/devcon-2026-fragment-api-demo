@@ -9,7 +9,8 @@
 #
 # Liferay only lets its own pages frame its pages, so this server proxies the
 # portal (LIFERAY_URL) next to the grid page, without the X-Frame-Options
-# header.
+# header. It drops cookies both ways: localhost shares them across ports, and
+# the browser's admin session would show the pages with the admin sidebar.
 
 import http.server
 import os
@@ -23,7 +24,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LIFERAY_URL = os.environ.get('LIFERAY_URL', 'http://localhost:8080').rstrip('/')
 PORT = int(os.environ.get('GRID_PORT', '8090'))
 
-HOP_BY_HOP = {'connection', 'content-length', 'keep-alive', 'transfer-encoding', 'x-frame-options'}
+HOP_BY_HOP = {'connection', 'content-length', 'keep-alive', 'set-cookie', 'transfer-encoding', 'x-frame-options'}
 
 
 def cities():
@@ -69,7 +70,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
 		request = urllib.request.Request(
 			LIFERAY_URL + self.path,
-			headers={key: value for key, value in self.headers.items() if key.lower() not in ('host', 'accept-encoding')})
+			headers={key: value for key, value in self.headers.items() if key.lower() not in ('accept-encoding', 'cookie', 'host')})
 
 		try:
 			response = urllib.request.urlopen(request, timeout=30)

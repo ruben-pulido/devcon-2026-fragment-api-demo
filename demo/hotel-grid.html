@@ -86,13 +86,14 @@
 			return;
 		}
 
-		const sections = [...iframe.contentDocument.querySelectorAll('.rays-header, .rays-offer, [class*="rays-breakfast"]')].map((section) => section.getBoundingClientRect());
+		const columns = getComputedStyle(document.documentElement).getPropertyValue('--columns').trim();
+		const selector = columns === '1' ? '.rays-header, .rays-offer, [class*="rays-breakfast"]' : '.rays-header, .rays-offer';
+		const sections = [...iframe.contentDocument.querySelectorAll(selector)].map((section) => section.getBoundingClientRect());
 
 		const top = sections.length ? Math.min(...sections.map((section) => section.top)) + iframe.contentWindow.scrollY : 0;
 		const bottom = sections.length ? Math.max(...sections.map((section) => section.bottom)) + iframe.contentWindow.scrollY : frame.clientHeight;
 
-		const columns = getComputedStyle(document.documentElement).getPropertyValue('--columns').trim();
-		const scale = columns === '1' ? Math.min(frame.clientWidth / PAGE_WIDTH, frame.clientHeight / (bottom - top)) : frame.clientWidth / PAGE_WIDTH;
+		const scale = Math.min(frame.clientWidth / PAGE_WIDTH, frame.clientHeight / (bottom - top));
 		const left = (frame.clientWidth - PAGE_WIDTH * scale) / 2 / scale;
 
 		iframe.style.transform = `scale(${scale}) translate(${left}px, ${-top}px)`;
