@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 #
 # Opens the browser for the demo: a Chrome window filling the screen to the
-# right of demo/terminal.sh's window, with three tabs: the portal's sign-in
-# and both views of the store grid, which it starts if it is not running.
+# right of demo/terminal.sh's window, with one tab: the portal's sign-in. It
+# also starts the store grid if it is not running.
 #
-#   demo/browser.sh         the sign-in and both views of the store grid
+#   demo/browser.sh         the sign-in
 #   demo/browser.sh --all   one tab for every screen the demo shows, in order,
 #                           each once
 #
@@ -95,7 +95,7 @@ bookmarks=(
 	"7.3b|Winter|Store grid: all eight stores (winter)|$GRID_URL/"
 )
 
-urls=("$LIFERAY_URL/c/portal/login" "$GRID_URL/?cities=Madrid,London" "$GRID_URL/")
+urls=("$LIFERAY_URL/c/portal/login")
 
 if [ "${1:-}" = --all ]; then
 	urls=()
