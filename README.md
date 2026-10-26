@@ -39,6 +39,16 @@ The story: Ray’s Coffee has one store, in Madrid (DevCon 2025), with its own L
 
 ## Before the show
 
+On the day, one command gets everything ready and says what is not, without any AI or internet:
+
+```bash
+./demo/check.sh
+```
+
+It checks the tools, the portal and its demo endpoints, runs the setup scripts and `./demo.sh reset`, checks that the starting point is clean, starts the store grid, and checks what the AI agent needs. When the agent cannot run (no Claude Code, no internet), it says to run `AI_FALLBACK=1 ./demo.sh`, which uses the cached agent run.
+
+What it runs, step by step:
+
 ```bash
 ./setup/00-setup.sh        # the Madrid site with its own Store Header fragment
 ./setup/10-mcp-profile.sh  # "devcon" profile of Liferay's MCP server
