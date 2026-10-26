@@ -5,7 +5,8 @@
 # and both views of the store grid, which it starts if it is not running.
 #
 #   demo/browser.sh         the sign-in and both views of the store grid
-#   demo/browser.sh --all   one tab for every screen the demo shows, in order
+#   demo/browser.sh --all   one tab for every screen the demo shows, in order,
+#                           each once
 #
 # Those screens are also on the bookmarks bar. The design library's own
 # screens are not among them, as its URLs change every time it is created, so
@@ -36,22 +37,48 @@ RESOURCES="&_com_liferay_fragment_web_portlet_FragmentPortlet_tabs1=resources"
 PAGES="/~/control_panel/manage?p_p_id=com_liferay_layout_admin_web_portlet_GroupPagesPortlet"
 MCP_PORTLET=com_liferay_mcp_server_web_internal_portlet_MCPServerPortlet
 
-# Every screen the demo shows, in order: NUMBER|TITLE|URL. The number is the
-# act where the screen first appears and its order in it; it names the
-# bookmark, and the titles are printed as a legend.
+# The browser screen of every step that shows one, in order:
+# NUMBER|TITLE|URL. The number is the step's act and number on the terminal
+# (a, b... when a step shows several screens; 1.0 is the starting point); it
+# names the bookmark, and the titles are printed as a legend. The design
+# library's own screens have no fixed URL (it is created anew in every run),
+# so their bookmarks open the Design Libraries list.
+MADRID_ADMIN="$LIFERAY_URL/group/ray-s-coffee-madrid"
+LONDON_ADMIN="$LIFERAY_URL/group/ray-s-coffee-london"
+LIBRARIES="$LIFERAY_URL/group/control_panel/manage?p_p_id=com_liferay_design_library_web_internal_portlet_DesignLibraryAdminPortlet"
+MCP_TOOLS_URL="$LIFERAY_URL/group/control_panel/manage?p_p_id=$MCP_PORTLET&p_p_lifecycle=0&p_p_state=maximized&_${MCP_PORTLET}_mvcRenderCommandName=%2Fmcp_server%2Fedit_profile&_${MCP_PORTLET}_profileERC=devcon&_${MCP_PORTLET}_tab=tools"
+
 bookmarks=(
 	"0.1|Sign in|$LIFERAY_URL/c/portal/login"
-	"1.1|Madrid: Ray’s Store fragments|$LIFERAY_URL/group/ray-s-coffee-madrid$FRAGMENTS=rays-store"
-	"1.2|Madrid: Ray’s Campaigns fragments|$LIFERAY_URL/group/ray-s-coffee-madrid$FRAGMENTS=$FRAGMENT_SET_ERC"
-	"1.3|Madrid: Ray’s Campaigns resources|$LIFERAY_URL/group/ray-s-coffee-madrid$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES"
-	"1.4|Madrid: pages|$LIFERAY_URL/group/ray-s-coffee-madrid$PAGES"
-	"1.5|Madrid store page|$LIFERAY_URL/web/ray-s-coffee-madrid/store-home"
-	"2.1|London: Ray’s Store fragments|$LIFERAY_URL/group/ray-s-coffee-london$FRAGMENTS=rays-store"
-	"2.2|Design Libraries (open Ray’s Design Library from here)|$LIFERAY_URL/group/control_panel/manage?p_p_id=com_liferay_design_library_web_internal_portlet_DesignLibraryAdminPortlet"
-	"3.1|Store grid: Madrid and London|$GRID_URL/?cities=Madrid,London"
-	"4.1|MCP Server: profiles|$LIFERAY_URL/group/control_panel/manage?p_p_id=$MCP_PORTLET"
-	"4.2|MCP Server: the devcon profile's tools|$LIFERAY_URL/group/control_panel/manage?p_p_id=$MCP_PORTLET&p_p_lifecycle=0&p_p_state=maximized&_${MCP_PORTLET}_mvcRenderCommandName=%2Fmcp_server%2Fedit_profile&_${MCP_PORTLET}_profileERC=devcon&_${MCP_PORTLET}_tab=tools"
-	"6.1|Store grid: all eight stores|$GRID_URL/"
+	"1.0|Madrid: Ray’s Store fragments (only the Store Header)|$MADRID_ADMIN$FRAGMENTS=rays-store"
+	"1.1|Madrid: Ray’s Campaigns fragments|$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC"
+	"1.2|Madrid: Ray’s Campaigns resources (the images folder)|$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES"
+	"1.3|Madrid: Ray’s Campaigns resources, then open the images folder|$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES"
+	"1.4|Madrid: Ray’s Campaigns fragments (Seasonal Promo)|$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC"
+	"1.5a|Madrid: pages (before and after the request)|$MADRID_ADMIN$PAGES"
+	"1.5b|Madrid store page|$LIFERAY_URL/web/ray-s-coffee-madrid/store-home"
+	"2.1|Sites (London appears)|$LIFERAY_URL/group/control_panel/manage?p_p_id=com_liferay_site_admin_web_portlet_SiteAdminPortlet"
+	"2.2|London: Ray’s Store fragments (London's Store Header)|$LONDON_ADMIN$FRAGMENTS=rays-store"
+	"2.3|Design Libraries (Ray’s Design Library appears)|$LIBRARIES"
+	"2.4|Design Libraries > Ray’s Design Library: Connected Sites (before and after)|$LIBRARIES"
+	"2.5|Design Libraries > Ray’s Design Library: Connected Sites|$LIBRARIES"
+	"3.2|Design Libraries > Ray’s Design Library (empty), then its Ray’s Campaigns|$LIBRARIES"
+	"3.4|Design Libraries > Ray’s Design Library > Ray’s Campaigns > Resources|$LIBRARIES"
+	"3.6|Design Libraries > Ray’s Design Library > Ray’s Campaigns > Resources > images|$LIBRARIES"
+	"3.8|Design Libraries > Ray’s Design Library > Ray’s Campaigns fragments|$LIBRARIES"
+	"3.9|Madrid store page|$LIFERAY_URL/web/ray-s-coffee-madrid/store-home"
+	"3.10|Store grid: Madrid and London|$GRID_URL/?cities=Madrid,London"
+	"3.11a|Madrid: Ray’s Store fragments (Ray’s Campaigns is gone)|$MADRID_ADMIN$FRAGMENTS=rays-store"
+	"3.11b|Store grid: Madrid and London|$GRID_URL/?cities=Madrid,London"
+	"4.1|MCP Server: profiles (devcon appears)|$LIFERAY_URL/group/control_panel/manage?p_p_id=$MCP_PORTLET"
+	"4.2|MCP Server: the devcon profile's tools|$MCP_TOOLS_URL"
+	"5.3|Design Libraries > Ray’s Design Library > Ray’s Campaigns fragments (Store Hours)|$LIBRARIES"
+	"5.4|Design Libraries > Ray’s Design Library > Ray’s Campaigns: Store Hours with its thumbnail, then open it|$LIBRARIES"
+	"5.6|Store grid: Madrid and London (with Store Hours)|$GRID_URL/?cities=Madrid,London"
+	"6.1|Store grid: all eight stores (they appear as they open)|$GRID_URL/"
+	"7.2|Store grid: all eight stores (still autumn)|$GRID_URL/"
+	"7.3a|Design Libraries > Ray’s Design Library > Ray’s Campaigns: Seasonal Promo > View Site Usages > select all > Propagate|$LIBRARIES"
+	"7.3b|Store grid: all eight stores (winter)|$GRID_URL/"
 )
 
 urls=("$LIFERAY_URL/c/portal/login" "$GRID_URL/?cities=Madrid,London" "$GRID_URL/")
@@ -60,7 +87,9 @@ if [ "${1:-}" = --all ]; then
 	urls=()
 
 	for bookmark in "${bookmarks[@]}"; do
-		urls+=("${bookmark#*|*|}")
+		url="${bookmark#*|*|}"
+
+		[[ " ${urls[*]} " == *" $url "* ]] || urls+=("$url")
 	done
 fi
 

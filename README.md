@@ -57,22 +57,40 @@ What it runs, step by step:
 ./demo/windows.sh          # both demo windows, side by side: the terminal and the browser
 ```
 
-`demo/windows.sh` runs `demo/terminal.sh` (a Ptyxis window with the demo font on the left half of the screen, 73 × 37 at 16 points; `demo/windows.sh ./demo.sh` starts the demo in it) and `demo/browser.sh` (a Chrome window on the right half, with the sign-in and both store grid views); each also works alone. The browser's bookmarks bar holds every screen the demo shows, numbered by the act where it first appears (`demo/browser.sh` prints this legend too):
+`demo/windows.sh` runs `demo/terminal.sh` (a Ptyxis window with the demo font on the left half of the screen, 73 × 37 at 16 points; `demo/windows.sh ./demo.sh` starts the demo in it) and `demo/browser.sh` (a Chrome window on the right half, with the sign-in and both store grid views); each also works alone. The browser's bookmarks bar holds the screen of every step that changes the browser, named after the step's number on the terminal (act.step; a, b when a step shows several screens; 1.0 is the starting point). `demo/browser.sh` prints this legend too. The design library's own screens have no fixed URL, so their bookmarks open the Design Libraries list. With `AI_FALLBACK=1`, act 5 has no "Check the agent’s calls" step, so its later steps are one number lower.
 
 | Bookmark | Screen |
 | --- | --- |
 | 0.1 | Sign in |
-| 1.1 | Madrid: Ray’s Store fragments |
-| 1.2 | Madrid: Ray’s Campaigns fragments |
-| 1.3 | Madrid: Ray’s Campaigns resources |
-| 1.4 | Madrid: pages |
-| 1.5 | Madrid store page |
-| 2.1 | London: Ray’s Store fragments |
-| 2.2 | Design Libraries (open Ray’s Design Library from here: its URLs change every time it is created) |
-| 3.1 | Store grid: Madrid and London |
-| 4.1 | MCP Server: profiles |
+| 1.0 | Madrid: Ray’s Store fragments (only the Store Header) |
+| 1.1 | Madrid: Ray’s Campaigns fragments |
+| 1.2 | Madrid: Ray’s Campaigns resources (the images folder) |
+| 1.3 | Madrid: Ray’s Campaigns resources, then open the images folder |
+| 1.4 | Madrid: Ray’s Campaigns fragments (Seasonal Promo) |
+| 1.5a | Madrid: pages (before and after the request) |
+| 1.5b | Madrid store page |
+| 2.1 | Sites (London appears) |
+| 2.2 | London: Ray’s Store fragments (London's Store Header) |
+| 2.3 | Design Libraries (Ray’s Design Library appears) |
+| 2.4 | Design Libraries > Ray’s Design Library: Connected Sites (before and after) |
+| 2.5 | Design Libraries > Ray’s Design Library: Connected Sites |
+| 3.2 | Design Libraries > Ray’s Design Library (empty), then its Ray’s Campaigns |
+| 3.4 | Design Libraries > Ray’s Design Library > Ray’s Campaigns > Resources |
+| 3.6 | Design Libraries > Ray’s Design Library > Ray’s Campaigns > Resources > images |
+| 3.8 | Design Libraries > Ray’s Design Library > Ray’s Campaigns fragments |
+| 3.9 | Madrid store page |
+| 3.10 | Store grid: Madrid and London |
+| 3.11a | Madrid: Ray’s Store fragments (Ray’s Campaigns is gone) |
+| 3.11b | Store grid: Madrid and London |
+| 4.1 | MCP Server: profiles (devcon appears) |
 | 4.2 | MCP Server: the devcon profile's tools |
-| 6.1 | Store grid: all eight stores |
+| 5.3 | Design Libraries > Ray’s Design Library > Ray’s Campaigns fragments (Store Hours) |
+| 5.4 | Design Libraries > Ray’s Design Library > Ray’s Campaigns: Store Hours with its thumbnail, then open it |
+| 5.6 | Store grid: Madrid and London (with Store Hours) |
+| 6.1 | Store grid: all eight stores (they appear as they open) |
+| 7.2 | Store grid: all eight stores (still autumn) |
+| 7.3a | Design Libraries > Ray’s Design Library > Ray’s Campaigns: Seasonal Promo > View Site Usages > select all > Propagate |
+| 7.3b | Store grid: all eight stores (winter) |
 
 The two windows are laid out for the presentation screen, 1920 x 1080 like the slides, whatever screen you rehearse on (`DEMO_SCREEN`, `DEMO_FONT_SIZE` for another one).
 
