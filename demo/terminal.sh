@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #
-# Opens a terminal window sized for the demo: Source Code Pro Medium, 41 rows,
-# the left half of the screen (DEMO_TERMINAL_WIDTH, default half of
-# DEMO_SCREEN's width; about 95 columns), in the demo kit's directory, under
-# GNOME's top bar (DEMO_TOP_BAR, default 32 pixels), next to demo/browser.sh.
+# Opens a terminal window sized for the demo: Source Code Pro Medium, the left
+# half of the screen below GNOME's top bar (at least 41 rows) (DEMO_TERMINAL_WIDTH, default half of
+# DEMO_SCREEN's width; about 95 columns), in the demo kit's directory. GNOME's
+# top bar takes DEMO_TOP_BAR pixels (default 32). Next to demo/browser.sh.
 #
 #   demo/terminal.sh             a shell, ready for ./demo.sh
 #   demo/terminal.sh ./demo.sh   the demo, straight away
@@ -82,11 +82,11 @@ if command -v wmctrl > /dev/null && command -v xprop > /dev/null; then
 
 			read -r left _ top _ < <(xprop -id "$window" _GTK_FRAME_EXTENTS | tr -d ',' | awk '{ print $3, $4, $5, $6 }')
 
-			read -r _ right _ _ < <(xprop -id "$window" _GTK_FRAME_EXTENTS | tr -d ',' | awk '{ print $3, $4, $5, $6 }')
+			read -r _ right _ bottom < <(xprop -id "$window" _GTK_FRAME_EXTENTS | tr -d ',' | awk '{ print $3, $4, $5, $6 }')
 
 			screen="${DEMO_SCREEN:-1920x1080}"
 
-			wmctrl -i -r "$window" -e "0,$(( ${DEMO_TERMINAL_X:-0} - ${left:-0} )),$(( ${DEMO_TOP_BAR:-32} - ${top:-0} )),$(( ${DEMO_TERMINAL_WIDTH:-$(( ${screen%x*} / 2 ))} + ${left:-0} + ${right:-0} )),-1"
+			wmctrl -i -r "$window" -e "0,$(( ${DEMO_TERMINAL_X:-0} - ${left:-0} )),$(( ${DEMO_TOP_BAR:-32} - ${top:-0} )),$(( ${DEMO_TERMINAL_WIDTH:-$(( ${screen%x*} / 2 ))} + ${left:-0} + ${right:-0} )),$(( ${screen#*x} - ${DEMO_TOP_BAR:-32} + ${top:-0} + ${bottom:-0} ))"
 			wmctrl -i -a "$window"
 
 			break
