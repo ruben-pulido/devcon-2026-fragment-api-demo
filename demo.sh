@@ -348,7 +348,7 @@ PATH_COLOR=$'\033[1;37m'
 ERC_COLOR=$'\033[1;38;5;214m'
 
 # Collections whose next path segment is an external reference code.
-ERC_COLLECTIONS=" asset-libraries connected-sites design-libraries fragment-sets fragments mcp resource-folders resource-files site-pages sites "
+ERC_COLLECTIONS=" asset-libraries by-external-reference-code connected-sites design-libraries fragment-sets fragments resource-folders resource-files site-pages sites "
 
 # show_path METHOD PATH: the endpoint, wrapped after a slash, continuation
 # lines indented, with external reference codes in their own color.
@@ -383,7 +383,7 @@ show_path() {
 			colored="$PATH_COLOR"
 		fi
 
-		if [[ "$ERC_COLLECTIONS" == *" $previous "* ]]; then
+		if [[ "$ERC_COLLECTIONS" == *" $previous "* ]] || { [ "$previous" = mcp ] && [ "$part" = "${parts[-1]}" ]; }; then
 			colored="$colored$ERC_COLOR$part$PATH_COLOR/"
 		else
 			colored="$colored$part/"
@@ -595,6 +595,27 @@ library_urls() {
 
 	LIBRARY_VIEW="$LIBRARIES&p_p_lifecycle=0&p_p_state=maximized&_${LIBRARY_PORTLET}_mvcRenderCommandName=%2Fdesign_library%2Fview_resources_design_library&_${LIBRARY_PORTLET}_designLibraryEntryId=$LIBRARY_ID"
 	LIBRARY_SET="$LIFERAY_URL/group/asset-library-$LIBRARY_ID$FRAGMENTS=$FRAGMENT_SET_ERC"
+}
+
+# profile_body: the MCP profile as sent, with the start of its instructions
+# wrapped to the screen, in yellow, as raw lines for request.
+profile_body() {
+	printf '@def width: %d; ' "$(( $(cols) - 9 ))"
+	cat << 'EOF'
+def wrap($w): reduce (split(" ")[] | select(. != "")) as $word ([""];
+	if .[-1] == "" then .[-1] = $word
+	elif (.[-1] | length) + 1 + ($word | length) > $w then . + [$word]
+	else .[-1] += " " + $word end);
+([.instructions | split("\n\n")[] | gsub("\n"; " ") | wrap(width), [""]] | add | .[:11]) as $lines |
+"{",
+"  \"externalReferenceCode\": \"\(.externalReferenceCode)\",",
+"  \"name\": \"\(.name)\",",
+"  \"instructions\":",
+($lines | to_entries[] | "    \u001b[1;33m" + (if .key == 0 then "\"" else " " end) + .value + "\u001b[0m"),
+"     \u001b[1;33m…\"\u001b[0m,",
+"  \"profileStatus\": \"\(.profileStatus)\"",
+"}"
+EOF
 }
 
 FRAGMENT_BODY='{externalReferenceCode, name, fragmentVersions: [.fragmentVersions[] | {html, css} + ([.configuration.fieldSets[]?.fields[]?.name] | if length > 0 then {configuration: join(", ")} else {} end)], thumbnailURLReference}'
@@ -909,7 +930,7 @@ act4() {
 	# UI: Applications Menu > MCP Server: the devcon profile appears.
 	step profile "Create the agent’s MCP profile"
 	show "$MCP_PROFILES"
-	HIGHLIGHT='"instructions"' request PUT "$MCP_API/server-profiles/by-external-reference-code/$MCP_PROFILE_ERC" "$(mcp_profile_payload)" '{id, externalReferenceCode, profileStatus: .profileStatus.key}' '{externalReferenceCode, name, instructions, profileStatus}'
+	request PUT "$MCP_API/server-profiles/by-external-reference-code/$MCP_PROFILE_ERC" "$(mcp_profile_payload)" '{id, externalReferenceCode, profileStatus: .profileStatus.key}' "$(profile_body)"
 	note "(the instructions brief the agent on Ray’s Hotels: mcp/instructions.md)"
 	local profile_id tool
 	profile_id=$(jq -r .id <<< "$LAST")
