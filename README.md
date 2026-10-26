@@ -94,7 +94,7 @@ What it runs, step by step:
 | 7.3a Propagate | Design Libraries > Ray’s Design Library > Ray’s Campaigns: Seasonal Offer > View Site Usages > select all > Propagate |
 | 7.3b Winter | Hotel grid: all eight hotels (winter) |
 
-The two windows are laid out for the presentation screen, 1920 x 1080 like the slides, whatever screen you rehearse on (`DEMO_SCREEN`, `DEMO_FONT_SIZE` for another one).
+The two windows are laid out for the presentation screen, 1920 x 1080 like the slides (`DEMO_SCREEN`), and zoomed to fit the screen you rehearse on (`demo/layout.sh`): on a bigger or HiDPI screen the terminal font, the window sizes and the browser zoom grow together, so the terminal keeps at least 73 x 37 and the pages keep their width in CSS pixels.
 
 The MCP setup script is idempotent. Rehearse once (`./demo.sh`, including the agent in act 5), then `./demo.sh reset`, so the first real run is not the first run of the day and Claude Code already trusts `stage/`.
 

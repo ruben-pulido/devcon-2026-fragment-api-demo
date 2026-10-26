@@ -2,14 +2,14 @@
 #
 # Opens a terminal window sized for the demo: Source Code Pro Medium, the left
 # half of the screen below GNOME's top bar (DEMO_TERMINAL_WIDTH, default half of
-# DEMO_SCREEN's width), in the demo kit's directory. GNOME's
-# top bar takes DEMO_TOP_BAR pixels (default 32). Next to demo/browser.sh.
+# DEMO_SCREEN's width, in presentation pixels), in the demo kit's directory.
+# Next to demo/browser.sh; the layout is in demo/layout.sh.
 #
 #   demo/terminal.sh             a shell, ready for ./demo.sh
 #   demo/terminal.sh ./demo.sh   the demo, straight away
 #
-# The size is for the presentation screen, not the one you rehearse on: at
-# DEMO_FONT_SIZE 16 (points, the default) a 1920 x 1080 screen at 100%
+# The size is for the presentation screen, zoomed to the one you rehearse on:
+# at DEMO_FONT_SIZE 16 (points, the default) a 1920 x 1080 screen at 100%
 # scaling gives 73 x 37, the smallest the demo's screens fit, and text about
 # as big as in the video.
 #
@@ -23,8 +23,10 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
+source "$ROOT_DIR/demo/layout.sh"
+
 FONT="${DEMO_FONT:-Source Code Pro Medium}"
-SIZE="${DEMO_FONT_SIZE:-16}"
+SIZE=$(awk -v size="${DEMO_FONT_SIZE:-16}" -v zoom="$ZOOM" -v dpi="$DPI_SCALE" 'BEGIN { printf "%.1f", size * zoom / dpi }')
 
 if ! command -v ptyxis > /dev/null; then
 	echo "Ptyxis not found. Set your terminal to \"$FONT $SIZE\" with at least 73 x 37 on half the screen, by hand."
@@ -84,9 +86,11 @@ if command -v wmctrl > /dev/null && command -v xprop > /dev/null; then
 
 			read -r _ right _ bottom < <(xprop -id "$window" _GTK_FRAME_EXTENTS | tr -d ',' | awk '{ print $3, $4, $5, $6 }')
 
-			screen="${DEMO_SCREEN:-1920x1080}"
+			x=$(px "${DEMO_TERMINAL_X:-0}")
+			width=$(px "${DEMO_TERMINAL_WIDTH:-$(( SCREEN_WIDTH / 2 ))}")
+			height=$(px $(( SCREEN_HEIGHT - DEMO_TOP_BAR )))
 
-			wmctrl -i -r "$window" -e "0,$(( ${DEMO_TERMINAL_X:-0} - ${left:-0} )),$(( ${DEMO_TOP_BAR:-32} - ${top:-0} )),$(( ${DEMO_TERMINAL_WIDTH:-$(( ${screen%x*} / 2 ))} + ${left:-0} + ${right:-0} )),$(( ${screen#*x} - ${DEMO_TOP_BAR:-32} + ${top:-0} + ${bottom:-0} ))"
+			wmctrl -i -r "$window" -e "0,$(( x - ${left:-0} )),$(( TOP - ${top:-0} )),$(( width + ${left:-0} + ${right:-0} )),$(( height + ${top:-0} + ${bottom:-0} ))"
 			wmctrl -i -a "$window"
 
 			break

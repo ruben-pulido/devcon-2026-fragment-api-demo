@@ -12,12 +12,11 @@
 # screens are not among them, as its URLs change every time it is created, so
 # open it from the Design Libraries list.
 #
-# The layout is for the presentation screen, DEMO_SCREEN (default 1920x1080,
-# like the slides), whatever screen you rehearse on: GNOME's top bar takes the
-# first DEMO_TOP_BAR pixels (default 32), and the browser fills the rest of
-# the screen to the right of the demo terminal (DEMO_BROWSER_X, default: the
-# terminal's right edge, or half the screen). DEMO_BROWSER_SCALE zooms it; by
-# default, pages lay out at 1000 CSS pixels or more.
+# The layout is for the presentation screen, zoomed to the one you rehearse on
+# (demo/layout.sh): the browser fills the screen below GNOME's top bar to the
+# right of the demo terminal (DEMO_BROWSER_X, in presentation pixels; default:
+# the terminal's right edge, or half the screen). DEMO_BROWSER_SCALE sets
+# Chrome's zoom; by default, pages lay out at 1000 CSS pixels or more.
 #
 # It uses its own Chrome profile (~/.cache/devcon-demo-browser), so another
 # portal's cached JavaScript never gets in the way and the sign-in is kept
@@ -168,8 +167,7 @@ if ! curl -s -o /dev/null "$GRID_URL/"; then
 	done
 fi
 
-screen="${DEMO_SCREEN:-1920x1080}"
-top_bar="${DEMO_TOP_BAR:-32}"
+source "$ROOT_DIR/demo/layout.sh"
 
 # A window's X geometry includes the shadow it draws around itself
 # (_GTK_FRAME_EXTENTS: left, right, top, bottom), so this works with the
@@ -188,14 +186,20 @@ if [ -n "$terminal" ]; then
 	terminal_right=$(( terminal_x + terminal_width - terminal_shadow_right ))
 fi
 
-x="${DEMO_BROWSER_X:-${terminal_right:-$(( ${screen%x*} / 2 ))}}"
-y="$top_bar"
-width=$(( ${screen%x*} - x ))
-height=$(( ${screen#*x} - top_bar ))
+if [ -n "${DEMO_BROWSER_X:-}" ]; then
+	x=$(px "$DEMO_BROWSER_X")
+else
+	x="${terminal_right:-$(px $(( SCREEN_WIDTH / 2 )))}"
+fi
+
+y="$TOP"
+width=$(( $(px "$SCREEN_WIDTH") - x ))
+height=$(px $(( SCREEN_HEIGHT - DEMO_TOP_BAR )))
 
 # Pages lay out at no less than 1000 CSS pixels, as in the video: the
 # fragments admin needs 992 to show the fragment sets beside their fragments.
-scale="${DEMO_BROWSER_SCALE:-$(awk -v width="$width" 'BEGIN { print (width < 1000 ? width / 1000 : 1) }')}"
+# The zoom keeps them at the same CSS width on a bigger screen.
+scale="${DEMO_BROWSER_SCALE:-$(awk -v width="$width" -v zoom="$ZOOM" 'BEGIN { css = width / zoom; print (css < 1000 ? css / 1000 : 1) * zoom }')}"
 
 setsid "$CHROME" \
 	--force-device-scale-factor="$scale" \
