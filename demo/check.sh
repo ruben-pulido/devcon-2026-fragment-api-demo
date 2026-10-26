@@ -111,27 +111,54 @@ fi
 
 section "Starting point"
 
+# leftovers: the demo data that is not part of the starting point, one item
+# per line as DESCRIPTION|COMMAND THAT DELETES IT.
+leftovers() {
+	local city name set site
+
+	for set in $(api GET "$FRAGMENT_API/sites/$MADRID_ERC/fragment-sets" 2> /dev/null | jq -r '.items[].externalReferenceCode'); do
+		[ "$set" = rays-store ] && continue
+
+		echo "Madrid's $set fragment set|curl -u '$LIFERAY_AUTH' -X DELETE $FRAGMENT_API/sites/$MADRID_ERC/fragment-sets/$set"
+	done
+
+	for city in "${DEVCON_CITIES[@]}"; do
+		IFS='|' read -r _ site name _ _ <<< "$city"
+
+		if api GET "$SITE_API/sites/$site/site-pages/store-home" > /dev/null 2>&1; then
+			echo "$name's store page|curl -u '$LIFERAY_AUTH' -X DELETE $SITE_API/sites/$site/site-pages/store-home"
+		fi
+
+		if [ "$site" != "$MADRID_ERC" ] && site_exists "$site"; then
+			echo "the $name site|curl -u '$LIFERAY_AUTH' -X DELETE $SITE_API/sites/$site"
+		fi
+	done
+
+	if library_exists; then
+		echo "the design library|curl -u '$LIFERAY_AUTH' -X DELETE $LIFERAY_URL/o/headless-asset-library/v1.0/asset-libraries/$DESIGN_LIBRARY_ERC"
+	fi
+}
+
+before=$(leftovers)
+
 ./demo.sh reset > /dev/null 2>&1
 
-sets=$(api GET "$FRAGMENT_API/sites/$MADRID_ERC/fragment-sets" 2> /dev/null | jq -r '[.items[].externalReferenceCode] | join(",")')
-leftovers=()
+after=$(leftovers)
 
-[ "$sets" = rays-store ] || leftovers+=("Madrid's fragment sets: ${sets:-none}")
-library_exists && leftovers+=("the design library")
-curl -s -o /dev/null -w '%{http_code}' "$LIFERAY_URL/web/ray-s-coffee-madrid/store-home" | grep -q 200 && leftovers+=("Madrid's store page")
+cleaned=$(comm -23 <(sort <<< "$before") <(sort <<< "$after") | grep -v '^$')
 
-for city in "${DEVCON_CITIES[@]}"; do
-	IFS='|' read -r _ site name _ _ <<< "$city"
+if [ -n "$cleaned" ]; then
+	ok "Cleaned up a previous run: $(cut -d'|' -f1 <<< "$cleaned" | paste -sd, - | sed 's/,/, /g')"
+fi
 
-	[ "$site" = "$MADRID_ERC" ] && continue
-
-	site_exists "$site" && leftovers+=("the $name site")
-done
-
-if [ ${#leftovers[@]} -eq 0 ]; then
-	ok "Reset: Madrid with only its Store Header, no other stores, no design library"
+if [ -z "$after" ]; then
+	ok "Starting point: Madrid with only its Store Header, no other stores, no design library"
 else
-	fail "The reset left: $(IFS=,; echo "${leftovers[*]}")" "Run ./demo.sh reset again; if it persists, delete those by hand."
+	fail "./demo.sh reset could not remove all of a previous run. Delete these, then run this again:"
+
+	while IFS='|' read -r description command; do
+		printf '     %s:\n       %s\n' "$description" "$command"
+	done <<< "$after"
 fi
 
 section "Store grid ($GRID_URL)"
