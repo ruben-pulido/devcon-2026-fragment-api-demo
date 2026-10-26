@@ -4,6 +4,8 @@
 #
 #   ./demo.sh            run every act, pausing before each request
 #   ./demo.sh act3       run a single act (act1 ... act7)
+#   ./demo.sh from act5  run from the start of an act to the end, to go on
+#                        after the demo stopped
 #   ./demo.sh reset      back to the starting point: Madrid with its store header
 #
 # NO_PAUSE=1 ./demo.sh   run without waiting for key presses
@@ -166,7 +168,7 @@ wait_key() {
 	[ -n "${NO_PAUSE:-}" ] && return
 
 	printf '\n%s[ press any key to %s ]%s' "$DIM" "$1" "$R"
-	read -rsn1 _ < /dev/tty
+	until read -rsn1 _ < /dev/tty; do :; done
 	printf '\r\033[K\033[1A\033[K'
 }
 
@@ -254,26 +256,25 @@ colorize() {
 	sed -E "s/(\"[^\"]*\")(:)/\x1b[38;5;117m\1\x1b[0m\2/g; s/: (\"[^\"]*\"?)([,}]|$)/: \x1b[32m\1\x1b[0m\2/g"
 }
 
-HIGHLIGHT_BACKGROUND=$'\033[48;5;239m'
-
-# highlight: the lines matching HIGHLIGHT (an extended regular expression)
-# get a mark in the margin and a background, so the audience knows where to
-# look.
+# highlight: in the lines that match HIGHLIGHT (an extended regular
+# expression), the values that match it, alone or with their key, turn
+# yellow, so the audience knows where to look.
 highlight() {
-	local line plain rest width
-
-	width=$(($(cols) - 2))
-
-	while IFS= read -r line; do
-		plain=$(sed 's/\x1b\[[0-9;]*m//g' <<< "$line")
-
-		if [ -n "${HIGHLIGHT:-}" ] && grep -qE -- "$HIGHLIGHT" <<< "$plain"; then
-			rest="${line:1}"
-			printf '\033[1;38;5;214m▌%s%s%*s%s\n' "${R}${HIGHLIGHT_BACKGROUND}" "${rest//$R/$R$HIGHLIGHT_BACKGROUND}" "$((width - ${#plain} + 1))" '' "$R"
-		else
-			printf '%s\n' "$line"
-		fi
-	done
+	HIGHLIGHT="${HIGHLIGHT:-}" perl -CSD -ne '
+		BEGIN { $h = $ENV{HIGHLIGHT} }
+		chomp;
+		(my $plain = $_) =~ s/\e\[[0-9;]*m//g;
+		if ($h eq "" || $plain !~ /$h/) { print "$_\n"; next }
+		$plain =~ s{("(?:[^"\\]|\\.)*")(\s*:\s*)?("(?:[^"\\]|\\.)*"?|-?[\w.]+)?}{
+			my ($k, $colon, $v) = ($1, $2, $3);
+			if (defined $colon) {
+				"\e[38;5;117m$k\e[0m$colon" . (defined $v ? ("$k$colon$v" =~ /$h/ ? "\e[1;33m$v\e[0m" : $v =~ /^"/ ? "\e[32m$v\e[0m" : $v) : "")
+			} else {
+				($k =~ /$h/ ? "\e[1;33m$k\e[0m" : $k) . ($v // "")
+			}
+		}ge;
+		print "$plain\n";
+	'
 }
 
 LAST=""
@@ -429,12 +430,12 @@ act1() {
 
 	# UI: Resources > images: autumn-cup.svg appears.
 	step file "Upload the autumn campaign image"
-	HIGHLIGHT='resourceFolderExternalReferenceCode|fileBase64' request POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/autumn-cup.svg" "$RESOURCE_FOLDER_ERC")" '{externalReferenceCode, name, resourceFolderExternalReferenceCode}'
+	HIGHLIGHT='resourceFolderExternalReferenceCode' request POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/autumn-cup.svg" "$RESOURCE_FOLDER_ERC")" '{externalReferenceCode, name, resourceFolderExternalReferenceCode}'
 	next
 
 	# UI: Ray’s Campaigns > Fragments: Seasonal Promo appears, with its thumbnail.
 	step promo "Create the Seasonal Promo fragment"
-	HIGHLIGHT='"html"|"configuration"|fileBase64' request POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$(fragment_payload autumn configuration.json)" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
+	HIGHLIGHT='"html"' request POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$(fragment_payload autumn configuration.json)" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
 	next
 
 	# UI: before the request, Madrid > Site Builder > Pages: no pages yet.
@@ -442,7 +443,7 @@ act1() {
 	# After it, the same list with Store Home, then the Madrid store page.
 	#   /web/<madrid>/store-home
 	step page "Create Madrid’s store page"
-	HIGHLIGHT='"(externalReferenceCode)": "rays-|"pageElements"' put_store_page "$MADRID_ERC" "$MADRID_ERC:$HEADER_FRAGMENT_ERC" "$MADRID_ERC:$PROMO_FRAGMENT_ERC"
+	HIGHLIGHT='"externalReferenceCode": "rays-' put_store_page "$MADRID_ERC" "$MADRID_ERC:$HEADER_FRAGMENT_ERC" "$MADRID_ERC:$PROMO_FRAGMENT_ERC"
 	next
 }
 
@@ -451,7 +452,7 @@ act2() {
 
 	# UI: Applications Menu > Sites: Ray’s Coffee London appears.
 	step london "Create the London site"
-	HIGHLIGHT='"name"|friendlyUrlPath' request PUT "$SITE_API/sites/$LONDON_ERC" "{\"externalReferenceCode\": \"$LONDON_ERC\", \"name\": \"Ray’s Coffee London\"}" '{externalReferenceCode, name, friendlyUrlPath}'
+	HIGHLIGHT='"name"' request PUT "$SITE_API/sites/$LONDON_ERC" "{\"externalReferenceCode\": \"$LONDON_ERC\", \"name\": \"Ray’s Coffee London\"}" '{externalReferenceCode, name, friendlyUrlPath}'
 	next
 
 	api PUT "$LONDON/fragment-sets/$STORE_SET_ERC" '{"name": "Ray’s Store"}' > /dev/null
@@ -459,7 +460,7 @@ act2() {
 
 	# UI: London > Design > Fragments > Ray’s Store: the London Store Header, with its thumbnail.
 	step header "Create London’s Store Header"
-	HIGHLIGHT='fileBase64|"html"' request POST "$LONDON/fragment-sets/$STORE_SET_ERC/fragments" "$(header_payload London london-ray.png '#7cc4ff' '221 Baker Street, London')" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
+	HIGHLIGHT='fileBase64' request POST "$LONDON/fragment-sets/$STORE_SET_ERC/fragments" "$(header_payload London london-ray.png '#7cc4ff' '221 Baker Street, London')" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
 	note "(its fragment set and header image were created the same way as Madrid’s)"
 	next
 
@@ -484,14 +485,14 @@ act3() {
 	act "Share the campaigns" "The campaigns move from Madrid’s site to the design library, so both stores can use the same fragments. There is no move operation: we copy, repoint the pages and delete the originals."
 
 	step read-set "Read the fragment set from Madrid"
-	HIGHLIGHT='"name"|"description"' request GET "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" "" '{externalReferenceCode, name, description}'
+	HIGHLIGHT='"name"' request GET "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" "" '{externalReferenceCode, name, description}'
 	local set="$LAST"
 	next
 
 	# UI: before the request, Design Libraries > Ray’s Design Library: no design resources yet.
 	# After it, the library's fragment sets: Ray’s Campaigns.
 	step put-set "Create it in the design library"
-	HIGHLIGHT='"name"|"description"' request PUT "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC" "$(jq -c '{description, name}' <<< "$set")" '{externalReferenceCode, name}'
+	HIGHLIGHT='"name"' request PUT "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC" "$(jq -c '{description, name}' <<< "$set")" '{externalReferenceCode, name}'
 	next
 
 	step read-folders "Read its resource folders"
@@ -516,7 +517,7 @@ act3() {
 
 		while read -r file; do
 			step post-file "Copy $(jq -r .name <<< "$file") to the library"
-			HIGHLIGHT='resourceFolderExternalReferenceCode|fileBase64' request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$file" '{externalReferenceCode, resourceFolderExternalReferenceCode}'
+			HIGHLIGHT='resourceFolderExternalReferenceCode' request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$file" '{externalReferenceCode, resourceFolderExternalReferenceCode}'
 			next
 		done < <(jq -c --arg folder "$folder" '.items[] | {externalReferenceCode, fileURLReference: {fileBase64: .fileURLReference.fileBase64}, name, resourceFolderExternalReferenceCode: $folder}' <<< "$files")
 	done < <(jq -r '.items[].externalReferenceCode' <<< "$folders")
@@ -534,7 +535,7 @@ act3() {
 		fragment=$(jq -c --arg erc "$erc" --rawfile thumbnail <(base64 -w0 "$thumbnail") '.items[] | select(.externalReferenceCode == $erc) | {externalReferenceCode, fragmentVersions: [.fragmentVersions[] | select(.status == "Approved") | {configuration, css, html, js, status}], icon, name, type} + (if $thumbnail != "" then {thumbnailURLReference: {fileBase64: $thumbnail}} else {} end)' <<< "$fragments")
 
 		step post-fragment "Copy $(jq -r .name <<< "$fragment") to the library"
-		HIGHLIGHT='"html"|fileBase64' request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$fragment" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
+		HIGHLIGHT='"html"' request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$fragment" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
 		next
 	done < <(jq -r '.items[].externalReferenceCode' <<< "$fragments")
 
@@ -542,12 +543,12 @@ act3() {
 
 	# UI: the Madrid store page, unchanged.
 	step madrid-page "Point Madrid’s page to the library’s promo"
-	HIGHLIGHT='"scope"' put_store_page "$MADRID_ERC" "$MADRID_ERC:$HEADER_FRAGMENT_ERC" "library:$PROMO_FRAGMENT_ERC"
+	HIGHLIGHT='rays-design-library' put_store_page "$MADRID_ERC" "$MADRID_ERC:$HEADER_FRAGMENT_ERC" "library:$PROMO_FRAGMENT_ERC"
 	next
 
 	# UI: Madrid and London, one under the other: http://localhost:8090/?cities=Madrid,London
 	step london-page "Create London’s store page"
-	HIGHLIGHT='"scope"' put_store_page "$LONDON_ERC" "$LONDON_ERC:$HEADER_FRAGMENT_ERC" "library:$PROMO_FRAGMENT_ERC"
+	HIGHLIGHT='rays-design-library' put_store_page "$LONDON_ERC" "$LONDON_ERC:$HEADER_FRAGMENT_ERC" "library:$PROMO_FRAGMENT_ERC"
 	next
 
 	# UI: Madrid > Design > Fragments: only Ray’s Store is left. Then Madrid and London (?cities=Madrid,London).
@@ -591,7 +592,7 @@ act4() {
 
 	# UI: Applications Menu > MCP Server: the devcon profile appears.
 	step profile "Create the agent’s MCP profile"
-	HIGHLIGHT='"name"|"instructions"' request PUT "$MCP_API/server-profiles/by-external-reference-code/$MCP_PROFILE_ERC" "$(mcp_profile_payload)" '{id, externalReferenceCode, profileStatus: .profileStatus.key}' '{externalReferenceCode, name, instructions, profileStatus}'
+	HIGHLIGHT='"instructions"' request PUT "$MCP_API/server-profiles/by-external-reference-code/$MCP_PROFILE_ERC" "$(mcp_profile_payload)" '{id, externalReferenceCode, profileStatus: .profileStatus.key}' '{externalReferenceCode, name, instructions, profileStatus}'
 	note "(the instructions brief the agent on Ray’s Coffee: mcp/instructions.md)"
 	local profile_id tool
 	profile_id=$(jq -r .id <<< "$LAST")
@@ -646,6 +647,8 @@ act5() {
 	else
 		wait_key "launch Claude Code"
 
+		trap : INT
+
 		"$DIR/demo/02-ai-fragment.sh"
 
 		step agent-calls "Check the agent’s calls"
@@ -656,9 +659,11 @@ act5() {
 
 	next
 
+	trap - INT
+
 	# UI: the library's Ray’s Campaigns > Fragments: Store Hours, still without a thumbnail.
 	step read-hours "Read what the agent created"
-	HIGHLIGHT='"name"|colorPicker|: text' request GET "$LIBRARY/fragments/$HOURS_FRAGMENT_ERC" "" '{externalReferenceCode, name, fields: [.fragmentVersions[0].configuration.fieldSets[]?.fields[]? | "\(.name): \(.type)"]}'
+	HIGHLIGHT='colorPicker|: text' request GET "$LIBRARY/fragments/$HOURS_FRAGMENT_ERC" "" '{externalReferenceCode, name, fields: [.fragmentVersions[0].configuration.fieldSets[]?.fields[]? | "\(.name): \(.type)"]}'
 	next
 
 	local hours="$LAST" thumbnail_file
@@ -755,12 +760,12 @@ act7() {
 	act "Winter campaign" "Winter arrives. Marketing updates the Seasonal Promo once, in the design library, and all eight stores get it with one propagation."
 
 	step winter-file "Upload the winter image to the library"
-	HIGHLIGHT='resourceFolderExternalReferenceCode|fileBase64' request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/winter-cup.svg" "$RESOURCE_FOLDER_ERC")" '{externalReferenceCode, resourceFolderExternalReferenceCode}'
+	HIGHLIGHT='resourceFolderExternalReferenceCode' request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/winter-cup.svg" "$RESOURCE_FOLDER_ERC")" '{externalReferenceCode, resourceFolderExternalReferenceCode}'
 	next
 
 	# UI: the Madrid store page: still autumn.
 	step winter-promo "Update the Seasonal Promo in the library"
-	HIGHLIGHT='"html"|fileBase64' request PUT "$LIBRARY/fragments/$PROMO_FRAGMENT_ERC" "$(fragment_payload winter winter-configuration.json)" - "$FRAGMENT_BODY"
+	HIGHLIGHT='"html"' request PUT "$LIBRARY/fragments/$PROMO_FRAGMENT_ERC" "$(fragment_payload winter winter-configuration.json)" - "$FRAGMENT_BODY"
 	compact || say ""
 	say "Pages keep their copy of each fragment: the stores still show autumn."
 	show_sites
@@ -832,18 +837,37 @@ reset() {
 	echo "reset done: Madrid has $(api GET "$MADRID/fragment-sets" | jq -r .totalCount) fragment set(s), no store page; no other stores, no design library, no MCP profile"
 }
 
-if [ -t 1 ]; then
-	tput civis 2> /dev/null
-	trap 'tput cnorm 2> /dev/null' EXIT
-fi
+# stopped: on an exit before the end, how to go on from the act it stopped in.
+stopped() {
+	[ -t 1 ] && tput cnorm 2> /dev/null
 
-if [ $# -gt 0 ]; then
+	[ -n "$FINISHED" ] || [ "$ACT_NUMBER" = 0 ] && return
+
+	printf '\n\n%sStopped in act %s. To go on from its start: ./demo.sh from act%s%s\n' "$DIM" "$ACT_NUMBER" "$ACT_NUMBER" "$R"
+}
+
+FINISHED=""
+
+[ -t 1 ] && tput civis 2> /dev/null
+
+trap stopped EXIT
+
+if [ "${1:-}" = from ]; then
+	for ((a = ${2#act}; a <= ${#ACT_NAMES[@]}; a++)); do
+		"act$a"
+	done
+
+	the_end
+	marker act done
+elif [ $# -gt 0 ]; then
 	"$1"
 else
-	for a in act1 act2 act3 act4 act5 act6 act7; do
-		"$a"
+	for ((a = 1; a <= ${#ACT_NAMES[@]}; a++)); do
+		"act$a"
 	done
 
 	the_end
 	marker act done
 fi
+
+FINISHED=1

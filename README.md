@@ -104,6 +104,7 @@ One API call per step, one key press at a time:
 ./demo.sh reset         # back to the starting point
 ./demo.sh               # all seven acts
 ./demo.sh act3          # a single act (act1 ... act7)
+./demo.sh from act5     # from the start of an act to the end
 NO_PAUSE=1 ./demo.sh    # no key presses
 AI_FALLBACK=1 ./demo.sh # act 5 uses the cached agent run instead of launching Claude Code
 ```
@@ -111,7 +112,8 @@ AI_FALLBACK=1 ./demo.sh # act 5 uses the cached agent run instead of launching C
 Every screen is built to be read from far away, at any terminal size (it needs at least 73 × 37, which `demo/windows.sh` gives it on half of a 1920 × 1080 screen, and with fewer than 40 rows it skips its blank lines):
 
 - At the top, the act's use case, from the business side, and its steps so far, the current one highlighted. A new step starts on a clean screen.
-- Then the call: the endpoint, wrapped after a slash, and the request body, then the status, time and response. Bodies are summarized so they fit on the screen without wrapping: long values are cut, and a page shows only the fragments it references.
+- Then the call: the endpoint, wrapped after a slash, and the request body, then the status, time and response. The one or two values that matter in each step are yellow. Bodies are summarized so they fit on the screen without wrapping: long values are cut, and a page shows only the fragments it references.
+- Ctrl+C while the agent runs in act 5 (to leave Claude Code) only stops the agent: the demo goes on, and one more stray Ctrl+C at the next key press is ignored too. If the demo stops anyway, it says how to go on: `./demo.sh from actN` runs that act again from its start, then the rest. Acts 4 to 6 can run again as they are; acts 1, 2, 3 and 7 create things with POST, so after one of them stopped halfway, `./demo.sh reset` and start over.
 - What to show in the browser at each step is in the `# UI:` comments of `demo.sh`.
 
 | Act | Use case | Steps |
