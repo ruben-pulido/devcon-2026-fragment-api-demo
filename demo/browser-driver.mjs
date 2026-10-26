@@ -5,6 +5,9 @@
 //   goto URL   show URL in the tab on display
 //   reload     reload the tab on display
 //
+// Each change waits DEMO_BROWSER_DELAY seconds (default 1) first, so the
+// browser changes after the terminal, not at the same time.
+//
 // It drives the most recently used tab, reconnecting when that tab changes,
 // and ignores what it cannot do, so the demo goes on without a browser. It
 // speaks the WebSocket protocol itself, as Node.js has no WebSocket client
@@ -15,6 +18,7 @@ import http from 'node:http';
 import {createInterface} from 'node:readline';
 
 const port = process.env.DEMO_CDP_PORT || '9333';
+const delay = Number(process.env.DEMO_BROWSER_DELAY ?? '1') * 1000;
 
 let socket = null;
 let targetId = null;
@@ -94,6 +98,7 @@ for await (const line of createInterface({input: process.stdin})) {
 	const [command, ...rest] = line.trim().split(' ');
 
 	try {
+		await new Promise((resolve) => setTimeout(resolve, delay));
 		await connect();
 
 		if (command === 'goto') {
