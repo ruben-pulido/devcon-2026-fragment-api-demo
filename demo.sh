@@ -519,7 +519,11 @@ request() {
 
 	local shown
 
-	shown=$(show_json "$LAST" "$filter" 14)
+	if [[ "$filter" == @* ]]; then
+		shown=$(jq -r "${filter#@}" <<< "$LAST" 2> /dev/null | sed 's/^/ /')
+	else
+		shown=$(show_json "$LAST" "$filter" 14)
+	fi
 
 	if [ -n "$shown" ]; then
 		colorize <<< "$shown" | highlight
@@ -617,6 +621,26 @@ def wrap($w): reduce (split(" ")[] | select(. != "")) as $word ([""];
 "}"
 EOF
 }
+
+# The fragment the agent created, as the API returns it, cut down to what it
+# shows: where it went, its HTML and CSS, and the settings it exposes.
+BREAKFAST_RESPONSE='@
+	def cut($n): if length > $n then .[0:$n] + "…" else . end;
+	"{",
+	"  \"externalReferenceCode\": \(.externalReferenceCode | tojson),",
+	"  \"name\": \(.name | tojson),",
+	"  \"fragmentSetExternalReferenceCode\": \(.fragmentSetExternalReferenceCode | tojson),",
+	"  \"fragmentVersions\": [{",
+	(.fragmentVersions[] | select(.status == "Approved") |
+		"    \"status\": \(.status | tojson),",
+		"    \"html\": \(.html | cut(44) | tojson),",
+		"    \"css\": \(.css | cut(44) | tojson),",
+		"    \"configuration\": {\"fieldSets\": [{\"fields\": [",
+		([.configuration.fieldSets[]?.fields[]?] as $fields | $fields | to_entries[] |
+			"      {\"name\": \(.value.name | tojson), \"type\": \(.value.type | tojson),",
+			"       \"defaultValue\": \(.value.defaultValue | tojson | gsub(":"; ": "))}\(if .key < ($fields | length) - 1 then "," else "]}]}" end)")),
+	"  }]",
+	"}"'
 
 FRAGMENT_BODY='{externalReferenceCode, name, fragmentVersions: [.fragmentVersions[] | {html, css} + ([.configuration.fieldSets[]?.fields[]?.name] | if length > 0 then {configuration: join(", ")} else {} end)], thumbnailURLReference}'
 FRAGMENT_RESPONSE='{externalReferenceCode, name}'
@@ -1013,7 +1037,8 @@ act5() {
 	step read-breakfast "Read what the agent created"
 	library_urls
 	show_still "$LIBRARY_SET"
-	HIGHLIGHT='colorPicker|: text' request GET "$LIBRARY/fragments/$BREAKFAST_FRAGMENT_ERC" "" '{externalReferenceCode, name, fields: [.fragmentVersions[0].configuration.fieldSets[]?.fields[]? | "\(.name): \(.type)"]}'
+	HIGHLIGHT='"(accentColor|ctaLabel)"' request GET "$LIBRARY/fragments/$BREAKFAST_FRAGMENT_ERC" "" "$BREAKFAST_RESPONSE"
+	note "(no thumbnail yet: the agent sent HTML, CSS and configuration only)"
 	next
 
 	local hours="$LAST" thumbnail_file
