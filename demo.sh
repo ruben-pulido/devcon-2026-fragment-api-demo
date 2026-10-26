@@ -532,7 +532,10 @@ request() {
 	fi
 }
 
+# next: the step's last key press, once the browser has shown all it had to
+# for the step, so the terminal never moves on before the browser.
 next() {
+	browser_sync
 	wait_key "continue"
 }
 
@@ -566,6 +569,13 @@ browser_on() {
 
 browser() {
 	browser_on && printf '%s\n' "$*" >&"${DRIVER[1]}"
+}
+
+browser_sync() {
+	[ -z "${NO_PAUSE:-}" ] && browser_on || return 0
+
+	printf 'sync\n' >&"${DRIVER[1]}"
+	read -r -t 20 _ <&"${DRIVER[0]}"
 }
 
 show() {

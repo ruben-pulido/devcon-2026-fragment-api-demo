@@ -5,6 +5,8 @@
 //   goto URL   show URL in the tab on display
 //   reload     reload the tab on display
 //   wait N     wait N more seconds before the next command
+//   sync       answer "synced" on the standard output once every command
+//              before it is done
 //   menu NAME  open the actions menu of the card named NAME
 //   click TEXT click the visible link or button that reads TEXT
 //   check-all  tick the checkbox that selects every item on the page
@@ -197,6 +199,12 @@ function send(method, params = {}) {
 
 for await (const line of createInterface({input: process.stdin})) {
 	const [command, ...rest] = line.trim().split(' ');
+
+	if (command === 'sync') {
+		process.stdout.write('synced\n');
+
+		continue;
+	}
 
 	if (command === 'wait') {
 		await new Promise((resolve) => setTimeout(resolve, Number(rest[0]) * 1000));
