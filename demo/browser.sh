@@ -4,7 +4,12 @@
 # right of demo/terminal.sh's window, with three tabs: the portal's sign-in
 # and both views of the store grid, which it starts if it is not running.
 #
-#   demo/browser.sh
+#   demo/browser.sh         the sign-in and both views of the store grid
+#   demo/browser.sh --all   one tab for every screen the demo shows, in order,
+#                           to bookmark them (Ctrl+Shift+D bookmarks them all);
+#                           the design library's own screens are not among
+#                           them, as its URLs change every time it is created,
+#                           so open it from the Design Libraries list
 #
 # The layout is for the presentation screen, DEMO_SCREEN (default 1920x1080,
 # like the slides), whatever screen you rehearse on: GNOME's top bar takes the
@@ -25,6 +30,29 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 source "$ROOT_DIR/lib.sh"
 
 GRID_URL="http://localhost:${GRID_PORT:-8090}"
+
+FRAGMENTS="/~/control_panel/manage/-/fragments/fragment_collections?_com_liferay_fragment_web_portlet_FragmentPortlet_fragmentCollectionExternalReferenceCode"
+RESOURCES="&_com_liferay_fragment_web_portlet_FragmentPortlet_tabs1=resources"
+PAGES="/~/control_panel/manage?p_p_id=com_liferay_layout_admin_web_portlet_GroupPagesPortlet"
+MCP_PORTLET=com_liferay_mcp_server_web_internal_portlet_MCPServerPortlet
+
+urls=("$LIFERAY_URL/c/portal/login" "$GRID_URL/?cities=Madrid,London" "$GRID_URL/")
+
+if [ "${1:-}" = --all ]; then
+	urls=(
+		"$LIFERAY_URL/c/portal/login"
+		"$LIFERAY_URL/group/ray-s-coffee-madrid$FRAGMENTS=rays-store"
+		"$LIFERAY_URL/group/ray-s-coffee-madrid$FRAGMENTS=$FRAGMENT_SET_ERC"
+		"$LIFERAY_URL/group/ray-s-coffee-madrid$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES"
+		"$LIFERAY_URL/group/ray-s-coffee-madrid$PAGES"
+		"$LIFERAY_URL/web/ray-s-coffee-madrid/store-home"
+		"$LIFERAY_URL/group/ray-s-coffee-london$FRAGMENTS=rays-store"
+		"$LIFERAY_URL/group/control_panel/manage?p_p_id=com_liferay_design_library_web_internal_portlet_DesignLibraryAdminPortlet"
+		"$GRID_URL/?cities=Madrid,London"
+		"$LIFERAY_URL/group/control_panel/manage?p_p_id=$MCP_PORTLET&p_p_lifecycle=0&p_p_state=maximized&_${MCP_PORTLET}_mvcRenderCommandName=%2Fmcp_server%2Fedit_profile&_${MCP_PORTLET}_profileERC=devcon&_${MCP_PORTLET}_tab=tools"
+		"$GRID_URL/"
+	)
+fi
 
 if [ -z "$CHROME" ]; then
 	echo "Chrome or Chromium not found. Set CHROME to its path."
@@ -80,9 +108,7 @@ setsid "$CHROME" \
 	--user-data-dir="$HOME/.cache/devcon-demo-browser" \
 	--window-position="$x,$y" \
 	--window-size="$width,$height" \
-	"$LIFERAY_URL/c/portal/login" \
-	"$GRID_URL/?cities=Madrid,London" \
-	"$GRID_URL/" > /dev/null 2>&1 &
+	"${urls[@]}" > /dev/null 2>&1 &
 
 pid=$!
 
