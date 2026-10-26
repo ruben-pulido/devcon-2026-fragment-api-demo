@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 #
 # Opens a terminal window sized for the demo: Source Code Pro Medium, the left
-# half of the screen below GNOME's top bar (at least 41 rows) (DEMO_TERMINAL_WIDTH, default half of
-# DEMO_SCREEN's width; about 95 columns), in the demo kit's directory. GNOME's
+# half of the screen below GNOME's top bar (DEMO_TERMINAL_WIDTH, default half of
+# DEMO_SCREEN's width), in the demo kit's directory. GNOME's
 # top bar takes DEMO_TOP_BAR pixels (default 32). Next to demo/browser.sh.
 #
 #   demo/terminal.sh             a shell, ready for ./demo.sh
 #   demo/terminal.sh ./demo.sh   the demo, straight away
 #
-# The size is for the presentation screen, not the one you rehearse on:
-# the demo's screens need 41 rows, which at DEMO_FONT_SIZE 13 (points, the
-# default) just fit the height of a 1920 x 1080 screen under GNOME's top bar,
-# at 100% scaling. For a taller presentation screen, go bigger.
+# The size is for the presentation screen, not the one you rehearse on: at
+# DEMO_FONT_SIZE 16 (points, the default) a 1920 x 1080 screen at 100%
+# scaling gives 73 x 37, the smallest the demo's screens fit, and text about
+# as big as in the video.
 #
 # Ptyxis keeps one font for all its windows, so this starts a separate
 # Ptyxis with its own settings (the keyfile settings backend, in
@@ -24,10 +24,10 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
 FONT="${DEMO_FONT:-Source Code Pro Medium}"
-SIZE="${DEMO_FONT_SIZE:-13}"
+SIZE="${DEMO_FONT_SIZE:-16}"
 
 if ! command -v ptyxis > /dev/null; then
-	echo "Ptyxis not found. Set your terminal to \"$FONT $SIZE\" with 41 rows on half the screen, by hand."
+	echo "Ptyxis not found. Set your terminal to \"$FONT $SIZE\" with at least 73 x 37 on half the screen, by hand."
 
 	exit 1
 fi

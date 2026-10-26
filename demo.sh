@@ -39,6 +39,12 @@ ACT_TEXT=""
 STEP=""
 STEPS=()
 
+# compact: a terminal with fewer than 40 rows, where the screens skip their
+# blank lines.
+compact() {
+	[ "$(rows)" -lt 40 ]
+}
+
 cols() {
 	tput cols 2> /dev/null < /dev/tty || echo 80
 }
@@ -69,7 +75,7 @@ header() {
 	printf '\033[2J\033[3J\033[H'
 	printf '\033[1;97;44m %-*s\033[0m\n' "$((width - 1))" "Ray’s Coffee · $ACT"
 	fold -s -w "$((width - 2))" <<< "$ACT_TEXT" | sed "s/^/ ${B}/; s/\$/${R}/"
-	printf '\n'
+	compact || printf '\n'
 
 	n=${#STEPS[@]}
 
@@ -228,6 +234,8 @@ request() {
 
 	used=$((${#STEPS[@]} + $(fold -s -w "$(($(cols) - 2))" <<< "$ACT_TEXT" | wc -l) + 12))
 
+	compact && used=$((used - 4))
+
 	if [ -n "$body" ] && [[ "$body_filter" == @* ]]; then
 		jq -r "${body_filter#@}" <<< "$body" | sed 's/^/ /' | colorize | highlight
 	elif [ -n "$body" ]; then
@@ -259,10 +267,12 @@ request() {
 
 	LAST="${output%$'\n'*}"
 
+	compact || printf '\n'
+
 	if [[ "$status" == 2* ]]; then
-		printf '\n \033[1;32m← %s OK\033[0m %s(%s ms)%s\n' "$status" "$DIM" "$elapsed" "$R"
+		printf ' \033[1;32m← %s OK\033[0m %s(%s ms)%s\n' "$status" "$DIM" "$elapsed" "$R"
 	else
-		printf '\n \033[1;31m← %s\033[0m %s(%s ms)%s\n' "$status" "$DIM" "$elapsed" "$R"
+		printf ' \033[1;31m← %s\033[0m %s(%s ms)%s\n' "$status" "$DIM" "$elapsed" "$R"
 	fi
 
 	marker done "$STEP"
@@ -271,7 +281,7 @@ request() {
 
 	local shown
 
-	shown=$(show_json "$LAST" "$filter" 12)
+	shown=$(show_json "$LAST" "$filter" 14)
 
 	if [ -n "$shown" ]; then
 		colorize <<< "$shown" | highlight
@@ -318,8 +328,7 @@ PAGE_BODY='@
 		([range(0; $elements | length) as $i | $elements[$i] | element($i == ($elements | length) - 1)] | add) +
 		[
 			"   ]}]},",
-			"  \"…and its draft, with the same elements\"",
-			" ]",
+			"  \"…and its draft, with the same elements\"]",
 			"}"
 		]
 	)[]'
@@ -333,7 +342,7 @@ put_store_page() {
 
 	request PUT "$SITE_API/sites/$site/site-pages/store-home" "$(page_payload "$@")" - "$PAGE_BODY"
 
-	note "(each fragmentInstance also carries the fragment’s HTML, CSS and configuration)"
+	note "(each element also carries its fragment’s HTML, CSS and configuration)"
 }
 
 stores() {
@@ -659,9 +668,9 @@ act6() {
 
 	# UI: the Madrid store page: still autumn.
 	step winter-promo "Update the Seasonal Promo in the library"
-	HIGHLIGHT='"html"|fileBase64' request PUT "$LIBRARY/fragments/$PROMO_FRAGMENT_ERC" "$(fragment_payload winter winter-configuration.json)" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
-	say ""
-	say "Pages keep their own copy of each fragment, so the stores still show autumn:"
+	HIGHLIGHT='"html"|fileBase64' request PUT "$LIBRARY/fragments/$PROMO_FRAGMENT_ERC" "$(fragment_payload winter winter-configuration.json)" - "$FRAGMENT_BODY"
+	compact || say ""
+	say "Pages keep their copy of each fragment: the stores still show autumn."
 	show_sites
 	next
 
