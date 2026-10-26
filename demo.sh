@@ -69,7 +69,7 @@ exec 3>&1
 
 # The acts' short names on the progress bar, the same as the browser's
 # bookmark folders.
-ACT_NAMES=(Madrid London Move MCP Agent Cities Winter)
+ACT_NAMES=(Madrid London "Design Library" MCP Agent Cities Winter)
 
 # compact: a terminal with fewer than 40 rows, where the screens skip their
 # blank lines.
@@ -151,7 +151,7 @@ progress() {
 		dots+="$R$(printf "%$((width - n - 2))s" "")  "
 	done
 
-	printf '%s\n%s\n' "${names%"${names##*[! ]}"}" "$dots"
+	printf '%s\n%s\n' "${names%"${names##*[! ]}"}" "${dots%"${dots##*[! ]}"}"
 }
 
 header() {
@@ -545,8 +545,6 @@ BROWSER_AFTER=""
 LIBRARY_ID=""
 LIBRARY_VIEW=""
 LIBRARY_SET=""
-MADRID_FOLDER_ID=""
-LIBRARY_FOLDER_ID=""
 
 browser_on() {
 	[ "${DEMO_BROWSER:-1}" != 0 ] && [ -z "$SKIPPING" ] || return 1
@@ -702,12 +700,11 @@ act1() {
 	step folder "Create the images resource folder"
 	show "$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES"
 	request POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/resource-folders" "{\"externalReferenceCode\": \"$RESOURCE_FOLDER_ERC\", \"name\": \"$RESOURCE_FOLDER_ERC\"}" '{externalReferenceCode, name}'
-	MADRID_FOLDER_ID=$(jq -r '.id // empty' <<< "$LAST")
 	next
 
 	# UI: Resources > images: autumn-getaway.svg appears.
 	step file "Upload the autumn campaign image"
-	show "$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES$FOLDER=$MADRID_FOLDER_ID"
+	show "$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES&demoOpenFolder=$RESOURCE_FOLDER_ERC"
 	HIGHLIGHT='resourceFolderExternalReferenceCode' request POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/autumn-getaway.svg" "$RESOURCE_FOLDER_ERC")" '{externalReferenceCode, name, resourceFolderExternalReferenceCode}'
 	next
 
@@ -813,8 +810,6 @@ act3() {
 		library_urls
 		show "$LIBRARY_SET$RESOURCES"
 		request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-folders" "$folder" '{externalReferenceCode, name}'
-		LIBRARY_FOLDER_ID=$(jq -r '.id // empty' <<< "$LAST")
-		printf '%s' "$LIBRARY_FOLDER_ID" > "$STATE_DIR/library-folder-id"
 		next
 	done < <(jq -c '.items[] | {externalReferenceCode, name}' <<< "$folders")
 
@@ -822,6 +817,7 @@ act3() {
 
 	while read -r folder; do
 		step read-files "Read the files in $folder"
+		show_still "$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES&demoOpenFolder=$folder"
 		request GET "$FRAGMENT_API/sites/$MADRID_ERC/resource-folders/$folder/resource-files?nestedFields=fileURLReference.fileBase64" "" '[.items[] | {externalReferenceCode, fileURLReference: {fileBase64: .fileURLReference.fileBase64}}]'
 		files="$LAST"
 		next
@@ -829,7 +825,7 @@ act3() {
 		while read -r file; do
 			step post-file "Copy $(jq -r .name <<< "$file") to the library"
 			library_urls
-			show "$LIBRARY_SET$RESOURCES$FOLDER=$LIBRARY_FOLDER_ID"
+			show "$LIBRARY_SET$RESOURCES&demoOpenFolder=$folder"
 			request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$file" '{externalReferenceCode, resourceFolderExternalReferenceCode}'
 			next
 		done < <(jq -c --arg folder "$folder" '.items[] | {externalReferenceCode, fileURLReference: {fileBase64: .fileURLReference.fileBase64}, name, resourceFolderExternalReferenceCode: $folder}' <<< "$files")
@@ -1104,8 +1100,7 @@ act7() {
 
 	step winter-file "Upload the winter image to the library"
 	library_urls
-	LIBRARY_FOLDER_ID=$(cat "$STATE_DIR/library-folder-id" 2> /dev/null)
-	show "$LIBRARY_SET$RESOURCES${LIBRARY_FOLDER_ID:+$FOLDER=$LIBRARY_FOLDER_ID}"
+	show "$LIBRARY_SET$RESOURCES&demoOpenFolder=$RESOURCE_FOLDER_ERC"
 	request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/winter-getaway.svg" "$RESOURCE_FOLDER_ERC")" '{externalReferenceCode, resourceFolderExternalReferenceCode}'
 	next
 

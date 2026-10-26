@@ -75,7 +75,6 @@ SITE_API="$LIFERAY_URL/o/headless-admin-site/v1.0"
 GRID_URL="http://localhost:${GRID_PORT:-8090}"
 FRAGMENTS="/~/control_panel/manage/-/fragments/fragment_collections?_com_liferay_fragment_web_portlet_FragmentPortlet_fragmentCollectionExternalReferenceCode"
 RESOURCES="&_com_liferay_fragment_web_portlet_FragmentPortlet_tabs1=resources"
-FOLDER="&_com_liferay_fragment_web_portlet_FragmentPortlet_folderId"
 PAGES="/~/control_panel/manage?p_p_id=com_liferay_layout_admin_web_portlet_GroupPagesPortlet"
 MCP_PORTLET=com_liferay_mcp_server_web_internal_portlet_MCPServerPortlet
 LIBRARY_PORTLET=com_liferay_design_library_web_internal_portlet_DesignLibraryAdminPortlet

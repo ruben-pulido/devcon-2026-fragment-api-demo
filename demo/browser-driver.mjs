@@ -9,8 +9,12 @@
 // Each change waits DEMO_BROWSER_DELAY seconds (default 1) first, so the
 // browser changes after the terminal, not at the same time.
 //
-// On the fragments screens it closes Liferay's product menu, if it is open,
-// so the fragment sets and fragments get the whole width.
+// On the fragments and design library screens it closes Liferay's product
+// menu, if it is open, so their content gets the whole width.
+//
+// The Fragment API does not give a resource folder's id, which a folder's
+// page needs, so a URL with demoOpenFolder=NAME opens the Resources tab
+// it points at and then the folder of that name in it.
 //
 // It drives the most recently used tab, reconnecting when that tab changes,
 // and ignores what it cannot do, so the demo goes on without a browser. It
@@ -25,23 +29,55 @@ const port = process.env.DEMO_CDP_PORT || '9333';
 const delay = Number(process.env.DEMO_BROWSER_DELAY ?? '1') * 1000;
 
 const CLOSE_PRODUCT_MENU = `
-	if (location.pathname.includes('/fragments/')) {
+	const folder = new URLSearchParams(location.search).get('demoOpenFolder');
+
+	if (folder) {
+		addEventListener('load', () => {
+			let tries = 0;
+
+			const open = () => {
+				const link = [...document.querySelectorAll('a[href*="folderId"]')].find((candidate) => candidate.textContent.trim() === folder);
+
+				if (link) {
+					location.replace(link.href);
+				}
+				else if (++tries < 40) {
+					setTimeout(open, 150);
+				}
+			};
+
+			open();
+		});
+	}
+
+	if (location.pathname.includes('/fragments/') || location.search.includes('DesignLibraryAdminPortlet')) {
 		addEventListener('load', () => {
 			let tries = 0;
 
 			const close = () => {
 				const slider = document.getElementById('_com_liferay_product_navigation_product_menu_web_portlet_ProductMenuPortlet_sidenavSliderId');
 				const toggle = document.querySelector('[data-qa-id="productMenu"]');
+				const sideNavigation = document.getElementById('com_liferay_application_list_taglib_side_navigation');
+				const closeButton = document.querySelector('.control-menu-nav-link[aria-label="Close Product Menu"]');
 
-				const sideNavigation = window.Liferay?.SideNavigation;
-
-				if (slider && toggle && sideNavigation?.instance(toggle)) {
+				if (slider && toggle && window.Liferay?.SideNavigation?.instance(toggle)) {
 					if (slider.classList.contains('open')) {
-						sideNavigation.hide(toggle);
+						Liferay.SideNavigation.hide(toggle);
 					}
+
+					return;
 				}
-				else if (++tries < 40) {
-					setTimeout(close, 100);
+
+				if (sideNavigation && closeButton) {
+					if (!sideNavigation.classList.contains('c-slideout-show')) {
+						return;
+					}
+
+					closeButton.click();
+				}
+
+				if (++tries < 40) {
+					setTimeout(close, 150);
 				}
 			};
 
