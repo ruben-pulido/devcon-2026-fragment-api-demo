@@ -1060,12 +1060,13 @@ act5() {
 
 	if library_fragment_exists "$BREAKFAST_FRAGMENT_ERC"; then
 		step breakfast-madrid "Add Breakfast Hours to Madrid’s page"
-		show_still "$GRID_URL/?cities=Madrid,London"
+		show_still "$GRID_URL/?cities=Madrid"
 		HIGHLIGHT='rays-breakfast-hours' put_hotel_page "$MADRID_ERC" "$MADRID_ERC:$HEADER_FRAGMENT_ERC" "library:$OFFER_FRAGMENT_ERC" "library:$BREAKFAST_FRAGMENT_ERC"
 		next
 
 		# UI: Madrid and London, one under the other (?cities=Madrid,London).
 		step breakfast-london "Add Breakfast Hours to London’s page"
+		show_still "$GRID_URL/?cities=London"
 		put_hotel_page "$LONDON_ERC" "$LONDON_ERC:$HEADER_FRAGMENT_ERC" "library:$OFFER_FRAGMENT_ERC" "library:$BREAKFAST_FRAGMENT_ERC"
 		next
 	fi

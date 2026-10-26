@@ -89,7 +89,8 @@ What it runs, step by step:
 | 4.2 Tools | MCP Server: the devcon profile's tools |
 | 5.3 Breakfast Hours | Design Libraries > Ray’s Design Library > Ray’s Campaigns fragments (Breakfast Hours) |
 | 5.4 Thumbnail | Design Libraries > Ray’s Design Library > Ray’s Campaigns: Breakfast Hours with its thumbnail, then open it |
-| 5.6 Grid | Hotel grid: Madrid and London (with Breakfast Hours) |
+| 5.5 Madrid | Hotel grid: Madrid alone (Breakfast Hours appears) |
+| 5.6 London | Hotel grid: London alone (Breakfast Hours appears) |
 | 6.1 All hotels | Hotel grid: all eight hotels (they appear as they open) |
 | 7.2 Autumn | Hotel grid: all eight hotels (still autumn) |
 | 7.3a Propagate | Design Libraries > Ray’s Design Library > Ray’s Campaigns: Seasonal Offer > View Site Usages > select all > Propagate |

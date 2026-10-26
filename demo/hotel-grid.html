@@ -97,6 +97,7 @@
 		const left = (frame.clientWidth - PAGE_WIDTH * scale) / 2 / scale;
 
 		iframe.style.transform = `scale(${scale}) translate(${left}px, ${-top}px)`;
+		iframe.style.clipPath = `inset(${top}px 0 calc(100% - ${bottom}px) 0)`;
 	};
 
 	const show = (tile, path) => {
