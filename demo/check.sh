@@ -8,6 +8,8 @@
 #   demo/check.sh
 #
 # ✓ ready, ! works but needs attention, ✗ must be fixed before the demo.
+# LIFERAY_HOME is the portal's bundle directory (default
+# ~/projects/liferay/p11/bundles), to say how to start it when it is down.
 # Exits with 1 when something must be fixed.
 
 set -uo pipefail
@@ -64,7 +66,14 @@ status=$(curl -s -o /dev/null -w '%{http_code}' -u "$LIFERAY_AUTH" "$LIFERAY_URL
 if [ "$status" = 200 ]; then
 	ok "It answers, and ${LIFERAY_AUTH%%:*} can sign in"
 else
-	fail "It does not answer as ${LIFERAY_AUTH%%:*} (HTTP $status)" "Start the portal (p11: bundles/tomcat-*/bin/catalina.sh start) and wait until it is up, or check LIFERAY_URL and LIFERAY_AUTH."
+	tomcat=$(ls -d "${LIFERAY_HOME:-$HOME/projects/liferay/p11/bundles}"/tomcat-* 2> /dev/null | tail -1)
+
+	if [ -n "$tomcat" ]; then
+		fail "It does not answer as ${LIFERAY_AUTH%%:*} (HTTP $status)" "Start it in the background, wait about a minute, then run this again:"
+		printf '\n       %s/bin/catalina.sh start\n\n' "$tomcat"
+	else
+		fail "It does not answer as ${LIFERAY_AUTH%%:*} (HTTP $status)" "Start the portal (LIFERAY_HOME is its bundle directory, default ~/projects/liferay/p11/bundles), or check LIFERAY_URL and LIFERAY_AUTH."
+	fi
 
 	printf '\n\033[1;31mThe portal is not ready: nothing else can be checked.\033[0m\n'
 
