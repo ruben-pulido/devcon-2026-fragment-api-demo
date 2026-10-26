@@ -419,13 +419,13 @@ act1() {
 
 	# UI: Madrid > Design > Fragments: the Ray’s Campaigns set appears.
 	step set "Create the Ray’s Campaigns fragment set"
-	HIGHLIGHT='"name"' request PUT "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" '{"description": "Seasonal campaigns", "name": "Ray’s Campaigns"}' '{externalReferenceCode, name}'
+	request PUT "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" '{"description": "Seasonal campaigns", "name": "Ray’s Campaigns"}' '{externalReferenceCode, name}'
 	next
 
 	# UI: Ray’s Campaigns > Resources tab (before the request): the images folder appears.
 	#   ...fragment_collections?..._fragmentCollectionExternalReferenceCode=rays-campaigns&_com_liferay_fragment_web_portlet_FragmentPortlet_tabs1=resources
 	step folder "Create the images resource folder"
-	HIGHLIGHT='"name"' request POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/resource-folders" "{\"externalReferenceCode\": \"$RESOURCE_FOLDER_ERC\", \"name\": \"$RESOURCE_FOLDER_ERC\"}" '{externalReferenceCode, name}'
+	request POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/resource-folders" "{\"externalReferenceCode\": \"$RESOURCE_FOLDER_ERC\", \"name\": \"$RESOURCE_FOLDER_ERC\"}" '{externalReferenceCode, name}'
 	next
 
 	# UI: Resources > images: autumn-cup.svg appears.
@@ -435,7 +435,7 @@ act1() {
 
 	# UI: Ray’s Campaigns > Fragments: Seasonal Promo appears, with its thumbnail.
 	step promo "Create the Seasonal Promo fragment"
-	HIGHLIGHT='"html"' request POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$(fragment_payload autumn configuration.json)" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
+	request POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$(fragment_payload autumn configuration.json)" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
 	next
 
 	# UI: before the request, Madrid > Site Builder > Pages: no pages yet.
@@ -452,7 +452,7 @@ act2() {
 
 	# UI: Applications Menu > Sites: Ray’s Coffee London appears.
 	step london "Create the London site"
-	HIGHLIGHT='"name"' request PUT "$SITE_API/sites/$LONDON_ERC" "{\"externalReferenceCode\": \"$LONDON_ERC\", \"name\": \"Ray’s Coffee London\"}" '{externalReferenceCode, name, friendlyUrlPath}'
+	request PUT "$SITE_API/sites/$LONDON_ERC" "{\"externalReferenceCode\": \"$LONDON_ERC\", \"name\": \"Ray’s Coffee London\"}" '{externalReferenceCode, name, friendlyUrlPath}'
 	next
 
 	api PUT "$LONDON/fragment-sets/$STORE_SET_ERC" '{"name": "Ray’s Store"}' > /dev/null
@@ -460,7 +460,7 @@ act2() {
 
 	# UI: London > Design > Fragments > Ray’s Store: the London Store Header, with its thumbnail.
 	step header "Create London’s Store Header"
-	HIGHLIGHT='fileBase64' request POST "$LONDON/fragment-sets/$STORE_SET_ERC/fragments" "$(header_payload London london-ray.png '#7cc4ff' '221 Baker Street, London')" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
+	request POST "$LONDON/fragment-sets/$STORE_SET_ERC/fragments" "$(header_payload London london-ray.png '#7cc4ff' '221 Baker Street, London')" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
 	note "(its fragment set and header image were created the same way as Madrid’s)"
 	next
 
@@ -472,12 +472,12 @@ act2() {
 
 	# UI: Design Libraries > Ray’s Design Library: its Connected Sites card, empty before the request, then with Madrid.
 	step connect-madrid "Connect Madrid to the design library"
-	HIGHLIGHT='"name"' request PUT "$ASSET_LIBRARY_API/$DESIGN_LIBRARY_ERC/connected-sites/$MADRID_ERC" '{"searchable": true}' '{externalReferenceCode, name}'
+	request PUT "$ASSET_LIBRARY_API/$DESIGN_LIBRARY_ERC/connected-sites/$MADRID_ERC" '{"searchable": true}' '{externalReferenceCode, name}'
 	next
 
 	# UI: Ray’s Design Library: its Connected Sites card, with Madrid and London.
 	step connect-london "Connect London to the design library"
-	HIGHLIGHT='"name"' request PUT "$ASSET_LIBRARY_API/$DESIGN_LIBRARY_ERC/connected-sites/$LONDON_ERC" '{"searchable": true}' '{externalReferenceCode, name}'
+	request PUT "$ASSET_LIBRARY_API/$DESIGN_LIBRARY_ERC/connected-sites/$LONDON_ERC" '{"searchable": true}' '{externalReferenceCode, name}'
 	next
 }
 
@@ -485,25 +485,25 @@ act3() {
 	act "Share the campaigns" "The campaigns move from Madrid’s site to the design library, so both stores can use the same fragments. There is no move operation: we copy, repoint the pages and delete the originals."
 
 	step read-set "Read the fragment set from Madrid"
-	HIGHLIGHT='"name"' request GET "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" "" '{externalReferenceCode, name, description}'
+	request GET "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" "" '{externalReferenceCode, name, description}'
 	local set="$LAST"
 	next
 
 	# UI: before the request, Design Libraries > Ray’s Design Library: no design resources yet.
 	# After it, the library's fragment sets: Ray’s Campaigns.
 	step put-set "Create it in the design library"
-	HIGHLIGHT='"name"' request PUT "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC" "$(jq -c '{description, name}' <<< "$set")" '{externalReferenceCode, name}'
+	request PUT "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC" "$(jq -c '{description, name}' <<< "$set")" '{externalReferenceCode, name}'
 	next
 
 	step read-folders "Read its resource folders"
-	HIGHLIGHT='"name"' request GET "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/resource-folders" "" "$ITEMS"
+	request GET "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/resource-folders" "" "$ITEMS"
 	local folders="$LAST" folder
 	next
 
 	# UI: the library's Ray’s Campaigns > Resources tab: the images folder appears.
 	while read -r folder; do
 		step post-folder "Create the $(jq -r .name <<< "$folder") folder in the library"
-		HIGHLIGHT='"name"' request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-folders" "$folder" '{externalReferenceCode, name}'
+		request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-folders" "$folder" '{externalReferenceCode, name}'
 		next
 	done < <(jq -c '.items[] | {externalReferenceCode, name}' <<< "$folders")
 
@@ -511,19 +511,19 @@ act3() {
 
 	while read -r folder; do
 		step read-files "Read the files in $folder"
-		HIGHLIGHT='fileBase64' request GET "$FRAGMENT_API/sites/$MADRID_ERC/resource-folders/$folder/resource-files?nestedFields=fileURLReference.fileBase64" "" '[.items[] | {externalReferenceCode, fileURLReference: {fileBase64: .fileURLReference.fileBase64}}]'
+		request GET "$FRAGMENT_API/sites/$MADRID_ERC/resource-folders/$folder/resource-files?nestedFields=fileURLReference.fileBase64" "" '[.items[] | {externalReferenceCode, fileURLReference: {fileBase64: .fileURLReference.fileBase64}}]'
 		files="$LAST"
 		next
 
 		while read -r file; do
 			step post-file "Copy $(jq -r .name <<< "$file") to the library"
-			HIGHLIGHT='resourceFolderExternalReferenceCode' request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$file" '{externalReferenceCode, resourceFolderExternalReferenceCode}'
+			request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$file" '{externalReferenceCode, resourceFolderExternalReferenceCode}'
 			next
 		done < <(jq -c --arg folder "$folder" '.items[] | {externalReferenceCode, fileURLReference: {fileBase64: .fileURLReference.fileBase64}, name, resourceFolderExternalReferenceCode: $folder}' <<< "$files")
 	done < <(jq -r '.items[].externalReferenceCode' <<< "$folders")
 
 	step read-fragments "Read its fragments"
-	HIGHLIGHT='"name"' request GET "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/fragments" "" "$ITEMS"
+	request GET "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/fragments" "" "$ITEMS"
 	local fragments="$LAST" fragment erc thumbnail
 
 	thumbnail=$(mktemp)
@@ -535,7 +535,7 @@ act3() {
 		fragment=$(jq -c --arg erc "$erc" --rawfile thumbnail <(base64 -w0 "$thumbnail") '.items[] | select(.externalReferenceCode == $erc) | {externalReferenceCode, fragmentVersions: [.fragmentVersions[] | select(.status == "Approved") | {configuration, css, html, js, status}], icon, name, type} + (if $thumbnail != "" then {thumbnailURLReference: {fileBase64: $thumbnail}} else {} end)' <<< "$fragments")
 
 		step post-fragment "Copy $(jq -r .name <<< "$fragment") to the library"
-		HIGHLIGHT='"html"' request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$fragment" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
+		request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$fragment" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
 		next
 	done < <(jq -r '.items[].externalReferenceCode' <<< "$fragments")
 
@@ -548,7 +548,7 @@ act3() {
 
 	# UI: Madrid and London, one under the other: http://localhost:8090/?cities=Madrid,London
 	step london-page "Create London’s store page"
-	HIGHLIGHT='rays-design-library' put_store_page "$LONDON_ERC" "$LONDON_ERC:$HEADER_FRAGMENT_ERC" "library:$PROMO_FRAGMENT_ERC"
+	put_store_page "$LONDON_ERC" "$LONDON_ERC:$HEADER_FRAGMENT_ERC" "library:$PROMO_FRAGMENT_ERC"
 	next
 
 	# UI: Madrid > Design > Fragments: only Ray’s Store is left. Then Madrid and London (?cities=Madrid,London).
@@ -619,11 +619,11 @@ act4() {
 	next
 
 	step profile-active "Activate the profile"
-	HIGHLIGHT='profileStatus' request PATCH "$MCP_API/server-profiles/by-external-reference-code/$MCP_PROFILE_ERC" '{"profileStatus": "active"}' '{externalReferenceCode, profileStatus: .profileStatus.key}'
+	request PATCH "$MCP_API/server-profiles/by-external-reference-code/$MCP_PROFILE_ERC" '{"profileStatus": "active"}' '{externalReferenceCode, profileStatus: .profileStatus.key}'
 	next
 
 	step tools "List the tools the agent gets"
-	HIGHLIGHT='Fragment|SitePage' request POST "$LIFERAY_URL/o/mcp/devcon" '{"id": 1, "jsonrpc": "2.0", "method": "tools/list"}' '[.result.tools[].name]'
+	request POST "$LIFERAY_URL/o/mcp/devcon" '{"id": 1, "jsonrpc": "2.0", "method": "tools/list"}' '[.result.tools[].name]'
 	note "(Liferay generates these tools from the OpenAPI of each headless API)"
 	next
 }
@@ -688,7 +688,7 @@ act5() {
 
 		# UI: Madrid and London, one under the other (?cities=Madrid,London).
 		step hours-london "Add Store Hours to London’s page"
-		HIGHLIGHT='rays-store-hours' put_store_page "$LONDON_ERC" "$LONDON_ERC:$HEADER_FRAGMENT_ERC" "library:$PROMO_FRAGMENT_ERC" "library:$HOURS_FRAGMENT_ERC"
+		put_store_page "$LONDON_ERC" "$LONDON_ERC:$HEADER_FRAGMENT_ERC" "library:$PROMO_FRAGMENT_ERC" "library:$HOURS_FRAGMENT_ERC"
 		next
 	fi
 }
@@ -760,12 +760,12 @@ act7() {
 	act "Winter campaign" "Winter arrives. Marketing updates the Seasonal Promo once, in the design library, and all eight stores get it with one propagation."
 
 	step winter-file "Upload the winter image to the library"
-	HIGHLIGHT='resourceFolderExternalReferenceCode' request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/winter-cup.svg" "$RESOURCE_FOLDER_ERC")" '{externalReferenceCode, resourceFolderExternalReferenceCode}'
+	request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/winter-cup.svg" "$RESOURCE_FOLDER_ERC")" '{externalReferenceCode, resourceFolderExternalReferenceCode}'
 	next
 
 	# UI: the Madrid store page: still autumn.
 	step winter-promo "Update the Seasonal Promo in the library"
-	HIGHLIGHT='"html"' request PUT "$LIBRARY/fragments/$PROMO_FRAGMENT_ERC" "$(fragment_payload winter winter-configuration.json)" - "$FRAGMENT_BODY"
+	request PUT "$LIBRARY/fragments/$PROMO_FRAGMENT_ERC" "$(fragment_payload winter winter-configuration.json)" - "$FRAGMENT_BODY"
 	compact || say ""
 	say "Pages keep their copy of each fragment: the stores still show autumn."
 	show_sites
