@@ -1048,7 +1048,7 @@ act5() {
 	step read-breakfast "Read what the agent created"
 	library_urls
 	show_still "$LIBRARY_SET"
-	HIGHLIGHT='"(accentColor|ctaLabel)"' request GET "$LIBRARY/fragments/$BREAKFAST_FRAGMENT_ERC" "" "$BREAKFAST_RESPONSE"
+	request GET "$LIBRARY/fragments/$BREAKFAST_FRAGMENT_ERC" "" "$BREAKFAST_RESPONSE"
 	note "(no thumbnail yet: the agent sent HTML, CSS and configuration only)"
 	next
 
