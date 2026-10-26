@@ -36,25 +36,32 @@ RESOURCES="&_com_liferay_fragment_web_portlet_FragmentPortlet_tabs1=resources"
 PAGES="/~/control_panel/manage?p_p_id=com_liferay_layout_admin_web_portlet_GroupPagesPortlet"
 MCP_PORTLET=com_liferay_mcp_server_web_internal_portlet_MCPServerPortlet
 
-# Every screen the demo shows, in order: TITLE|URL.
+# Every screen the demo shows, in order: NUMBER|TITLE|URL. The number is the
+# act where the screen first appears and its order in it; it names the
+# bookmark, and the titles are printed as a legend.
 bookmarks=(
-	"Sign in|$LIFERAY_URL/c/portal/login"
-	"Madrid: Ray’s Store|$LIFERAY_URL/group/ray-s-coffee-madrid$FRAGMENTS=rays-store"
-	"Madrid: Ray’s Campaigns|$LIFERAY_URL/group/ray-s-coffee-madrid$FRAGMENTS=$FRAGMENT_SET_ERC"
-	"Madrid: resources|$LIFERAY_URL/group/ray-s-coffee-madrid$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES"
-	"Madrid: pages|$LIFERAY_URL/group/ray-s-coffee-madrid$PAGES"
-	"Madrid store|$LIFERAY_URL/web/ray-s-coffee-madrid/store-home"
-	"London: Ray’s Store|$LIFERAY_URL/group/ray-s-coffee-london$FRAGMENTS=rays-store"
-	"Design Libraries|$LIFERAY_URL/group/control_panel/manage?p_p_id=com_liferay_design_library_web_internal_portlet_DesignLibraryAdminPortlet"
-	"Madrid + London|$GRID_URL/?cities=Madrid,London"
-	"MCP tools|$LIFERAY_URL/group/control_panel/manage?p_p_id=$MCP_PORTLET&p_p_lifecycle=0&p_p_state=maximized&_${MCP_PORTLET}_mvcRenderCommandName=%2Fmcp_server%2Fedit_profile&_${MCP_PORTLET}_profileERC=devcon&_${MCP_PORTLET}_tab=tools"
-	"All stores|$GRID_URL/"
+	"0.1|Sign in|$LIFERAY_URL/c/portal/login"
+	"1.1|Madrid: Ray’s Store fragments|$LIFERAY_URL/group/ray-s-coffee-madrid$FRAGMENTS=rays-store"
+	"1.2|Madrid: Ray’s Campaigns fragments|$LIFERAY_URL/group/ray-s-coffee-madrid$FRAGMENTS=$FRAGMENT_SET_ERC"
+	"1.3|Madrid: Ray’s Campaigns resources|$LIFERAY_URL/group/ray-s-coffee-madrid$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES"
+	"1.4|Madrid: pages|$LIFERAY_URL/group/ray-s-coffee-madrid$PAGES"
+	"1.5|Madrid store page|$LIFERAY_URL/web/ray-s-coffee-madrid/store-home"
+	"2.1|London: Ray’s Store fragments|$LIFERAY_URL/group/ray-s-coffee-london$FRAGMENTS=rays-store"
+	"2.2|Design Libraries (open Ray’s Design Library from here)|$LIFERAY_URL/group/control_panel/manage?p_p_id=com_liferay_design_library_web_internal_portlet_DesignLibraryAdminPortlet"
+	"3.1|Store grid: Madrid and London|$GRID_URL/?cities=Madrid,London"
+	"4.1|MCP Server: profiles|$LIFERAY_URL/group/control_panel/manage?p_p_id=$MCP_PORTLET"
+	"4.2|MCP Server: the devcon profile's tools|$LIFERAY_URL/group/control_panel/manage?p_p_id=$MCP_PORTLET&p_p_lifecycle=0&p_p_state=maximized&_${MCP_PORTLET}_mvcRenderCommandName=%2Fmcp_server%2Fedit_profile&_${MCP_PORTLET}_profileERC=devcon&_${MCP_PORTLET}_tab=tools"
+	"6.1|Store grid: all eight stores|$GRID_URL/"
 )
 
 urls=("$LIFERAY_URL/c/portal/login" "$GRID_URL/?cities=Madrid,London" "$GRID_URL/")
 
 if [ "${1:-}" = --all ]; then
-	urls=("${bookmarks[@]#*|}")
+	urls=()
+
+	for bookmark in "${bookmarks[@]}"; do
+		urls+=("${bookmark#*|*|}")
+	done
 fi
 
 profile="$HOME/.cache/devcon-demo-browser"
@@ -80,7 +87,7 @@ if ! pgrep -f -- "--user-data-dir=$profile" > /dev/null; then
 
 	printf '%s\n' "${bookmarks[@]}" |
 		jq -R -n '
-			[inputs | split("|") | {name: .[0], type: "url", url: (.[1:] | join("|"))}] as $bar |
+			[inputs | split("|") | {name: .[0], type: "url", url: (.[2:] | join("|"))}] as $bar |
 			{
 				roots: {
 					bookmark_bar: {children: $bar, name: "Bookmarks bar", type: "folder"},
@@ -171,4 +178,13 @@ if command -v wmctrl > /dev/null; then
 	done
 fi
 
+echo "Bookmarks:"
+
+for bookmark in "${bookmarks[@]}"; do
+	IFS='|' read -r number title _ <<< "$bookmark"
+
+	printf '  %s  %s\n' "$number" "$title"
+done
+
+echo
 echo "Sign in as ${LIFERAY_AUTH%%:*}, then switch to dark mode with the moon button in the Product Menu."

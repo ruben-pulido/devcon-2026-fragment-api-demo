@@ -57,7 +57,24 @@ What it runs, step by step:
 ./demo/windows.sh          # both demo windows, side by side: the terminal and the browser
 ```
 
-`demo/windows.sh` runs `demo/terminal.sh` (a Ptyxis window with the demo font on the left half of the screen, 73 × 37 at 16 points; `demo/windows.sh ./demo.sh` starts the demo in it) and `demo/browser.sh` (a Chrome window on the right half, with the sign-in and both store grid views); each also works alone. The two windows are laid out for the presentation screen, 1920 x 1080 like the slides, whatever screen you rehearse on (`DEMO_SCREEN`, `DEMO_FONT_SIZE` for another one).
+`demo/windows.sh` runs `demo/terminal.sh` (a Ptyxis window with the demo font on the left half of the screen, 73 × 37 at 16 points; `demo/windows.sh ./demo.sh` starts the demo in it) and `demo/browser.sh` (a Chrome window on the right half, with the sign-in and both store grid views); each also works alone. The browser's bookmarks bar holds every screen the demo shows, numbered by the act where it first appears (`demo/browser.sh` prints this legend too):
+
+| Bookmark | Screen |
+| --- | --- |
+| 0.1 | Sign in |
+| 1.1 | Madrid: Ray’s Store fragments |
+| 1.2 | Madrid: Ray’s Campaigns fragments |
+| 1.3 | Madrid: Ray’s Campaigns resources |
+| 1.4 | Madrid: pages |
+| 1.5 | Madrid store page |
+| 2.1 | London: Ray’s Store fragments |
+| 2.2 | Design Libraries (open Ray’s Design Library from here: its URLs change every time it is created) |
+| 3.1 | Store grid: Madrid and London |
+| 4.1 | MCP Server: profiles |
+| 4.2 | MCP Server: the devcon profile's tools |
+| 6.1 | Store grid: all eight stores |
+
+The two windows are laid out for the presentation screen, 1920 x 1080 like the slides, whatever screen you rehearse on (`DEMO_SCREEN`, `DEMO_FONT_SIZE` for another one).
 
 Both setup scripts are idempotent. Rehearse once (`./demo.sh`, including the agent in act 5), then `./demo.sh reset`, so the first real run is not the first run of the day and Claude Code already trusts `stage/`.
 
