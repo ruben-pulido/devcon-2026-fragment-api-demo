@@ -8,6 +8,9 @@
 // Each change waits DEMO_BROWSER_DELAY seconds (default 1) first, so the
 // browser changes after the terminal, not at the same time.
 //
+// On the fragments screens it closes Liferay's product menu, if it is open,
+// so the fragment sets and fragments get the whole width.
+//
 // It drives the most recently used tab, reconnecting when that tab changes,
 // and ignores what it cannot do, so the demo goes on without a browser. It
 // speaks the WebSocket protocol itself, as Node.js has no WebSocket client
@@ -19,6 +22,32 @@ import {createInterface} from 'node:readline';
 
 const port = process.env.DEMO_CDP_PORT || '9333';
 const delay = Number(process.env.DEMO_BROWSER_DELAY ?? '1') * 1000;
+
+const CLOSE_PRODUCT_MENU = `
+	if (location.pathname.includes('/fragments/')) {
+		addEventListener('load', () => {
+			let tries = 0;
+
+			const close = () => {
+				const slider = document.getElementById('_com_liferay_product_navigation_product_menu_web_portlet_ProductMenuPortlet_sidenavSliderId');
+				const toggle = document.querySelector('[data-qa-id="productMenu"]');
+
+				const sideNavigation = window.Liferay?.SideNavigation;
+
+				if (slider && toggle && sideNavigation?.instance(toggle)) {
+					if (slider.classList.contains('open')) {
+						sideNavigation.hide(toggle);
+					}
+				}
+				else if (++tries < 40) {
+					setTimeout(close, 100);
+				}
+			};
+
+			close();
+		});
+	}
+`;
 
 let socket = null;
 let targetId = null;
@@ -63,6 +92,9 @@ async function connect() {
 
 	socket = await open(target.webSocketDebuggerUrl);
 	targetId = target.id;
+
+	send('Page.enable');
+	send('Page.addScriptToEvaluateOnNewDocument', {source: CLOSE_PRODUCT_MENU});
 }
 
 function send(method, params = {}) {
