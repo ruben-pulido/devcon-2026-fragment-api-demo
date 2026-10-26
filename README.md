@@ -107,6 +107,7 @@ One API call per step, one key press at a time:
 ./demo.sh               # all seven acts
 ./demo.sh act3          # a single act (act1 ... act7)
 ./demo.sh resume        # go on from where the demo stopped
+./demo.sh help          # these commands, every act's steps, and where resume would go on
 ./demo.sh from act5     # from the start of an act to the end
 NO_PAUSE=1 ./demo.sh    # no key presses
 AI_FALLBACK=1 ./demo.sh # act 5 uses the cached agent run instead of launching Claude Code

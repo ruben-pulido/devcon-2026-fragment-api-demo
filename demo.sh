@@ -8,6 +8,7 @@
 #                        demo stopped
 #   ./demo.sh from act5  run from the start of an act to the end
 #   ./demo.sh reset      back to the starting point: no hotels yet
+#   ./demo.sh help       this help, every act's steps, and where resume goes on
 #
 # NO_PAUSE=1 ./demo.sh   run without waiting for key presses
 # AI_FALLBACK=1 ./demo.sh act5
@@ -936,6 +937,36 @@ reset() {
 	echo "reset done: no hotel sites, no design library, no MCP profile"
 }
 
+# help: the usage above, every act with its steps, and where resume goes on.
+help() {
+	local a last B="$B" R="$R"
+
+	[ -t 1 ] || { B=""; R=""; }
+
+	sed -n '3,/^$/{s/^# \{0,1\}//;p}' "$DIR/demo.sh" | sed '$d'
+
+	printf '%sActs and steps%s\n' "$B" "$R"
+
+	for ((a = 1; a <= ${#ACT_NAMES[@]}; a++)); do
+		printf '\n %s%d. %s%s\n' "$B" "$a" "$(declare -f "act$a" | sed -nE 's/^\s*act "([^"]*)".*/\1/p')" "$R"
+
+		declare -f "act$a" |
+			sed -nE 's/^\s*step [^ ]+ "(.*)";?\s*$/\1/p' |
+			sed -E 's/\$\([^)]*\)/…/g; s/\$[A-Za-z_]+/…/g' |
+			awk -v act="$a" '{ printf "   %d.%-3d %s\n", act, NR, $0 }'
+	done
+
+	printf '\n With AI_FALLBACK=1, act 5 skips "Check the agent’s calls".\n'
+
+	last=$(sort -t. -k1,1n -k2,2n "$STATE_DIR/done" 2> /dev/null | tail -1)
+
+	if [ -n "$last" ]; then
+		printf '\n%sResume%s\n\n Steps done up to %s: ./demo.sh resume goes on from the first one not done after it.\n' "$B" "$R" "$last"
+	else
+		printf '\n%sResume%s\n\n Nothing done yet: ./demo.sh starts from the beginning.\n' "$B" "$R"
+	fi
+}
+
 # stopped: on an exit before the end, how to go on from the act it stopped in.
 stopped() {
 	[ -t 1 ] && tput cnorm 2> /dev/null
@@ -977,8 +1008,15 @@ elif [ "${1:-}" = from ]; then
 
 	the_end
 	marker act done
-elif [ $# -gt 0 ]; then
+elif [ "${1:-}" = help ] || [ "${1:-}" = -h ] || [ "${1:-}" = --help ]; then
+	help
+elif [[ "${1:-}" =~ ^(act[1-7]|reset)$ ]]; then
 	"$1"
+elif [ $# -gt 0 ]; then
+	printf 'Unknown command: %s\n\n' "$1"
+	help
+
+	exit 1
 else
 	for ((a = 1; a <= ${#ACT_NAMES[@]}; a++)); do
 		"act$a"
