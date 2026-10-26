@@ -5,6 +5,12 @@
 //   goto URL   show URL in the tab on display
 //   reload     reload the tab on display
 //   wait N     wait N more seconds before the next command
+//   menu NAME  open the actions menu of the card named NAME
+//   click TEXT click the visible link or button that reads TEXT
+//   check-all  tick the checkbox that selects every item on the page
+//
+// The last three click in the page the way a presenter would, waiting up to
+// five seconds for what they click to appear.
 //
 // Each change waits DEMO_BROWSER_DELAY seconds (default 1) first, so the
 // browser changes after the terminal, not at the same time.
@@ -85,6 +91,32 @@ const CLOSE_PRODUCT_MENU = `
 		});
 	}
 `;
+
+const CLICK = {
+	'check-all': () => document.querySelector('.management-bar input[type="checkbox"]:not([name])'),
+	click: (text) => [...document.querySelectorAll('a, button')].find((element) => element.offsetParent !== null && element.textContent.trim() === text),
+	menu: (name) => [...document.querySelectorAll('.card')].find((card) => card.querySelector('.card-title')?.textContent.trim() === name)?.querySelector('button[aria-label="More actions"]'),
+};
+
+function click(command, argument) {
+	return `(() => {
+		const find = ${CLICK[command]};
+		let tries = 0;
+
+		const attempt = () => {
+			const element = find(${JSON.stringify(argument)});
+
+			if (element) {
+				element.click();
+			}
+			else if (++tries < 50) {
+				setTimeout(attempt, 100);
+			}
+		};
+
+		attempt();
+	})()`;
+}
 
 let socket = null;
 let targetId = null;
@@ -181,6 +213,9 @@ for await (const line of createInterface({input: process.stdin})) {
 		}
 		else if (command === 'reload') {
 			send('Page.reload', {ignoreCache: false});
+		}
+		else if (command in CLICK) {
+			send('Runtime.evaluate', {expression: click(command, rest.join(' '))});
 		}
 	}
 	catch {

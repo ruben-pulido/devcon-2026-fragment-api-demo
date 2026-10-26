@@ -133,7 +133,7 @@ Every screen is built to be read from far away, at any terminal size (it needs a
 | 4. The agent’s toolbox | Before an AI agent can help, it needs a profile on Liferay’s MCP server: a briefing and the only tools it may use | Create the `devcon` profile with its instructions, give it seven tools from three headless APIs, activate it, list what the agent sees |
 | 5. An AI agent builds the next fragment | Claude Code, with only its MCP profile's tools, creates Breakfast Hours | Run the agent, list the calls it made, read its fragment, give it a thumbnail (a headless Chrome screenshot of its HTML and CSS), add it to both hotel pages |
 | 6. A hotel in every DevCon city | Ray’s opens hotels in Berlin (2013), Darmstadt (2014), Amsterdam (2017), Mainz (2019), Porto (2023) and Budapest (2024) | The same calls as for London, one line per city on the screen, then list the design library's eight connected sites |
-| 7. Winter campaign | One change in the library reaches all eight hotels | Upload the winter image, update the Seasonal Offer, propagate from the UI (Seasonal Offer > ⋮ > View Site Usages, select all, Propagate) |
+| 7. Winter campaign | One change in the library reaches all eight hotels | Upload the winter image, update the Seasonal Offer, propagate from the UI (Seasonal Offer > ⋮ > View Site Usages, select all, Propagate): with the browser following the demo, one key press makes the browser do those clicks at a pace the audience can follow, then shows the hotel grid; without it, do them by hand |
 
 Act 4 adds Breakfast Hours to the pages only if it exists, so a failed agent run does not break the rest of the demo.
 

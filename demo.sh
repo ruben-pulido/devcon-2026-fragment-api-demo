@@ -1171,10 +1171,41 @@ act7() {
 	library_urls
 	show_still "$LIBRARY_SET"
 	say "Seasonal Offer > ⋮ > View Site Usages: select all the hotels, then Propagate."
-	wait_key "continue once you have propagated in the UI"
-	show_still "$GRID_URL/"
+
+	if browser_on; then
+		wait_key "propagate in the browser"
+		propagate_in_browser
+	else
+		wait_key "continue once you have propagated in the UI"
+	fi
+
 	hotels
 	next
+}
+
+# propagate_in_browser: the propagation of act 7, clicked in the browser at a
+# pace the audience can follow, then the hotel grid once the hotel pages have
+# the winter offer (or after 60 seconds).
+propagate_in_browser() {
+	local title
+
+	title=$(sed -nE 's/.*rays-offer__title"[^>]*>([^<]*)<.*/\1/p' "$DIR/payloads/seasonal-offer/winter/index.html")
+
+	browser menu Seasonal Offer
+	browser wait 2
+	browser click View Site Usages
+	browser wait 3
+	browser check-all
+	browser wait 2
+	browser click Propagate
+	browser wait 3
+	browser goto "$GRID_URL/"
+
+	for _ in $(seq 1 60); do
+		[ "$(page_offer "$MADRID_ERC")" = "$title" ] && break
+
+		sleep 1
+	done
 }
 
 # the_end: Ray in front of a hotel (demo/the-end.ans, in octant block
