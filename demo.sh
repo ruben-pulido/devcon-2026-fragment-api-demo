@@ -35,9 +35,14 @@ DIM=$'\033[2m'
 R=$'\033[0m'
 
 ACT=""
+ACT_NUMBER=0
 ACT_TEXT=""
 STEP=""
 STEPS=()
+
+# The acts' short names on the progress bar, the same as the browser's
+# bookmark folders.
+ACT_NAMES=(Madrid London Move MCP Agent Cities Winter)
 
 # compact: a terminal with fewer than 40 rows, where the screens skip their
 # blank lines.
@@ -58,13 +63,61 @@ marker() {
 	printf '\033]1337;devcon-%s=%s\007' "$1" "$2"
 }
 
-# act TITLE TEXT
+# act TITLE TEXT, called from actN.
 act() {
 	ACT="$1"
+	ACT_NUMBER="${FUNCNAME[1]#act}"
 	ACT_TEXT="$2"
 	STEPS=()
 
 	marker act "$ACT"
+}
+
+# step_count N: the number of steps of act N.
+step_count() {
+	declare -f "act$1" | grep -E '^\s*step ' | { [ -n "${AI_FALLBACK:-}" ] && grep -v 'step agent-calls' || cat; } | wc -l
+}
+
+# progress: every act's steps as dots, with the names of the acts that have
+# started above them.
+progress() {
+	local a i n color names=" " dots=" " width
+
+	for ((a = 1; a <= ${#ACT_NAMES[@]}; a++)); do
+		n=$(step_count "$a")
+		width=$((n + 2))
+		[ ${#ACT_NAMES[a - 1]} -gt $width ] && width=${#ACT_NAMES[a - 1]}
+
+		if [ "$a" -lt "$ACT_NUMBER" ]; then
+			color=$'\033[32m'
+		elif [ "$a" -eq "$ACT_NUMBER" ]; then
+			color=$'\033[1;33m'
+		else
+			color=$DIM
+		fi
+
+		if [ "$a" -le "$ACT_NUMBER" ]; then
+			names+="$color$(printf "%-${width}s" "${ACT_NAMES[a - 1]}")$R  "
+		else
+			names+="$(printf "%-${width}s" "")  "
+		fi
+
+		dots+="$color$a$R "
+
+		for ((i = 1; i <= n; i++)); do
+			if [ "$a" -lt "$ACT_NUMBER" ] || { [ "$a" -eq "$ACT_NUMBER" ] && [ $i -lt ${#STEPS[@]} ]; }; then
+				dots+=$'\033[32m●'
+			elif [ "$a" -eq "$ACT_NUMBER" ] && [ $i -eq ${#STEPS[@]} ]; then
+				dots+=$'\033[1;33m◉'
+			else
+				dots+="$R$DIM○"
+			fi
+		done
+
+		dots+="$R$(printf "%$((width - n - 2))s" "")  "
+	done
+
+	printf '%s\n%s\n' "${names%"${names##*[! ]}"}" "$dots"
 }
 
 header() {
@@ -73,7 +126,8 @@ header() {
 	width=$(cols)
 
 	printf '\033[2J\033[3J\033[H'
-	printf '\033[1;97;44m %-*s\033[0m\n' "$((width - 1))" "Ray’s Coffee · $ACT"
+	progress
+	printf '\033[1;97;44m %-*s\033[0m\n' "$((width - 1))" "Ray’s Coffee · $ACT_NUMBER. $ACT"
 	fold -s -w "$((width - 2))" <<< "$ACT_TEXT" | sed "s/^/ ${B}/; s/\$/${R}/"
 	compact || printf '\n'
 
@@ -81,9 +135,9 @@ header() {
 
 	for ((i = 0; i < n; i++)); do
 		if [ $i -eq $((n - 1)) ]; then
-			printf ' \033[1;33m▶ %d. %s\033[0m\n' "$((i + 1))" "${STEPS[$i]}"
+			printf ' \033[1;33m▶ %d.%d %s\033[0m\n' "$ACT_NUMBER" "$((i + 1))" "${STEPS[$i]}"
 		else
-			printf ' \033[32m✓\033[0m %s%d. %s%s\n' "$DIM" "$((i + 1))" "${STEPS[$i]}" "$R"
+			printf ' \033[32m✓\033[0m %s%d.%d %s%s\n' "$DIM" "$ACT_NUMBER" "$((i + 1))" "${STEPS[$i]}" "$R"
 		fi
 	done
 
@@ -232,7 +286,7 @@ request() {
 
 	local used
 
-	used=$((${#STEPS[@]} + $(fold -s -w "$(($(cols) - 2))" <<< "$ACT_TEXT" | wc -l) + 12))
+	used=$((${#STEPS[@]} + $(fold -s -w "$(($(cols) - 2))" <<< "$ACT_TEXT" | wc -l) + 14))
 
 	compact && used=$((used - 4))
 
