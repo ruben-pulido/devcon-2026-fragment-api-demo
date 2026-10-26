@@ -470,17 +470,21 @@ act3() {
 	step read-fragments "Read its fragments"
 	HIGHLIGHT='"name"' request GET "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/fragments" "" "$ITEMS"
 	local fragments="$LAST" fragment erc thumbnail
+
+	thumbnail=$(mktemp)
 	next
 
 	# UI: the library's Ray’s Campaigns > Fragments: Seasonal Promo, with its thumbnail.
 	while read -r erc; do
-		thumbnail=$(thumbnail_reference "$MADRID/fragments/$erc")
-		fragment=$(jq -c --arg erc "$erc" --argjson thumbnail "$thumbnail" '.items[] | select(.externalReferenceCode == $erc) | {externalReferenceCode, fragmentVersions: [.fragmentVersions[] | select(.status == "Approved") | {configuration, css, html, js, status}], icon, name, type} + (if $thumbnail then {thumbnailURLReference: $thumbnail} else {} end)' <<< "$fragments")
+		thumbnail_file "$MADRID/fragments/$erc" "$thumbnail" || : > "$thumbnail"
+		fragment=$(jq -c --arg erc "$erc" --rawfile thumbnail <(base64 -w0 "$thumbnail") '.items[] | select(.externalReferenceCode == $erc) | {externalReferenceCode, fragmentVersions: [.fragmentVersions[] | select(.status == "Approved") | {configuration, css, html, js, status}], icon, name, type} + (if $thumbnail != "" then {thumbnailURLReference: {fileBase64: $thumbnail}} else {} end)' <<< "$fragments")
 
 		step post-fragment "Copy $(jq -r .name <<< "$fragment") to the library"
-		HIGHLIGHT='"html"|"url"' request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$fragment" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
+		HIGHLIGHT='"html"|fileBase64' request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$fragment" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
 		next
 	done < <(jq -r '.items[].externalReferenceCode' <<< "$fragments")
+
+	rm -f "$thumbnail"
 
 	# UI: the Madrid store page, unchanged.
 	step madrid-page "Point Madrid’s page to the library’s promo"
@@ -499,21 +503,21 @@ act3() {
 	next
 }
 
-# thumbnail_reference FRAGMENT_URL: the fragment's thumbnail as a reference
-# to copy it from. The first read after creating a fragment can come without
-# the thumbnail URL, so it retries.
-thumbnail_reference() {
-	local i reference
+# thumbnail_file FRAGMENT_URL FILE: downloads the fragment's thumbnail into
+# FILE. The first read after creating a fragment can come without the
+# thumbnail URL, so it retries.
+thumbnail_file() {
+	local i url
 
 	for i in 1 2 3 4 5; do
-		reference=$(api GET "$1?nestedFields=thumbnailURLReference" | jq -c '.thumbnailURLReference | if .url then {url: (.url | sub("&imageThumbnail=1"; ""))} else null end')
+		url=$(api GET "$1?nestedFields=thumbnailURLReference" | jq -r '.thumbnailURLReference.url // empty | sub("&imageThumbnail=1"; "")')
 
-		[ "$reference" != null ] && break
+		[ -n "$url" ] && break
 
 		sleep 1
 	done
 
-	printf '%s' "$reference"
+	[ -n "$url" ] && curl -s -f -u "$LIFERAY_AUTH" -o "$2" "$url"
 }
 
 agent_tool_calls() {
