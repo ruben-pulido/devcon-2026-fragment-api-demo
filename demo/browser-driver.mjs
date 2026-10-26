@@ -4,6 +4,7 @@
 //
 //   goto URL   show URL in the tab on display
 //   reload     reload the tab on display
+//   wait N     wait N more seconds before the next command
 //
 // Each change waits DEMO_BROWSER_DELAY seconds (default 1) first, so the
 // browser changes after the terminal, not at the same time.
@@ -128,6 +129,12 @@ function send(method, params = {}) {
 
 for await (const line of createInterface({input: process.stdin})) {
 	const [command, ...rest] = line.trim().split(' ');
+
+	if (command === 'wait') {
+		await new Promise((resolve) => setTimeout(resolve, Number(rest[0]) * 1000));
+
+		continue;
+	}
 
 	try {
 		await new Promise((resolve) => setTimeout(resolve, delay));

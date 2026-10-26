@@ -185,7 +185,7 @@ header() {
 step() {
 	step_done
 	BROWSER_RELOAD=""
-	BROWSER_NEXT=""
+	BROWSER_AFTER=""
 	STEP="$1"
 	STEPS+=("$2")
 	CURRENT="$ACT_NUMBER.${#STEPS[@]}"
@@ -530,20 +530,18 @@ request() {
 
 next() {
 	wait_key "continue"
-
-	[ -n "$BROWSER_NEXT" ] && browser goto "$BROWSER_NEXT"
-	BROWSER_NEXT=""
 }
 
 # The browser follows the demo through demo/browser-driver.mjs, when the demo
 # browser runs with its remote control (demo/browser.sh) and DEMO_BROWSER is
 # not 0. show URL shows a screen when a step starts and reloads it once the
 # step's request has changed something; show_still shows one that needs no
-# reload (the hotel grid reloads its own tiles); show_next shows one with the
-# step's last key press. The design library's screens need its id, which
+# reload (the hotel grid reloads its own tiles); show_after shows a second
+# screen a couple of seconds after that reload, such as the page just created
+# after the list of pages. The design library's screens need its id, which
 # changes in every run: library_urls looks it up.
 BROWSER_RELOAD=""
-BROWSER_NEXT=""
+BROWSER_AFTER=""
 LIBRARY_ID=""
 LIBRARY_VIEW=""
 LIBRARY_SET=""
@@ -578,12 +576,18 @@ show_still() {
 	BROWSER_RELOAD=""
 }
 
-show_next() {
-	BROWSER_NEXT="$1"
+show_after() {
+	BROWSER_AFTER="$1"
 }
 
 refresh() {
 	[ -n "$BROWSER_RELOAD" ] && browser reload
+
+	if [ -n "$BROWSER_AFTER" ]; then
+		browser wait 2
+		browser goto "$BROWSER_AFTER"
+		BROWSER_AFTER=""
+	fi
 }
 
 library_urls() {
@@ -719,7 +723,7 @@ act1() {
 	#   /web/<madrid>/hotel-home
 	step page "Create Madrid’s hotel page"
 	show "$MADRID_ADMIN$PAGES"
-	show_next "$MADRID_PAGE"
+	show_after "$MADRID_PAGE"
 	HIGHLIGHT='"externalReferenceCode": "rays-' put_hotel_page "$MADRID_ERC" "$MADRID_ERC:$HEADER_FRAGMENT_ERC" "$MADRID_ERC:$OFFER_FRAGMENT_ERC"
 	next
 }
@@ -744,7 +748,7 @@ act2() {
 	# UI: Applications Menu > Sites: Ray’s Hotel London appears. Then London > Design > Fragments > Ray’s Hotel: the London Hotel Header.
 	step london "Open the London site, the same way as Madrid"
 	show "$SITES"
-	show_next "$LONDON_ADMIN$FRAGMENTS=$HOTEL_SET_ERC"
+	show_after "$LONDON_ADMIN$FRAGMENTS=$HOTEL_SET_ERC"
 	say "${B}The same calls as for Madrid, with London’s header:${R}"
 	say ""
 	site_calls
@@ -793,7 +797,7 @@ act3() {
 	step put-set "Create it in the design library"
 	library_urls
 	show "$LIBRARY_VIEW"
-	show_next "$LIBRARY_SET"
+	show_after "$LIBRARY_SET"
 	request PUT "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC" "$(jq -c '{description, name}' <<< "$set")" '{externalReferenceCode, name}'
 	next
 
@@ -868,7 +872,7 @@ act3() {
 	# UI: Madrid > Design > Fragments: only Ray’s Hotel is left. Then Madrid and London (?cities=Madrid,London).
 	step delete-set "Delete the fragment set from Madrid"
 	show "$MADRID_ADMIN$FRAGMENTS=$HOTEL_SET_ERC"
-	show_next "$GRID_URL/?cities=Madrid,London"
+	show_after "$GRID_URL/?cities=Madrid,London"
 	request DELETE "$MADRID/fragment-sets/$FRAGMENT_SET_ERC"
 	hotels
 	next
