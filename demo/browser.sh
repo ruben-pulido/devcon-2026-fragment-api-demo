@@ -29,13 +29,6 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
 source "$ROOT_DIR/lib.sh"
 
-GRID_URL="http://localhost:${GRID_PORT:-8090}"
-
-FRAGMENTS="/~/control_panel/manage/-/fragments/fragment_collections?_com_liferay_fragment_web_portlet_FragmentPortlet_fragmentCollectionExternalReferenceCode"
-RESOURCES="&_com_liferay_fragment_web_portlet_FragmentPortlet_tabs1=resources"
-PAGES="/~/control_panel/manage?p_p_id=com_liferay_layout_admin_web_portlet_GroupPagesPortlet"
-MCP_PORTLET=com_liferay_mcp_server_web_internal_portlet_MCPServerPortlet
-
 # The browser screen of every step that shows one, in order:
 # NUMBER|LABEL|TITLE|URL. The number is the step's act and number on the
 # terminal (a, b... when a step shows several screens); with the label it
@@ -54,12 +47,6 @@ ACT_FOLDERS=(
 	"6. Cities"
 	"7. Winter"
 )
-
-MADRID_ADMIN="$LIFERAY_URL/group/ray-s-hotel-madrid"
-LONDON_ADMIN="$LIFERAY_URL/group/ray-s-hotel-london"
-SITES="$LIFERAY_URL/group/control_panel/manage?p_p_id=com_liferay_site_admin_web_portlet_SiteAdminPortlet"
-LIBRARIES="$LIFERAY_URL/group/control_panel/manage?p_p_id=com_liferay_design_library_web_internal_portlet_DesignLibraryAdminPortlet"
-MCP_TOOLS_URL="$LIFERAY_URL/group/control_panel/manage?p_p_id=$MCP_PORTLET&p_p_lifecycle=0&p_p_state=maximized&_${MCP_PORTLET}_mvcRenderCommandName=%2Fmcp_server%2Fedit_profile&_${MCP_PORTLET}_profileERC=devcon&_${MCP_PORTLET}_tab=tools"
 
 bookmarks=(
 	"0.1|Sign in|Sign in|$LIFERAY_URL/c/portal/login"
@@ -208,6 +195,7 @@ setsid "$CHROME" \
 	--no-default-browser-check \
 	--no-first-run \
 	--ozone-platform=x11 \
+	--remote-debugging-port="${DEMO_CDP_PORT:-9333}" \
 	--user-data-dir="$profile" \
 	--window-position="$x,$y" \
 	--window-size="$width,$height" \

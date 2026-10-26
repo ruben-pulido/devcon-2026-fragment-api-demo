@@ -57,6 +57,7 @@ done
 
 command -v ptyxis > /dev/null && ok "Ptyxis (demo/terminal.sh)" || warn "Ptyxis is missing" "Use any terminal at 73 x 37 or more, with a large font."
 [ -n "$CHROME" ] && ok "Chrome ($CHROME)" || warn "Chrome is missing" "Use any browser at 1000 CSS pixels wide or more."
+command -v node > /dev/null && ok "Node.js (the browser follows the demo)" || warn "Node.js is missing" "The browser does not follow the demo: use the bookmarks."
 command -v wmctrl > /dev/null && command -v xdotool > /dev/null && ok "wmctrl and xdotool (window placement)" || warn "wmctrl or xdotool is missing" "demo/windows.sh opens the windows but cannot place them."
 
 section "Portal ($LIFERAY_URL)"
