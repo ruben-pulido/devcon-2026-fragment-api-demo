@@ -48,6 +48,8 @@ The story: Ray’s Coffee has one store, in Madrid (DevCon 2025), with its own L
 ./demo/browser.sh          # a Chrome window filling the rest of the screen: sign-in and both store grid views
 ```
 
+The two windows are laid out for the presentation screen, 1920 x 1080 like the slides, whatever screen you rehearse on (`DEMO_SCREEN`, `DEMO_FONT_SIZE` for another one).
+
 Both setup scripts are idempotent. Rehearse once (`./demo.sh`, including the agent in act 4), then `./demo.sh reset`, so the first real run is not the first run of the day and Claude Code already trusts `stage/`.
 
 ## Running the demo: `demo.sh`

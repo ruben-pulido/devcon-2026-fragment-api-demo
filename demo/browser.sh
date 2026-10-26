@@ -6,10 +6,13 @@
 #
 #   demo/browser.sh
 #
-# DEMO_BROWSER_X (default: the right edge of the demo terminal, or 782) and
-# DEMO_BROWSER_SCALE (default 1) fit it to another screen; the fragments admin
-# shows the fragment sets beside their fragments only when the page is at
-# least 992 CSS pixels wide.
+# The layout is for the presentation screen, DEMO_SCREEN (default 1920x1080,
+# like the slides), whatever screen you rehearse on: GNOME's top bar takes the
+# first DEMO_TOP_BAR pixels (default 32), and the browser fills the rest of
+# the screen to the right of the demo terminal (DEMO_BROWSER_X, default: the
+# terminal's right edge, or 782). DEMO_BROWSER_SCALE (default 1) zooms it; the
+# fragments admin shows the fragment sets beside their fragments only when
+# the page is at least 992 CSS pixels wide.
 #
 # It uses its own Chrome profile (~/.cache/devcon-demo-browser), so another
 # portal's cached JavaScript never gets in the way and the sign-in is kept
@@ -40,14 +43,15 @@ if ! curl -s -o /dev/null "$GRID_URL/"; then
 	done
 fi
 
-read -r area_x area_y area_width area_height < <(xprop -root _NET_WORKAREA 2> /dev/null | tr -d ',' | awk '{ print $3, $4, $5, $6 }')
+screen="${DEMO_SCREEN:-1920x1080}"
+top_bar="${DEMO_TOP_BAR:-32}"
 
-terminal=$(wmctrl -lG 2> /dev/null | awk '/Ray’s Coffee demo/ { print $3 + $5; exit }')
+terminal=$(xdotool search --name 'Ray’s Coffee demo' getwindowgeometry 2> /dev/null | awk '/Geometry/ { split($2, size, "x"); print size[1]; exit }')
 
 x="${DEMO_BROWSER_X:-${terminal:-782}}"
-y="${area_y:-0}"
-width=$(( ${area_width:-1920} - x ))
-height="${area_height:-1080}"
+y="$top_bar"
+width=$(( ${screen%x*} - x ))
+height=$(( ${screen#*x} - top_bar ))
 
 setsid "$CHROME" \
 	--force-device-scale-factor="${DEMO_BROWSER_SCALE:-1}" \

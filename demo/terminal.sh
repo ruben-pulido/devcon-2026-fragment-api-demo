@@ -8,9 +8,10 @@
 #   demo/terminal.sh             a shell, ready for ./demo.sh
 #   demo/terminal.sh ./demo.sh   the demo, straight away
 #
-# DEMO_FONT_SIZE (points, default 13) scales it to the screen: the demo's
-# screens need 73 x 41, which at 13 points just fits the height of a
-# 1920 x 1080 screen under GNOME's top bar. On a taller screen, go bigger.
+# The size is for the presentation screen, not the one you rehearse on:
+# the demo's screens need 73 x 41, which at DEMO_FONT_SIZE 13 (points, the
+# default) just fits the height of a 1920 x 1080 screen under GNOME's top bar,
+# at 100% scaling. For a taller presentation screen, go bigger.
 #
 # Ptyxis keeps one font for all its windows, so this starts a separate
 # Ptyxis with its own settings (the keyfile settings backend, in
