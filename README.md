@@ -51,15 +51,15 @@ What it runs, step by step:
 
 ```bash
 ./setup/00-setup.sh        # the Madrid site with its own Store Header fragment
-./setup/10-mcp-profile.sh  # "devcon" profile of Liferay's MCP server
+./setup/10-mcp-profile.sh  # "devcon" profile of Liferay's MCP server, to rehearse the agent alone (the demo creates it in act 4, the reset removes it)
 ./demo.sh reset            # Madrid only: no campaigns, no store page, no other stores, no design library
-./demo/store-grid.py &     # the store grid at http://localhost:8090, for acts 3 to 6
+./demo/store-grid.py &     # the store grid at http://localhost:8090, for acts 3, 6 and 7
 ./demo/windows.sh          # both demo windows, side by side: the terminal and the browser
 ```
 
 `demo/windows.sh` runs `demo/terminal.sh` (a Ptyxis window with the demo font on the left half of the screen, 73 × 37 at 16 points; `demo/windows.sh ./demo.sh` starts the demo in it) and `demo/browser.sh` (a Chrome window on the right half, with the sign-in and both store grid views); each also works alone. The two windows are laid out for the presentation screen, 1920 x 1080 like the slides, whatever screen you rehearse on (`DEMO_SCREEN`, `DEMO_FONT_SIZE` for another one).
 
-Both setup scripts are idempotent. Rehearse once (`./demo.sh`, including the agent in act 4), then `./demo.sh reset`, so the first real run is not the first run of the day and Claude Code already trusts `stage/`.
+Both setup scripts are idempotent. Rehearse once (`./demo.sh`, including the agent in act 5), then `./demo.sh reset`, so the first real run is not the first run of the day and Claude Code already trusts `stage/`.
 
 ## Running the demo: `demo.sh`
 
@@ -67,10 +67,10 @@ One API call per step, one key press at a time:
 
 ```bash
 ./demo.sh reset         # back to the starting point
-./demo.sh               # all six acts
-./demo.sh act3          # a single act (act1 ... act6)
+./demo.sh               # all seven acts
+./demo.sh act3          # a single act (act1 ... act7)
 NO_PAUSE=1 ./demo.sh    # no key presses
-AI_FALLBACK=1 ./demo.sh # act 4 uses the cached agent run instead of launching Claude Code
+AI_FALLBACK=1 ./demo.sh # act 5 uses the cached agent run instead of launching Claude Code
 ```
 
 Every screen is built to be read from far away, at any terminal size (it needs at least 73 × 37, which `demo/windows.sh` gives it on half of a 1920 × 1080 screen, and with fewer than 40 rows it skips its blank lines):
@@ -84,9 +84,10 @@ Every screen is built to be read from far away, at any terminal size (it needs a
 | 1. Madrid opens | Ray’s Coffee opens its first store; its site exists with its Store Header | Create the Ray’s Campaigns fragment set, its `images` resource folder, the autumn image, the Seasonal Promo fragment (with a thumbnail), and Madrid's store page |
 | 2. London opens | A second store with its own site and header; campaigns must launch in all stores at the same time | Create the London site and its Store Header, the design library, and connect both sites to it |
 | 3. Share the campaigns | Move the campaigns from Madrid to the design library: copy, repoint, delete | Read and create the fragment set, its folders, files and fragments (with their thumbnails) in the library, point Madrid's page to the library's promo, create London's page, delete Madrid's set |
-| 4. An AI agent builds the next fragment | Claude Code, with only Liferay's MCP server, creates Store Hours | List the agent's tools, run the agent, list the calls it made, read its fragment, give it a thumbnail (a headless Chrome screenshot of its HTML and CSS), add it to both store pages |
-| 5. A store in every DevCon city | Ray’s opens stores in Berlin (2013), Darmstadt (2014), Amsterdam (2017), Mainz (2019), Porto (2023) and Budapest (2024) | The same calls as for London, one line per city on the screen, then list the design library's eight connected sites |
-| 6. Winter campaign | One change in the library reaches all eight stores | Upload the winter image, update the Seasonal Promo, propagate from the UI (Seasonal Promo > ⋮ > View Site Usages, select all, Propagate) |
+| 4. The agent’s toolbox | Before an AI agent can help, it needs a profile on Liferay’s MCP server: a briefing and the only tools it may use | Create the `devcon` profile with its instructions, give it seven tools from three headless APIs, activate it, list what the agent sees |
+| 5. An AI agent builds the next fragment | Claude Code, with only its MCP profile's tools, creates Store Hours | Run the agent, list the calls it made, read its fragment, give it a thumbnail (a headless Chrome screenshot of its HTML and CSS), add it to both store pages |
+| 6. A store in every DevCon city | Ray’s opens stores in Berlin (2013), Darmstadt (2014), Amsterdam (2017), Mainz (2019), Porto (2023) and Budapest (2024) | The same calls as for London, one line per city on the screen, then list the design library's eight connected sites |
+| 7. Winter campaign | One change in the library reaches all eight stores | Upload the winter image, update the Seasonal Promo, propagate from the UI (Seasonal Promo > ⋮ > View Site Usages, select all, Propagate) |
 
 Act 4 adds Store Hours to the pages only if it exists, so a failed agent run does not break the rest of the demo.
 
@@ -98,12 +99,12 @@ Gotchas:
 
 - If another portal build ran on the same host and port in the same browser, the browser can serve its cached JavaScript modules and the admin screens render blank or menus do not open. Hard-reload with Ctrl+Shift+R, or use a separate browser profile for the demo.
 - The Design Libraries list (and `GET /asset-libraries`) is search-backed. If it shows "No Design Libraries Yet" while the library exists, reindex: Control Panel > Search > Index Actions > All Search Indexes > Reindex.
-- Claude Code asks whether to trust the `stage/` folder the first time it starts there. Rehearse act 4 once on the presentation machine so the question does not come up on stage.
+- Claude Code asks whether to trust the `stage/` folder the first time it starts there. Rehearse act 5 once on the presentation machine so the question does not come up on stage.
 
 ### The AI step
 
 - The agent runs in the empty `stage/` directory with every built-in tool disabled: it can only call the seven tools of the `devcon` MCP profile.
-- Everything it knows about Liferay comes from the profile instructions (`mcp/instructions.md`, stored in the portal by `setup/10-mcp-profile.sh`) and from the tool schemas, which Liferay generates from the OpenAPI of each headless API. The prototype design library endpoints became MCP tools without any MCP-specific code.
+- Everything it knows about Liferay comes from the profile instructions (`mcp/instructions.md`, stored in the portal when act 4 creates the profile) and from the tool schemas, which Liferay generates from the OpenAPI of each headless API. The prototype design library endpoints became MCP tools without any MCP-specific code.
 - If the API rejects a payload, the agent reads the error and fixes the payload. Good moment to narrate if it happens live.
 - Fallback if the network or the model misbehaves: `AI_FALLBACK=1`, or `./demo/02-fallback.sh`, creates the same kind of fragment from a cached payload (`payloads/store-hours.json`).
 - Variant for a longer slot: add "Then add it to the home page of every store, right below the seasonal promo" to `demo/02-prompt.txt`. The agent then composes the pages itself with `putSiteSitePage`.

@@ -179,12 +179,12 @@ else
 	fail "It does not start" "Run ./demo/store-grid.py by hand to see why."
 fi
 
-section "The AI agent (act 4)"
+section "The AI agent (act 5)"
 
 if command -v claude > /dev/null || [ -x "$HOME/.local/bin/claude" ]; then
 	ok "Claude Code is installed"
 else
-	warn "Claude Code is missing" "Run the demo with AI_FALLBACK=1 ./demo.sh: act 4 then uses the cached agent run."
+	warn "Claude Code is missing" "Run the demo with AI_FALLBACK=1 ./demo.sh: act 5 then uses the cached agent run."
 fi
 
 trusted=$(jq -r --arg dir "$ROOT_DIR" '[.projects // {} | to_entries[] | select(.value.hasTrustDialogAccepted == true) | .key | select(. as $key | $dir | startswith($key))] | length' "$HOME/.claude.json" 2> /dev/null)
@@ -192,13 +192,13 @@ trusted=$(jq -r --arg dir "$ROOT_DIR" '[.projects // {} | to_entries[] | select(
 if [ "${trusted:-0}" -gt 0 ]; then
 	ok "Claude Code trusts the demo kit's folder (no trust question on stage)"
 else
-	warn "Claude Code has not been told to trust this folder" "Run 'claude' once in stage/ and answer the question, or it will ask during act 4."
+	warn "Claude Code has not been told to trust this folder" "Run 'claude' once in stage/ and answer the question, or it will ask during act 5."
 fi
 
 if curl -s -o /dev/null --max-time 5 https://api.anthropic.com; then
 	ok "The internet answers (the agent needs it)"
 else
-	warn "No internet: the agent cannot run" "Run the demo with AI_FALLBACK=1 ./demo.sh: act 4 then uses the cached agent run."
+	warn "No internet: the agent cannot run" "Run the demo with AI_FALLBACK=1 ./demo.sh: act 5 then uses the cached agent run."
 fi
 
 if [ -s "$ROOT_DIR/payloads/store-hours.json" ]; then

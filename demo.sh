@@ -3,11 +3,11 @@
 # One API, Thousands of Sites: step-by-step demo
 #
 #   ./demo.sh            run every act, pausing before each request
-#   ./demo.sh act3       run a single act (act1 ... act6)
+#   ./demo.sh act3       run a single act (act1 ... act7)
 #   ./demo.sh reset      back to the starting point: Madrid with its store header
 #
 # NO_PAUSE=1 ./demo.sh   run without waiting for key presses
-# AI_FALLBACK=1 ./demo.sh act4
+# AI_FALLBACK=1 ./demo.sh act5
 #                        create the Store Hours fragment from the cached agent
 #                        run instead of launching Claude Code
 #
@@ -533,14 +533,48 @@ agent_tool_calls() {
 }
 
 act4() {
-	act "An AI agent builds the next fragment" "Customers keep asking about opening hours. An AI agent creates a Store Hours fragment in the design library. It can only use Liferay’s MCP server."
+	act "The agent’s toolbox" "Ray’s wants an AI agent to help build the stores’ fragments. Before it can, it needs a profile on Liferay’s MCP server: a briefing, and the only tools it may use. We create it through the API too."
 
-	# UI: MCP Server > devcon > Tools.
+	# UI: Applications Menu > MCP Server: the devcon profile appears.
+	step profile "Create the agent’s MCP profile"
+	HIGHLIGHT='"name"|"instructions"' request PUT "$MCP_API/server-profiles/by-external-reference-code/$MCP_PROFILE_ERC" "$(mcp_profile_payload)" '{id, externalReferenceCode, profileStatus: .profileStatus.key}' '{externalReferenceCode, name, instructions, profileStatus}'
+	note "(the instructions brief the agent on Ray’s Coffee: mcp/instructions.md)"
+	local profile_id tool
+	profile_id=$(jq -r .id <<< "$LAST")
+	next
+
+	# UI: MCP Server > devcon > Tools: the seven tools.
 	#   /group/control_panel/manage?p_p_id=com_liferay_mcp_server_web_internal_portlet_MCPServerPortlet&p_p_lifecycle=0&p_p_state=maximized&_com_liferay_mcp_server_web_internal_portlet_MCPServerPortlet_mvcRenderCommandName=%2Fmcp_server%2Fedit_profile&_com_liferay_mcp_server_web_internal_portlet_MCPServerPortlet_profileERC=devcon&_com_liferay_mcp_server_web_internal_portlet_MCPServerPortlet_tab=tools
+	step profile-tools "Give it seven tools, from three headless APIs"
+	printf ' %s\n' "${B}For each tool, its tool set (a headless API) and its name:${R}" ""
+	printf ' %s\n' "  ${B}PUT${R}  ${PATH_COLOR}…/o/mcp/server-profile-tools/${R}"
+	printf ' %s\n' "         ${PATH_COLOR}by-external-reference-code/${ERC_COLOR}devcon-{tool}${R}"
+	wait_key "add the tools"
+	say ""
+
+	for tool in "${MCP_TOOLS[@]}"; do
+		if api PUT "$MCP_API/server-profile-tools/by-external-reference-code/$MCP_PROFILE_ERC-${tool##*:}" "$(mcp_tool_payload "$profile_id" "$tool")" > /dev/null; then
+			printf '  %-27s %s \033[32m✓\033[0m\n' "${tool%%:*}" "${tool##*:}"
+		else
+			printf '  %-27s %s \033[31m✗\033[0m\n' "${tool%%:*}" "${tool##*:}"
+		fi
+	done
+
+	marker done profile-tools
+	next
+
+	step profile-active "Activate the profile"
+	HIGHLIGHT='profileStatus' request PATCH "$MCP_API/server-profiles/by-external-reference-code/$MCP_PROFILE_ERC" '{"profileStatus": "active"}' '{externalReferenceCode, profileStatus: .profileStatus.key}'
+	next
+
 	step tools "List the tools the agent gets"
 	HIGHLIGHT='Fragment|SitePage' request POST "$LIFERAY_URL/o/mcp/devcon" '{"id": 1, "jsonrpc": "2.0", "method": "tools/list"}' '[.result.tools[].name]'
 	note "(Liferay generates these tools from the OpenAPI of each headless API)"
 	next
+}
+
+act5() {
+	act "An AI agent builds the next fragment" "Customers keep asking about opening hours. An AI agent creates a Store Hours fragment in the design library, using only the tools of its MCP profile."
 
 	step agent "Ask the agent"
 	say "${B}The prompt:${R}"
@@ -625,7 +659,7 @@ open_store() {
 	marker store "$site"
 }
 
-act5() {
+act6() {
 	act "A store in every DevCon city" "Ray’s Coffee follows DevCon: Madrid hosted it in 2025 and London hosts it now. Ray’s opens a store in every city that has hosted DevCon since 2013, each with its own site and header, all sharing the design library."
 
 	# UI: the store grid (demo/store-grid.py, http://localhost:8090): one tile per DevCon city, filled as each store opens.
@@ -663,7 +697,7 @@ act5() {
 	next
 }
 
-act6() {
+act7() {
 	act "Winter campaign" "Winter arrives. Marketing updates the Seasonal Promo once, in the design library, and all eight stores get it with one propagation."
 
 	step winter-file "Upload the winter image to the library"
@@ -726,6 +760,14 @@ reset() {
 
 	api DELETE "$ASSET_LIBRARY_API/$DESIGN_LIBRARY_ERC" > /dev/null 2>&1
 
+	local erc
+
+	for erc in $(api GET "$MCP_API/server-profile-tools?pageSize=-1" 2> /dev/null | jq -r --arg prefix "$MCP_PROFILE_ERC-" '.items[] | select(.externalReferenceCode | startswith($prefix)) | .externalReferenceCode'); do
+		api DELETE "$MCP_API/server-profile-tools/by-external-reference-code/$erc" > /dev/null 2>&1
+	done
+
+	api DELETE "$MCP_API/server-profiles/by-external-reference-code/$MCP_PROFILE_ERC" > /dev/null 2>&1
+
 	for city in "${DEVCON_CITIES[@]}"; do
 		IFS='|' read -r _ site _ _ _ <<< "$city"
 
@@ -733,7 +775,7 @@ reset() {
 	done
 	api DELETE "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" > /dev/null 2>&1
 
-	echo "reset done: Madrid has $(api GET "$MADRID/fragment-sets" | jq -r .totalCount) fragment set(s), no store page; no other stores, no design library"
+	echo "reset done: Madrid has $(api GET "$MADRID/fragment-sets" | jq -r .totalCount) fragment set(s), no store page; no other stores, no design library, no MCP profile"
 }
 
 if [ -t 1 ]; then
@@ -744,7 +786,7 @@ fi
 if [ $# -gt 0 ]; then
 	"$1"
 else
-	for a in act1 act2 act3 act4 act5 act6; do
+	for a in act1 act2 act3 act4 act5 act6 act7; do
 		"$a"
 	done
 

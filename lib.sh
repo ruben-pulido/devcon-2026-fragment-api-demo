@@ -10,6 +10,50 @@ PROMO_FRAGMENT_ERC="${PROMO_FRAGMENT_ERC:-rays-seasonal-promo}"
 HOURS_FRAGMENT_ERC="${HOURS_FRAGMENT_ERC:-rays-store-hours}"
 MADRID_ERC="${MADRID_ERC:-rays-madrid}"
 LONDON_ERC="${LONDON_ERC:-rays-london}"
+MCP_PROFILE_ERC="${MCP_PROFILE_ERC:-devcon}"
+MCP_API="$LIFERAY_URL/o/mcp"
+
+# The tools of the agent's MCP profile: TOOL_SET:TOOL.
+MCP_TOOLS=(
+	headless-admin-fragment-v1.0:getDesignLibraryFragment
+	headless-admin-fragment-v1.0:getDesignLibraryFragmentSetFragmentsPage
+	headless-admin-fragment-v1.0:postDesignLibraryFragmentSetFragment
+	headless-admin-fragment-v1.0:putDesignLibraryFragment
+	headless-admin-site-v1.0:getSiteSitePage
+	headless-admin-site-v1.0:putSiteSitePage
+	headless-asset-library-v1.0:getAssetLibraryConnectedSitesPage
+)
+
+# mcp_profile_payload: the agent's MCP profile, inactive until its tools are
+# in place, with the instructions in mcp/instructions.md.
+mcp_profile_payload() {
+	jq -n \
+		--arg erc "$MCP_PROFILE_ERC" \
+		--rawfile instructions "$ROOT_DIR/mcp/instructions.md" \
+		'{
+			description: "Devcon 2026: fragments of the Ray’s Coffee design library and the store pages that use them.",
+			externalReferenceCode: $erc,
+			instructions: $instructions,
+			name: $erc,
+			profileStatus: "inactive"
+		}'
+}
+
+# mcp_tool_payload PROFILE_ID TOOL_SET:TOOL
+mcp_tool_payload() {
+	jq -n \
+		--arg erc "$MCP_PROFILE_ERC-${2##*:}" \
+		--argjson profileId "$1" \
+		--arg toolName "${2##*:}" \
+		--arg toolSetName "${2%%:*}" \
+		'{
+			externalReferenceCode: $erc,
+			r_mcpServerProfileToTools_l_mcpServerProfileId: $profileId,
+			toolName: $toolName,
+			toolSetName: $toolSetName
+		}'
+}
+
 # Every city that has hosted DevCon, in order: YEAR|SITE_ERC|CITY|ACCENT|ADDRESS
 DEVCON_CITIES=(
 	"2013|rays-berlin|Berlin|#ff6b6b|Unter den Linden 21, Berlin"

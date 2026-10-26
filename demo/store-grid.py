@@ -2,8 +2,8 @@
 # The store grid: every DevCon city's store page, in a 2 x 4 grid, at
 # http://localhost:8090 (GRID_PORT), or only some of them, one under another, as in
 # http://localhost:8090/?cities=Madrid,London. A tile shows up as soon as its
-# store page exists and reloads when the page changes, so act 5 fills the
-# grid and the propagation in act 6 turns every tile to winter.
+# store page exists and reloads when the page changes, so act 6 fills the
+# grid and the propagation in act 7 turns every tile to winter.
 #
 #   demo/store-grid.py
 #
