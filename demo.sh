@@ -14,10 +14,23 @@
 # AI_FALLBACK=1 ./demo.sh act5
 #                        create the Breakfast Hours fragment from the cached agent
 #                        run instead of launching Claude Code
+# DEMO_BROWSER=0 ./demo.sh
+#                        leave the browser alone (the bookmarks have every
+#                        screen)
+# DEMO_BROWSER_DELAY=1.5 ./demo.sh
+#                        seconds the browser waits after the terminal before
+#                        it changes (default 1)
+# DEMO_CDP_PORT=9333     the demo browser's remote control port (default 9333)
+#
+# Keys, at any prompt:
+#   any key, Page Down   go on (Page Down is a clicker's "next")
+#   ← or Page Up         show the screen before, as it was, without running it
+#   →                    the screen after, back to the current one
 #
 # Each screen shows the act's use case, the steps so far (the current one
-# highlighted) and one API call. The "UI:" comments say what to show in the
-# browser at each step.
+# highlighted) and one API call. The browser follows: each step shows its
+# screen there (demo/browser.sh starts it with its remote control), and the
+# "UI:" comments say which.
 #
 
 set -uo pipefail
