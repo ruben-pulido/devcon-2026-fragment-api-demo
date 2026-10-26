@@ -1138,6 +1138,8 @@ the_end() {
 	fi
 
 	cat "$DIR/demo/the-end.ans"
+
+	[ -n "${NO_PAUSE:-}" ] || read -rsn1 _ < /dev/tty 2> /dev/null
 }
 
 reset() {
@@ -1210,59 +1212,66 @@ stopped() {
 	printf '\n\n%sStopped in act %s. To go on from where it stopped: ./demo.sh resume%s\n' "$DIM" "$ACT_NUMBER" "$R"
 }
 
-FINISHED=""
+# The run, as one function called from the file's last line: bash reads the
+# whole of it before it starts, so editing demo.sh while it runs cannot break
+# the run in progress.
+main() {
+	FINISHED=""
 
-[ -t 1 ] && tput civis 2> /dev/null
+	[ -t 1 ] && tput civis 2> /dev/null
 
-trap stopped EXIT
+	trap stopped EXIT
 
-case "${1:-}" in
-	help | -h | --help | reset) ;;
-	*) [ -t 1 ] && [ -z "${NO_PAUSE:-}" ] && log_screens ;;
-esac
+	case "${1:-}" in
+		help | -h | --help | reset) ;;
+		*) [ -t 1 ] && [ -z "${NO_PAUSE:-}" ] && log_screens ;;
+	esac
 
-if [ "${1:-}" = resume ]; then
-	last=$(sort -t. -k1,1n -k2,2n "$STATE_DIR/done" 2> /dev/null | tail -1)
+	if [ "${1:-}" = resume ]; then
+		last=$(sort -t. -k1,1n -k2,2n "$STATE_DIR/done" 2> /dev/null | tail -1)
 
-	if [ -z "$last" ]; then
-		echo "Nothing to resume: run ./demo.sh"
+		if [ -z "$last" ]; then
+			echo "Nothing to resume: run ./demo.sh"
+
+			exit 1
+		fi
+
+		RESUMING=1
+
+		for ((a = ${last%%.*}; a <= ${#ACT_NAMES[@]}; a++)); do
+			"act$a"
+		done
+
+		step_done
+		exec >&3
+		the_end
+		marker act done
+	elif [ "${1:-}" = from ]; then
+		for ((a = ${2#act}; a <= ${#ACT_NAMES[@]}; a++)); do
+			"act$a"
+		done
+
+		the_end
+		marker act done
+	elif [ "${1:-}" = help ] || [ "${1:-}" = -h ] || [ "${1:-}" = --help ]; then
+		help
+	elif [[ "${1:-}" =~ ^(act[1-7]|reset)$ ]]; then
+		"$1"
+	elif [ $# -gt 0 ]; then
+		printf 'Unknown command: %s\n\n' "$1"
+		help
 
 		exit 1
+	else
+		for ((a = 1; a <= ${#ACT_NAMES[@]}; a++)); do
+			"act$a"
+		done
+
+		the_end
+		marker act done
 	fi
 
-	RESUMING=1
+	FINISHED=1
+}
 
-	for ((a = ${last%%.*}; a <= ${#ACT_NAMES[@]}; a++)); do
-		"act$a"
-	done
-
-	step_done
-	exec >&3
-	the_end
-	marker act done
-elif [ "${1:-}" = from ]; then
-	for ((a = ${2#act}; a <= ${#ACT_NAMES[@]}; a++)); do
-		"act$a"
-	done
-
-	the_end
-	marker act done
-elif [ "${1:-}" = help ] || [ "${1:-}" = -h ] || [ "${1:-}" = --help ]; then
-	help
-elif [[ "${1:-}" =~ ^(act[1-7]|reset)$ ]]; then
-	"$1"
-elif [ $# -gt 0 ]; then
-	printf 'Unknown command: %s\n\n' "$1"
-	help
-
-	exit 1
-else
-	for ((a = 1; a <= ${#ACT_NAMES[@]}; a++)); do
-		"act$a"
-	done
-
-	the_end
-	marker act done
-fi
-
-FINISHED=1
+main "$@"; exit
