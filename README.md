@@ -45,6 +45,7 @@ The story: Ray’s Coffee has one store, in Madrid (DevCon 2025), with its own L
 ./demo.sh reset            # Madrid only: no campaigns, no store page, no other stores, no design library
 ./demo/store-grid.py &     # the store grid at http://localhost:8090, for acts 3 to 6
 ./demo/terminal.sh         # a Ptyxis window with the demo font, 73 x 41 (DEMO_FONT_SIZE, default 16)
+./demo/browser.sh          # a Chrome window for the right half of the screen: sign-in and both store grid views
 ```
 
 Both setup scripts are idempotent. Rehearse once (`./demo.sh`, including the agent in act 4), then `./demo.sh reset`, so the first real run is not the first run of the day and Claude Code already trusts `stage/`.
