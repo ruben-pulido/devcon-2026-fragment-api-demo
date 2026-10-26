@@ -37,6 +37,33 @@ The story: Ray’s Hotels opens its first hotel, in Madrid (DevCon 2025). We bui
 
 1. Sign in and switch to dark mode with the moon button ("Switch to Dark Mode") in the Product Menu, Applications or Control Panel header. Dark mode only covers the administration UI; the hotel pages are dark by design of their fragments.
 
+## Setting up the demo windows on another machine
+
+There is nothing to set up by hand for the browser: the first run of `demo/browser.sh` (which `demo/windows.sh` runs) creates its profile.
+
+- It creates a Chrome profile of its own in `~/.cache/devcon-demo-browser`, so your everyday Chrome is untouched and another portal's cached JavaScript never gets in the way.
+- It writes the bookmarks (one folder per act, one bookmark per step) and makes the bookmarks bar always visible, without the apps shortcut or tab groups.
+- It starts Chrome with that profile, with its remote control on localhost (`DEMO_CDP_PORT`, default 9333) so the browser can follow the demo, and with the window size and zoom of the presentation screen.
+- It closes a Chrome already running on that profile first, so the bookmarks are written again and the window lands in its place.
+
+By hand, once: sign in to the portal in that window as `test@liferay.com` (or the user of `LIFERAY_AUTH`), and switch to dark mode with the moon button in the Product Menu. The sign-in stays in the profile for the next runs; `demo/browser.sh` prints both reminders. To start from a fresh profile, delete `~/.cache/devcon-demo-browser` and run `demo/browser.sh` again (and sign in again).
+
+What the machine needs (`demo/check.sh` checks it and says what is missing):
+
+- Chrome or Chromium on the `PATH`, or `CHROME=/path/to/chrome`.
+- Node.js 18 or later, for the browser to follow the demo. Without it, the demo runs and the bookmarks have every screen.
+- `wmctrl` and `xdotool` to place the windows; without them the windows open but have to be placed by hand.
+- Ptyxis for `demo/terminal.sh`, or any terminal of at least 73 × 37 with a large font.
+- A Linux desktop that runs X11 applications; the scripts were made on GNOME. On macOS or Windows, start Chrome by hand with a profile of its own and `--remote-debugging-port=9333`, and import the bookmarks.
+
+In short:
+
+```bash
+./demo/check.sh     # the portal, the tools, the starting point
+./demo/windows.sh   # the terminal and the browser; the first time, sign in and switch to dark mode
+./demo.sh
+```
+
 ## Before the show
 
 On the day, one command gets everything ready and says what is not, without any AI or internet:
