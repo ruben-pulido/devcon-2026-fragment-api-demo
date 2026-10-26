@@ -974,11 +974,12 @@ act4() {
 	#   /group/control_panel/manage?p_p_id=com_liferay_mcp_server_web_internal_portlet_MCPServerPortlet&p_p_lifecycle=0&p_p_state=maximized&_com_liferay_mcp_server_web_internal_portlet_MCPServerPortlet_mvcRenderCommandName=%2Fmcp_server%2Fedit_profile&_com_liferay_mcp_server_web_internal_portlet_MCPServerPortlet_profileERC=devcon&_com_liferay_mcp_server_web_internal_portlet_MCPServerPortlet_tab=tools
 	step profile-tools "Give it seven tools, from three headless APIs"
 	show "$MCP_TOOLS_URL"
-	printf ' %s\n' "${B}For each tool, its tool set (a headless API) and its name:${R}" ""
-	printf ' %s\n' "  ${B}PUT${R}  ${PATH_COLOR}…/o/mcp/server-profile-tools/${R}"
-	printf ' %s\n' "         ${PATH_COLOR}by-external-reference-code/${ERC_COLOR}devcon-{tool}${R}"
-	wait_key "add the tools"
+	say "${B}One PUT per tool, linked to the profile; the first one:${R}"
+	show_path PUT "${MCP_API#"$LIFERAY_URL"}/server-profile-tools/by-external-reference-code/$MCP_PROFILE_ERC-${MCP_TOOLS[0]##*:}"
+	mcp_tool_payload "$profile_id" "${MCP_TOOLS[0]}" | sed 's/^/ /' | colorize | HIGHLIGHT='"(toolSetName|toolName)"' highlight
+	wait_key "add the seven tools"
 	say ""
+	say "${B}Each tool's tool set (a headless API) and name:${R}"
 
 	live && for tool in "${MCP_TOOLS[@]}"; do
 		if api PUT "$MCP_API/server-profile-tools/by-external-reference-code/$MCP_PROFILE_ERC-${tool##*:}" "$(mcp_tool_payload "$profile_id" "$tool")" > /dev/null; then
