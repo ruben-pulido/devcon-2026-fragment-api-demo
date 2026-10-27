@@ -68,16 +68,25 @@ mcp_tool_payload() {
 		}'
 }
 
-# Every city that has hosted DevCon, in order: YEAR|SITE_ERC|CITY|ACCENT|ADDRESS
+# slug CITY: the city's name in the file names of its images and thumbnail.
+slug() {
+	local city="${1,,}"
+
+	echo "${city// /-}"
+}
+
+# The hotels, in order: SITE_ERC|CITY|ACCENT|ADDRESS. Madrid and London come
+# last: they are built by hand in acts 1 and 2. The other six are the cities
+# that could host DevCon next, with their hotels opened in act 6.
 DEVCON_CITIES=(
-	"2013|rays-berlin|Berlin|#ff6b6b|Unter den Linden 21, Berlin"
-	"2014|rays-darmstadt|Darmstadt|#b38cff|Luisenplatz 5, Darmstadt"
-	"2017|rays-amsterdam|Amsterdam|#4dd4ac|Damrak 70, Amsterdam"
-	"2019|rays-mainz|Mainz|#ff7eb6|Markt 12, Mainz"
-	"2023|rays-porto|Porto|#00c2d1|Rua de Santa Catarina 112, Porto"
-	"2024|rays-budapest|Budapest|#9be15d|Andrássy út 34, Budapest"
-	"2025|$MADRID_ERC|Madrid|#f2b84b|Calle de Alcalá 42, Madrid"
-	"2026|$LONDON_ERC|London|#7cc4ff|221 Baker Street, London"
+	"rays-tenerife|Tenerife|#ff8c42|Avenida de Las Américas 8, Tenerife"
+	"rays-mykonos|Mykonos|#4f8dff|Matoyianni 14, Mykonos Town"
+	"rays-taormina|Taormina|#d4e157|Corso Umberto 54, Taormina"
+	"rays-sydney|Sydney|#b07cff|Circular Quay 1, Sydney"
+	"rays-rio|Rio de Janeiro|#1fd18a|Avenida Atlântica 1702, Rio de Janeiro"
+	"rays-honolulu|Honolulu|#ff5d73|Kalakaua Avenue 2005, Honolulu"
+	"$MADRID_ERC|Madrid|#f2b84b|Calle de Alcalá 42, Madrid"
+	"$LONDON_ERC|London|#7cc4ff|221 Baker Street, London"
 )
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -230,13 +239,13 @@ site_exists() {
 }
 
 show_sites() {
-	local city site year
+	local city site
 
 	for city in "${DEVCON_CITIES[@]}"; do
-		IFS='|' read -r year site city _ _ <<< "$city"
+		IFS='|' read -r site city _ _ <<< "$city"
 
 		if site_exists "$site"; then
-			printf '  %s %-10s %s\n' "$year" "$city" "$(page_offer "$site")"
+			printf '  %-15s %s\n' "$city" "$(page_offer "$site")"
 		fi
 	done
 }
@@ -350,8 +359,8 @@ header_payload() {
 
 	jq -n \
 		--arg css "$(cat "$dir/index.css")" \
-		--arg html "$(sed -e "s|@CITY@|$1|g" -e "s|@IMAGE@|$2|g" -e "s|@RAY@|${1,,}-ray.png|g" -e "s|@ACCENT@|$3|g" -e "s|@TAGLINE@|$4|g" "$dir/index.html")" \
-		--argjson thumbnail "$(thumbnail "hotel-header-${1,,}.jpg")" \
+		--arg html "$(sed -e "s|@CITY@|$1|g" -e "s|@IMAGE@|$2|g" -e "s|@RAY@|$(slug "$1")-ray.png|g" -e "s|@ACCENT@|$3|g" -e "s|@TAGLINE@|$4|g" "$dir/index.html")" \
+		--argjson thumbnail "$(thumbnail "hotel-header-$(slug "$1").jpg")" \
 		'{
 			externalReferenceCode: "rays-hotel-header",
 			fragmentVersions: [{css: $css, html: $html, js: "", status: "Approved"}],

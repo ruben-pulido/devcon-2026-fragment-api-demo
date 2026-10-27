@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 200" width="480" height="200">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#241347"/>
+      <stop offset="1" stop-color="#d9702f"/>
+    </linearGradient>
+  </defs>
+  <rect width="480" height="200" rx="18" fill="url(#sky)"/>
+  <circle cx="360" cy="70" r="18" fill="#ffd27a"/>
+  <g fill="#12060a">
+    <path d="M10 170 L150 50 L170 40 L190 50 L330 170 Z"/>
+    <path d="M168 40 Q150 18 168 4 Q160 24 176 14 Q184 28 172 40 Z" fill="#8a7a88"/>
+    <rect x="250" y="118" width="210" height="52"/>
+    <g fill="#d9702f"><path d="M262 170 v-26 a14 14 0 0 1 28 0 v26z"/><path d="M304 170 v-26 a14 14 0 0 1 28 0 v26z"/><path d="M346 170 v-26 a14 14 0 0 1 28 0 v26z"/><path d="M388 170 v-26 a14 14 0 0 1 28 0 v26z"/><path d="M430 170 v-26 a14 14 0 0 1 28 0 v26z"/></g>
+    <rect x="250" y="106" width="210" height="14"/>
+    <rect x="262" y="92" width="8" height="16"/><rect x="304" y="92" width="8" height="16"/><rect x="346" y="92" width="8" height="16"/>
+  </g>
+  <rect x="0" y="170" width="480" height="30" fill="#2a1624"/>
+  <path d="M0 182 q20 -6 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" stroke="#4a2a3a" stroke-width="3" fill="none"/>
+</svg>

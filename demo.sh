@@ -827,9 +827,9 @@ site_calls() {
 act2() {
 	act "London opens" "A second hotel opens in London. Campaigns must launch in every hotel at the same time, so we create a design library and connect both sites to it."
 
-	local year site name accent address
+	local site name accent address
 
-	IFS='|' read -r year site name accent address <<< "$(printf '%s\n' "${DEVCON_CITIES[@]}" | grep -F "|$LONDON_ERC|")"
+	IFS="|" read -r site name accent address <<< "$(printf '%s\n' "${DEVCON_CITIES[@]}" | grep -F "$LONDON_ERC|")"
 
 	# UI: Applications Menu > Sites: Ray’s Hotel London appears. Then London > Design > Fragments > Ray’s Hotel: the London Hotel Header.
 	step london "Open the London site, the same way as Madrid"
@@ -841,7 +841,7 @@ act2() {
 	wait_key "open the London site"
 	say ""
 
-	live && open_site "$year" "$site" "$name" "$accent" "$address" && printf '\n'
+	live && open_site "$site" "$name" "$accent" "$address" && printf '\n'
 	refresh
 
 	marker done london
@@ -1153,26 +1153,26 @@ act5() {
 	fi
 }
 
-# open_hotel YEAR SITE_ERC CITY ACCENT ADDRESS: a new hotel, the way London
+# open_hotel SITE_ERC CITY ACCENT ADDRESS: a new hotel, the way London
 # opened, on one line of the screen.
-# open_site YEAR SITE_ERC CITY ACCENT ADDRESS: a hotel's site, fragment set,
+# open_site SITE_ERC CITY ACCENT ADDRESS: a hotel's site, fragment set,
 # header image and Hotel Header, on one line of ticks.
 open_site() {
-	local year="$1" site="$2" city="$3" accent="$4" address="$5" image="${3,,}-room.svg"
+	local site="$1" city="$2" accent="$3" address="$4" image="$(slug "$2")-room.svg"
 
-	printf '  %s %-10s' "$year" "$city"
+	printf "  %-15s" "$city"
 
 	api PUT "$SITE_API/sites/$site" "{\"externalReferenceCode\": \"$site\", \"name\": \"Ray’s Hotel $city\"}" > /dev/null &&
 		printf ' site \033[32m✓\033[0m' &&
 		api PUT "$FRAGMENT_API/sites/$site/fragment-sets/$HOTEL_SET_ERC" '{"name": "Ray’s Hotel"}' > /dev/null &&
 		api POST "$FRAGMENT_API/sites/$site/fragment-sets/$HOTEL_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/$image")" > /dev/null &&
-		api POST "$FRAGMENT_API/sites/$site/fragment-sets/$HOTEL_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/${city,,}-ray.png")" > /dev/null &&
+		api POST "$FRAGMENT_API/sites/$site/fragment-sets/$HOTEL_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/$(slug "$city")-ray.png")" > /dev/null &&
 		api POST "$FRAGMENT_API/sites/$site/fragment-sets/$HOTEL_SET_ERC/fragments" "$(header_payload "$city" "$image" "$accent" "$address")" > /dev/null &&
 		printf '  header \033[32m✓\033[0m' || { printf '  \033[31m✗\033[0m\n'; return 1; }
 }
 
 open_hotel() {
-	local year="$1" site="$2" city="$3" accent="$4" address="$5"
+	local site="$1" city="$2" accent="$3" address="$4"
 	local fragments=("$site:$HEADER_FRAGMENT_ERC" "library:$OFFER_FRAGMENT_ERC")
 
 	open_site "$@" || return 1
@@ -1189,10 +1189,10 @@ open_hotel() {
 }
 
 act6() {
-	act "A hotel in every DevCon city" "Ray’s Hotels follows DevCon: Madrid hosted it in 2025 and London hosts it now. Ray opens a hotel in every city that has hosted DevCon since 2013, each with its own site and header, all sharing the design library."
+	act "The next DevCon cities" "Ray’s Hotels follows DevCon: Madrid hosted it in 2025 and London hosts it now. Which city could host it next? Tenerife, Mykonos, Taormina, Sydney, Rio de Janeiro and Honolulu are candidates, and Ray opens a hotel in each, with its own site and header, all sharing the design library."
 
-	# UI: the hotel grid (demo/hotel-grid.py, http://localhost:8090): one tile per DevCon city, filled as each hotel opens.
-	step hotels "Open the hotels of the other six DevCon cities"
+	# UI: the hotel grid (demo/hotel-grid.py, http://localhost:8090): one tile per city, filled as each hotel opens.
+	step hotels "Open the hotels of six possible future DevCon cities"
 	show_still "$GRID_URL/"
 	say "${B}For each city, the same calls as for London:${R}"
 	say ""
@@ -1205,14 +1205,14 @@ act6() {
 	wait_key "open the hotels"
 	say ""
 
-	local city year site name accent address
+	local city site name accent address
 
 	for city in "${DEVCON_CITIES[@]}"; do
-		IFS='|' read -r year site name accent address <<< "$city"
+		IFS='|' read -r site name accent address <<< "$city"
 
 		[ "$site" = "$MADRID_ERC" ] || [ "$site" = "$LONDON_ERC" ] && continue
 
-		live && open_hotel "$year" "$site" "$name" "$accent" "$address"
+		live && open_hotel "$site" "$name" "$accent" "$address"
 	done
 
 	marker done hotels
@@ -1423,7 +1423,7 @@ reset_portal() {
 	local city site
 
 	for city in "${DEVCON_CITIES[@]}"; do
-		IFS='|' read -r _ site _ _ _ <<< "$city"
+		IFS='|' read -r site _ _ _ <<< "$city"
 
 		api DELETE "$SITE_API/sites/$site/site-pages/hotel-home" > /dev/null 2>&1
 	done
@@ -1439,7 +1439,7 @@ reset_portal() {
 	api DELETE "$MCP_API/server-profiles/by-external-reference-code/$MCP_PROFILE_ERC" > /dev/null 2>&1
 
 	for city in "${DEVCON_CITIES[@]}"; do
-		IFS='|' read -r _ site _ _ _ <<< "$city"
+		IFS='|' read -r site _ _ _ <<< "$city"
 
 		api DELETE "$SITE_API/sites/$site" > /dev/null 2>&1
 	done

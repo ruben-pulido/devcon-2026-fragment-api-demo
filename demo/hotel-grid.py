@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# The hotel grid: every DevCon city's hotel page, in a 2 x 4 grid, at
+# The hotel grid: every city's hotel page, in a 2 x 4 grid, at
 # http://localhost:8090 (GRID_PORT), or only some of them, one under another, as in
 # http://localhost:8090/?cities=Madrid,London. A tile shows up as soon as its
 # hotel page exists and reloads when the page changes, so act 6 fills the
@@ -37,13 +37,13 @@ def cities():
 
 def grid_page(query):
 	selected = [name for name in urllib.parse.parse_qs(query).get('cities', [''])[0].split(',') if name]
-	shown = [city for city in cities() if not selected or city[2] in selected]
+	shown = [city for city in cities() if not selected or city[1] in selected]
 
 	tiles = ''.join(
 		f'<div class="tile" data-path="/web/ray-s-hotel-{re.sub("[^a-z]", "-", city.lower())}/hotel-home">'
-		f'<div class="label"><b>{year}</b> {city}</div>'
+		f'<div class="label">{city}</div>'
 		f'<div class="frame"><div class="empty">Opening soon</div></div></div>'
-		for year, _, city, _, _ in shown)
+		for _, city, _, _ in shown)
 
 	with open(os.path.join(ROOT, 'demo', 'hotel-grid.html'), encoding='utf-8') as file:
 		columns = 1 if selected else 2
