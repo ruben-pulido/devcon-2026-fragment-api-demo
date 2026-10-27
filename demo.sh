@@ -722,7 +722,7 @@ hotels() {
 }
 
 act1() {
-	act "Madrid opens" "Ray’s Hotels opens its first hotel, in Madrid. We build it all through the headless APIs: its site, its header, its first campaign and its home page."
+	act "Madrid opens" "Ray’s Hotels opens its first hotel, in Madrid."$'\n'"We build it all through the headless APIs: its site, its header, its first campaign and its home page."
 
 	# UI: Applications Menu > Sites: Ray’s Hotel Madrid appears.
 	step site "Create the Madrid site"
