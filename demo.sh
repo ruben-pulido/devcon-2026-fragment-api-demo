@@ -975,7 +975,7 @@ agent_tool_calls() {
 }
 
 act4() {
-	act "The agent’s toolbox" "Ray’s wants an AI agent to help build the hotels’ fragments. Before it can, it needs a profile on Liferay’s MCP server: a briefing, and the only tools it may use. We create it through the API too."
+	act "The agent’s toolbox" "Ray wants an AI agent to help build the hotels’ fragments. Before it can, it needs a profile on Liferay’s MCP server: a briefing, and the only tools it may use. We create it through the API too."
 
 	# UI: Applications Menu > MCP Server: the devcon profile appears.
 	step profile "Create the agent’s MCP profile"
@@ -1141,7 +1141,7 @@ open_hotel() {
 }
 
 act6() {
-	act "A hotel in every DevCon city" "Ray’s Hotels follows DevCon: Madrid hosted it in 2025 and London hosts it now. Ray’s opens a hotel in every city that has hosted DevCon since 2013, each with its own site and header, all sharing the design library."
+	act "A hotel in every DevCon city" "Ray’s Hotels follows DevCon: Madrid hosted it in 2025 and London hosts it now. Ray opens a hotel in every city that has hosted DevCon since 2013, each with its own site and header, all sharing the design library."
 
 	# UI: the hotel grid (demo/hotel-grid.py, http://localhost:8090): one tile per DevCon city, filled as each hotel opens.
 	step hotels "Open the hotels of the other six DevCon cities"
