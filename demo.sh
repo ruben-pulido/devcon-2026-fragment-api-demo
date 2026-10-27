@@ -9,6 +9,10 @@
 #   ./demo.sh resume offline
 #                        the same, with act 5 using the cached agent run
 #                        (AI_FALLBACK=1), when the agent or the network fails
+#   ./demo.sh resume fix the same, after rebuilding the portal: it clears what
+#                        the demo created and runs every step done again,
+#                        without showing it (the agent from its cached run),
+#                        for when the portal lost or broke the demo's data
 #   ./demo.sh from act5  run from the start of an act to the end
 #   ./demo.sh reset      back to the starting point: no hotels yet
 #   ./demo.sh help       this help, every act's steps, and where resume goes on
@@ -65,6 +69,7 @@ STEPS=()
 # response, so the steps skipped on resume leave LAST as it was.
 STATE_DIR="$HOME/.cache/devcon-demo-state"
 RESUMING=""
+REPLAYING=""
 SKIPPING=""
 CURRENT=""
 
@@ -235,8 +240,10 @@ forget_from() {
 }
 
 # live: true unless the step is being skipped.
+# live: true unless the step is being skipped, or when it is being replayed
+# (./demo.sh resume fix).
 live() {
-	[ -z "$SKIPPING" ]
+	[ -z "$SKIPPING" ] || [ -n "$REPLAYING" ]
 }
 
 say() {
@@ -480,7 +487,7 @@ request() {
 
 	wait_key "send the request"
 
-	if [ -n "$SKIPPING" ]; then
+	if [ -n "$SKIPPING" ] && [ -z "$REPLAYING" ]; then
 		LAST=$(cat "$STATE_DIR/$CURRENT.json" 2> /dev/null)
 
 		return
@@ -1048,20 +1055,18 @@ act5() {
 		say ""
 		note "AI_FALLBACK: creating the fragment from the cached agent run instead."
 
-		if live; then
-			if library_fragment_exists "$BREAKFAST_FRAGMENT_ERC"; then
-				api PUT "$LIBRARY/fragments/$BREAKFAST_FRAGMENT_ERC" "$DIR/payloads/breakfast-hours.json" > /dev/null
-			else
-				api POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$DIR/payloads/breakfast-hours.json" > /dev/null
-			fi
-		fi
+		live && cached_breakfast_hours
 		refresh
 	else
 		wait_key "launch Claude Code"
 
 		trap : INT
 
-		live && "$DIR/demo/02-ai-fragment.sh" > /dev/tty
+		if [ -n "$SKIPPING" ] && [ -n "$REPLAYING" ]; then
+			cached_breakfast_hours
+		else
+			live && "$DIR/demo/02-ai-fragment.sh" > /dev/tty
+		fi
 		refresh
 
 		step agent-calls "Check the agent’s calls"
@@ -1272,16 +1277,24 @@ running_elsewhere() {
 
 	group=$(ps -o pgid= -p $$ | tr -d ' ')
 
-	for pid in $(pgrep -f '(^|/)demo\.sh( |$)'); do
+	for pid in $(pgrep -f '^(/usr/bin/)?bash (\S*/)?demo\.sh( |$)'); do
 		[ "$(ps -o pgid= -p "$pid" | tr -d ' ')" = "$group" ] || return 0
 	done
 
 	return 1
 }
 
-reset() {
-	local city site
+# cached_breakfast_hours: Breakfast Hours from the cached agent run, created,
+# or updated when the agent got as far as creating it.
+cached_breakfast_hours() {
+	if library_fragment_exists "$BREAKFAST_FRAGMENT_ERC"; then
+		api PUT "$LIBRARY/fragments/$BREAKFAST_FRAGMENT_ERC" "$DIR/payloads/breakfast-hours.json" > /dev/null
+	else
+		api POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$DIR/payloads/breakfast-hours.json" > /dev/null
+	fi
+}
 
+reset() {
 	if running_elsewhere && [ -z "${FORCE:-}" ]; then
 		echo "A demo is running in another terminal: stop it first (or FORCE=1 ./demo.sh reset)." >&2
 
@@ -1289,6 +1302,16 @@ reset() {
 	fi
 
 	rm -rf "$STATE_DIR"
+
+	reset_portal
+
+	echo "reset done: no hotel sites, no design library, no MCP profile"
+}
+
+# reset_portal: removes everything the demo creates from the portal, and
+# keeps the record of the steps done.
+reset_portal() {
+	local city site
 
 	for city in "${DEVCON_CITIES[@]}"; do
 		IFS='|' read -r _ site _ _ _ <<< "$city"
@@ -1311,8 +1334,6 @@ reset() {
 
 		api DELETE "$SITE_API/sites/$site" > /dev/null 2>&1
 	done
-
-	echo "reset done: no hotel sites, no design library, no MCP profile"
 }
 
 # help: the usage above, every act with its steps, and where resume goes on.
@@ -1383,7 +1404,24 @@ main() {
 
 		RESUMING=1
 
-		for ((a = ${last%%.*}; a <= ${#ACT_NAMES[@]}; a++)); do
+		local first="${last%%.*}"
+
+		if [ "${2:-}" = fix ]; then
+			if running_elsewhere; then
+				echo "A demo is running in another terminal: stop it first." >&2
+
+				exit 1
+			fi
+
+			printf '%sRebuilding the portal up to step %s, without showing it…%s\n' "$DIM" "$last" "$R"
+
+			reset_portal
+
+			REPLAYING=1
+			first=1
+		fi
+
+		for ((a = first; a <= ${#ACT_NAMES[@]}; a++)); do
 			"act$a"
 		done
 

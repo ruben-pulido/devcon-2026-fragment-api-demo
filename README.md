@@ -139,6 +139,7 @@ One API call per step, one key press at a time:
 ./demo.sh act3          # a single act (act1 ... act7)
 ./demo.sh resume        # go on from where the demo stopped
 ./demo.sh resume offline  # the same, with act 5 using the cached agent run (when the agent or the network fails)
+./demo.sh resume fix      # the same, after rebuilding the portal: clears what the demo created and silently runs every step done again (the agent from its cached run)
 ./demo.sh help          # these commands, every act's steps, and where resume would go on
 ./demo.sh from act5     # from the start of an act to the end
 NO_PAUSE=1 ./demo.sh    # no key presses
