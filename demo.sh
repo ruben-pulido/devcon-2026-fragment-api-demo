@@ -1044,6 +1044,16 @@ act5() {
 	act "An AI agent builds the next fragment" "Guests keep asking when breakfast is served. An AI agent creates a Breakfast Hours fragment in the design library, using only the tools of its MCP profile."
 
 	step agent "Ask the agent"
+
+	# Resuming past this step while Breakfast Hours is missing (the agent
+	# failed): the step runs again.
+	if [ -n "$SKIPPING" ] && [ -z "$REPLAYING" ] && ! library_fragment_exists "$BREAKFAST_FRAGMENT_ERC"; then
+		SKIPPING=""
+		RESUMING=""
+		exec >&3
+		header
+	fi
+
 	library_urls
 	show "$LIBRARY_SET"
 	say "${B}The prompt:${R}"
@@ -1071,13 +1081,24 @@ act5() {
 			cached_breakfast_hours
 		else
 			live && "$DIR/demo/02-ai-fragment.sh" > /dev/tty
+
+			if live && ! library_fragment_exists "$BREAKFAST_FRAGMENT_ERC"; then
+				header
+				say ""
+				note "The agent did not create Breakfast Hours (no network, or it was stopped)."
+				wait_key "use the cached agent run instead"
+				cached_breakfast_hours
+				AI_FALLBACK=1
+			fi
 		fi
 		refresh
 
-		step agent-calls "Check the agent’s calls"
-		say "${B}Every call the agent made went through Liferay’s MCP server:${R}"
-		say ""
-		agent_tool_calls | sed 's/^/   /'
+		if [ -z "${AI_FALLBACK:-}" ]; then
+			step agent-calls "Check the agent’s calls"
+			say "${B}Every call the agent made went through Liferay’s MCP server:${R}"
+			say ""
+			agent_tool_calls | sed 's/^/   /'
+		fi
 	fi
 
 	next
