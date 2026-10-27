@@ -6,6 +6,9 @@
 #   ./demo.sh act3       run a single act (act1 ... act7)
 #   ./demo.sh resume     go on from the first step not done yet, after the
 #                        demo stopped
+#   ./demo.sh resume offline
+#                        the same, with act 5 using the cached agent run
+#                        (AI_FALLBACK=1), when the agent or the network fails
 #   ./demo.sh from act5  run from the start of an act to the end
 #   ./demo.sh reset      back to the starting point: no hotels yet
 #   ./demo.sh help       this help, every act's steps, and where resume goes on
@@ -1037,7 +1040,13 @@ act5() {
 		say ""
 		note "AI_FALLBACK: creating the fragment from the cached agent run instead."
 
-		live && api POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$DIR/payloads/breakfast-hours.json" > /dev/null
+		if live; then
+			if library_fragment_exists "$BREAKFAST_FRAGMENT_ERC"; then
+				api PUT "$LIBRARY/fragments/$BREAKFAST_FRAGMENT_ERC" "$DIR/payloads/breakfast-hours.json" > /dev/null
+			else
+				api POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$DIR/payloads/breakfast-hours.json" > /dev/null
+			fi
+		fi
 		refresh
 	else
 		wait_key "launch Claude Code"
@@ -1334,6 +1343,8 @@ main() {
 	esac
 
 	if [ "${1:-}" = resume ]; then
+		[ "${2:-}" = offline ] && AI_FALLBACK=1
+
 		last=$(sort -t. -k1,1n -k2,2n "$STATE_DIR/done" 2> /dev/null | tail -1)
 
 		if [ -z "$last" ]; then

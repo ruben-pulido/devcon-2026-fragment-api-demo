@@ -138,6 +138,7 @@ One API call per step, one key press at a time:
 ./demo.sh               # all seven acts
 ./demo.sh act3          # a single act (act1 ... act7)
 ./demo.sh resume        # go on from where the demo stopped
+./demo.sh resume offline  # the same, with act 5 using the cached agent run (when the agent or the network fails)
 ./demo.sh help          # these commands, every act's steps, and where resume would go on
 ./demo.sh from act5     # from the start of an act to the end
 NO_PAUSE=1 ./demo.sh    # no key presses
