@@ -109,7 +109,8 @@ What it runs, step by step:
 | 3.6 Images | Design Libraries > Ray’s Design Library > Ray’s Campaigns > Resources > images |
 | 3.8 Fragments | Design Libraries > Ray’s Design Library > Ray’s Campaigns fragments |
 | 3.9 Madrid hotel | Madrid hotel page |
-| 3.10 London | Hotel grid: London alone (its page appears) |
+| 3.10a Pages | London: pages (before and after the request) |
+| 3.10b London hotel | London hotel page |
 | 3.11a Set gone | Madrid: Ray’s Hotel fragments (Ray’s Campaigns is gone) |
 | 3.11b Grid | Hotel grid: Madrid and London |
 | 4.1 Profile | MCP Server: profiles (devcon appears) |

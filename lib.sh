@@ -85,6 +85,7 @@ LIBRARY_PORTLET=com_liferay_design_library_web_internal_portlet_DesignLibraryAdm
 MADRID_ADMIN="$LIFERAY_URL/group/ray-s-hotel-madrid"
 LONDON_ADMIN="$LIFERAY_URL/group/ray-s-hotel-london"
 MADRID_PAGE="$LIFERAY_URL/web/ray-s-hotel-madrid/hotel-home"
+LONDON_PAGE="$LIFERAY_URL/web/ray-s-hotel-london/hotel-home"
 SITES="$LIFERAY_URL/group/control_panel/manage?p_p_id=com_liferay_site_admin_web_portlet_SiteAdminPortlet"
 LIBRARIES="$LIFERAY_URL/group/control_panel/manage?p_p_id=$LIBRARY_PORTLET"
 MCP_PROFILES="$LIFERAY_URL/group/control_panel/manage?p_p_id=$MCP_PORTLET"

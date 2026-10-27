@@ -926,9 +926,10 @@ act3() {
 	HIGHLIGHT='rays-design-library' put_hotel_page "$MADRID_ERC" "$MADRID_ERC:$HEADER_FRAGMENT_ERC" "library:$OFFER_FRAGMENT_ERC"
 	next
 
-	# UI: Madrid and London, one under the other: http://localhost:8090/?cities=Madrid,London
+	# UI: before the request, London > Site Builder > Pages: no pages yet. After it, the same list with Hotel Home, then the London hotel page.
 	step london-page "Create London’s hotel page"
-	show_still "$GRID_URL/?cities=London"
+	show "$LONDON_ADMIN$PAGES"
+	show_after "$LONDON_PAGE"
 	put_hotel_page "$LONDON_ERC" "$LONDON_ERC:$HEADER_FRAGMENT_ERC" "library:$OFFER_FRAGMENT_ERC"
 	next
 
