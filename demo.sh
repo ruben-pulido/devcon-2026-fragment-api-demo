@@ -13,8 +13,9 @@
 #                        the demo created and runs every step done again,
 #                        without showing it (the agent from its cached run),
 #                        for when the portal lost or broke the demo's data
-#   ./demo.sh video      play the demo video (DEMO_VIDEO, default
-#                        ~/tmp/devcon-demo.mp4) fullscreen, from the start
+#   ./demo.sh video      play the demo video fullscreen, from the start: the
+#                        newest devcon-demo*.mp4 (with its .acts file) in
+#                        ~/tmp or the downloads folder, or DEMO_VIDEO
 #   ./demo.sh resume video
 #                        the same, from the step the demo stopped at (from
 #                        the start if nothing is done)
@@ -1304,18 +1305,38 @@ the_end() {
 	[ -n "${NO_PAUSE:-}" ] || read -rsn1 _ < /dev/tty 2> /dev/null
 }
 
-# play_video LAST_STEP: plays the demo video (DEMO_VIDEO), fullscreen, from
+# demo_video: the demo video to play: DEMO_VIDEO, or else the newest
+# devcon-demo*.mp4 in ~/tmp or the downloads folder that has its .acts file
+# next to it.
+demo_video() {
+	local file
+
+	if [ -n "${DEMO_VIDEO:-}" ]; then
+		readlink -f "$DEMO_VIDEO"
+
+		return
+	fi
+
+	ls -tL "$HOME"/tmp/devcon-demo*.mp4 "$HOME"/Downloads/devcon-demo*.mp4 "$(xdg-user-dir DOWNLOAD 2> /dev/null)"/devcon-demo*.mp4 2> /dev/null |
+		while read -r file; do
+			file=$(readlink -f "$file")
+
+			[ -f "$file.acts" ] && { echo "$file"; break; }
+		done
+}
+
+# play_video LAST_STEP: plays the demo video (demo_video), fullscreen, from
 # the step after LAST_STEP: the first step not done. The start times are in
 # VIDEO.acts, as the video recorder writes them: "ACT SECONDS" and
 # "ACT.STEP SECONDS" lines. A step it does not list plays from its act.
 play_video() {
 	local act=1 acts second step=1 video
 
-	video=$(readlink -f "${DEMO_VIDEO:-$HOME/tmp/devcon-demo.mp4}")
+	video=$(demo_video)
 	acts="$video.acts"
 
 	if [ ! -f "$video" ] || [ ! -f "$acts" ]; then
-		echo "No demo video: set DEMO_VIDEO to the video, with its start times in VIDEO.acts." >&2
+		echo "No demo video: save devcon-demo-vNN.mp4 and devcon-demo-vNN.mp4.acts in ~/tmp or your downloads folder, or set DEMO_VIDEO to the video (with VIDEO.acts next to it)." >&2
 
 		exit 1
 	fi
@@ -1333,11 +1354,11 @@ play_video() {
 	second=$(awk -v step="$act.$step" '($1 "") == (step "") { print $2 }' "$acts")
 
 	if [ -n "$second" ]; then
-		printf 'Playing the video from step %s.%s (%s): space pauses, ← → jump 10 s, q quits.\n' "$act" "$step" "${ACT_NAMES[act - 1]}"
+		printf 'Playing %s from step %s.%s (%s): space pauses, ← → jump 10 s, q quits.\n' "${video##*/}" "$act" "$step" "${ACT_NAMES[act - 1]}"
 	else
 		second=$(awk -v act="$act" '($1 "") == (act "") { print $2 }' "$acts")
 
-		printf 'Playing the video from act %s (%s): space pauses, ← → jump 10 s, q quits.\n' "$act" "${ACT_NAMES[act - 1]}"
+		printf 'Playing %s from act %s (%s): space pauses, ← → jump 10 s, q quits.\n' "${video##*/}" "$act" "${ACT_NAMES[act - 1]}"
 	fi
 
 	env -u GDK_BACKEND ffplay -autoexit -fs -loglevel error -ss "${second:-0}" "$video" < /dev/null

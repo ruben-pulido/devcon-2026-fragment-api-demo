@@ -144,7 +144,7 @@ One API call per step, one key press at a time:
 ./demo.sh offline         # any command plus offline: act 5 uses the cached agent run (when the agent or the network fails)
 ./demo.sh resume offline  # for example, going on from where it stopped
 ./demo.sh resume fix      # the same, after rebuilding the portal: clears what the demo created and silently runs every step done again (the agent from its cached run)
-./demo.sh video           # plays the demo video fullscreen from the start (DEMO_VIDEO, default ~/tmp/devcon-demo.mp4, with its act and step start times in VIDEO.acts, which the video recorder writes)
+./demo.sh video           # plays the demo video fullscreen from the start (see The backup video)
 ./demo.sh resume video    # the same, from the step the demo stopped at
 ./demo.sh help          # these commands, every act's steps, and where resume would go on
 ./demo.sh from act5     # from the start of an act to the end
@@ -195,9 +195,8 @@ Gotchas:
 
 `./demo.sh video` plays a recording of the whole demo fullscreen with `ffplay`, and `./demo.sh resume video` plays it from the step the live demo stopped at, for when the portal cannot go on.
 
-- The video is `DEMO_VIDEO`, by default `~/tmp/devcon-demo.mp4`. It is not in the repository: save the video you were sent there (or set `DEMO_VIDEO` to where it is).
-- Next to it goes the file with the start time of each act and step, named like the video plus `.acts` (`devcon-demo-v14.mp4.acts`). Without it the video does not play.
-- If `~/tmp/devcon-demo.mp4` is a link, the `.acts` file goes next to the file it points to. The video recorder makes that link point to each new recording.
+- The video is not in the repository. Save the two files you were sent, the video and the start time of each act and step (`devcon-demo-v14.mp4` and `devcon-demo-v14.mp4.acts`), together in `~/tmp` or in your downloads folder. Without the `.acts` file the video does not play.
+- It plays the newest `devcon-demo*.mp4` there that has its `.acts` file, and says which one. To play another, set `DEMO_VIDEO` to it (with its `.acts` file next to it).
 
 ## Files
 
