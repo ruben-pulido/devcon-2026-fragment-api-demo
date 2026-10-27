@@ -5,9 +5,9 @@
 #   ./demo.sh            run every act, pausing before each request
 #   ./demo.sh act3       run a single act (act1 ... act7)
 #   ./demo.sh resume     go on from the first step not done yet, after the
-#                        demo stopped
-#   ./demo.sh resume offline
-#                        the same, with act 5 using the cached agent run
+#                        demo stopped (from the beginning if nothing is done)
+#   ./demo.sh offline, ./demo.sh resume offline, ./demo.sh act5 offline...
+#                        any of these, with act 5 using the cached agent run
 #                        (AI_FALLBACK=1), when the agent or the network fails
 #   ./demo.sh resume fix the same, after rebuilding the portal: it clears what
 #                        the demo created and runs every step done again,
@@ -1387,6 +1387,18 @@ stopped() {
 main() {
 	FINISHED=""
 
+	local arg args=() fix=""
+
+	for arg in "$@"; do
+		case "$arg" in
+			offline) AI_FALLBACK=1 ;;
+			fix) fix=1 ;;
+			*) args+=("$arg") ;;
+		esac
+	done
+
+	set -- "${args[@]}"
+
 	[ -t 1 ] && tput civis 2> /dev/null
 
 	trap stopped EXIT
@@ -1396,22 +1408,18 @@ main() {
 		*) [ -t 1 ] && [ -z "${NO_PAUSE:-}" ] && log_screens ;;
 	esac
 
+	last=$(sort -t. -k1,1n -k2,2n "$STATE_DIR/done" 2> /dev/null | tail -1)
+
+	if [ "${1:-}" = resume ] && [ -z "$last" ]; then
+		set --
+	fi
+
 	if [ "${1:-}" = resume ]; then
-		[ "${2:-}" = offline ] && AI_FALLBACK=1
-
-		last=$(sort -t. -k1,1n -k2,2n "$STATE_DIR/done" 2> /dev/null | tail -1)
-
-		if [ -z "$last" ]; then
-			echo "Nothing to resume: run ./demo.sh"
-
-			exit 1
-		fi
-
 		RESUMING=1
 
 		local first="${last%%.*}"
 
-		if [ "${2:-}" = fix ]; then
+		if [ -n "$fix" ]; then
 			if running_elsewhere; then
 				echo "A demo is running in another terminal: stop it first." >&2
 
