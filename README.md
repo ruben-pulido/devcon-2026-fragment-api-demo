@@ -43,6 +43,7 @@ There is nothing to set up by hand for the browser: the first run of `demo/brows
 
 - It creates a Chrome profile of its own in `~/.cache/devcon-demo-browser`, so your everyday Chrome is untouched and another portal's cached JavaScript never gets in the way.
 - It writes the bookmarks (one folder per act, one bookmark per step) and makes the bookmarks bar always visible, without the apps shortcut or tab groups.
+- It makes Chrome's own window, address bar and bookmarks bar dark (Chrome's dark mode, with Chrome's own theme instead of the desktop's GTK theme).
 - It starts Chrome with that profile, with its remote control on localhost (`DEMO_CDP_PORT`, default 9333) so the browser can follow the demo, and with the window size and zoom of the presentation screen.
 - It closes a Chrome already running on that profile first, so the bookmarks are written again and the window lands in its place.
 

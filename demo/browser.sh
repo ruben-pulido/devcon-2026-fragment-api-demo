@@ -18,6 +18,9 @@
 # the terminal's right edge, or half the screen). DEMO_BROWSER_SCALE sets
 # Chrome's zoom; by default, pages lay out at 1000 CSS pixels or more.
 #
+# Chrome's own window, address bar and bookmarks bar are dark, like the
+# portal in dark mode.
+#
 # It uses its own Chrome profile (~/.cache/devcon-demo-browser), so another
 # portal's cached JavaScript never gets in the way and the sign-in is kept
 # between runs. After signing in, switch to dark mode with the moon button in
@@ -139,7 +142,7 @@ if ! pgrep -f -- "--user-data-dir=$profile" > /dev/null; then
 
 	[ -s "$preferences" ] || echo '{}' > "$preferences"
 
-	jq '.bookmark_bar.show_on_all_tabs = true | .bookmark_bar.show_apps_shortcut = false | .bookmark_bar.show_tab_groups = false' "$preferences" > "$preferences.new" && mv "$preferences.new" "$preferences"
+	jq '.bookmark_bar.show_on_all_tabs = true | .bookmark_bar.show_apps_shortcut = false | .bookmark_bar.show_tab_groups = false | .browser.theme.color_scheme = 2 | .browser.theme.color_scheme2 = 2 | .extensions.theme.system_theme = 0' "$preferences" > "$preferences.new" && mv "$preferences.new" "$preferences"
 fi
 
 if [ -z "$CHROME" ]; then
@@ -193,6 +196,7 @@ height=$(px $(( SCREEN_HEIGHT - DEMO_TOP_BAR )))
 scale="${DEMO_BROWSER_SCALE:-$(awk -v width="$width" -v zoom="$ZOOM" 'BEGIN { css = width / zoom; print (css < 1000 ? css / 1000 : 1) * zoom }')}"
 
 setsid "$CHROME" \
+	--force-dark-mode \
 	--force-device-scale-factor="$scale" \
 	--new-window \
 	--no-default-browser-check \
