@@ -1092,13 +1092,16 @@ act5() {
 			fi
 		fi
 		refresh
+	fi
 
-		if [ -z "${AI_FALLBACK:-}" ]; then
-			step agent-calls "Check the agent’s calls"
-			say "${B}Every call the agent made went through Liferay’s MCP server:${R}"
-			say ""
-			agent_tool_calls | sed 's/^/   /'
-		fi
+	step agent-calls "Check the agent’s calls"
+
+	if [ -n "${AI_FALLBACK:-}" ]; then
+		cached_agent_run
+	else
+		say "${B}Every call the agent made went through Liferay’s MCP server:${R}"
+		say ""
+		agent_tool_calls | sed 's/^/   /'
 	fi
 
 	next
@@ -1310,6 +1313,21 @@ running_elsewhere() {
 	return 1
 }
 
+# cached_agent_run: what the agent did in the run the cached Breakfast Hours
+# comes from (payloads/breakfast-hours-run.json): its calls, and the start of
+# its answer.
+cached_agent_run() {
+	local run="$DIR/payloads/breakfast-hours-run.json"
+
+	say "${B}A rehearsal run of the agent: its calls to Liferay’s MCP server${R}"
+	say ""
+	jq -r '.calls[] | "   liferay › \(.)"' "$run"
+	say ""
+	say "${B}And the start of its answer:${R}"
+	jq -r '.answer | gsub("[*`]"; "") | split("\n\n")[0:2] | join("\n\n")' "$run" | fold -s -w "$(( $(cols) - 6 ))" | head -9 | sed 's/^/   /'
+	note "   …"
+}
+
 # cached_breakfast_hours: Breakfast Hours from the cached agent run, created,
 # or updated when the agent got as far as creating it.
 cached_breakfast_hours() {
@@ -1381,7 +1399,7 @@ help() {
 			awk -v act="$a" '{ printf "   %d.%-3d %s\n", act, NR, $0 }'
 	done
 
-	printf '\n With AI_FALLBACK=1, act 5 skips "Check the agent’s calls".\n'
+	printf '\n With AI_FALLBACK=1 (or offline), 5.2 shows the calls of a rehearsal run.\n'
 
 	last=$(sort -t. -k1,1n -k2,2n "$STATE_DIR/done" 2> /dev/null | tail -1)
 

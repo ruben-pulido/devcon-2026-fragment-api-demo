@@ -1,39 +1,39 @@
 {
   "externalReferenceCode": "rays-breakfast-hours",
+  "name": "Breakfast Hours",
+  "type": "BasicFragment",
   "fragmentVersions": [
     {
+      "status": "Approved",
+      "js": "",
+      "html": "<section class=\"rays-breakfast\" style=\"--rays-accent: ${configuration.accentColor};\">\n\t<div class=\"rays-breakfast__inner\">\n\t\t<svg aria-hidden=\"true\" class=\"rays-breakfast__icon\" fill=\"none\" viewBox=\"0 0 120 120\" xmlns=\"http://www.w3.org/2000/svg\">\n\t\t\t<circle cx=\"60\" cy=\"60\" fill=\"var(--rays-accent)\" opacity=\"0.14\" r=\"58\" />\n\t\t\t<path d=\"M46 22c-4 6 4 10 0 16M60 18c-4 7 4 12 0 20M74 22c-4 6 4 10 0 16\" stroke=\"var(--rays-accent)\" stroke-linecap=\"round\" stroke-width=\"4\" />\n\t\t\t<path d=\"M30 48h60v18c0 17-13 30-30 30s-30-13-30-30V48z\" fill=\"var(--rays-accent)\" />\n\t\t\t<path d=\"M90 54h6a10 10 0 0 1 0 20h-8\" stroke=\"var(--rays-accent)\" stroke-width=\"6\" />\n\t\t\t<path d=\"M22 102h76\" stroke=\"#f5ede6\" stroke-linecap=\"round\" stroke-width=\"5\" />\n\t\t</svg>\n\n\t\t<div class=\"rays-breakfast__body\">\n\t\t\t<p class=\"rays-breakfast__eyebrow\" data-lfr-editable-id=\"eyebrow\" data-lfr-editable-type=\"text\">Good morning</p>\n\n\t\t\t<h2 class=\"rays-breakfast__title\" data-lfr-editable-id=\"title\" data-lfr-editable-type=\"text\">Breakfast is served</h2>\n\n\t\t\t<div class=\"rays-breakfast__hours\">\n\t\t\t\t<div class=\"rays-breakfast__slot\">\n\t\t\t\t\t<p class=\"rays-breakfast__days\" data-lfr-editable-id=\"weekdayLabel\" data-lfr-editable-type=\"text\">Monday to Friday</p>\n\n\t\t\t\t\t<p class=\"rays-breakfast__time\" data-lfr-editable-id=\"weekdayTime\" data-lfr-editable-type=\"text\">7:00 to 10:30</p>\n\t\t\t\t</div>\n\n\t\t\t\t<div class=\"rays-breakfast__slot\">\n\t\t\t\t\t<p class=\"rays-breakfast__days\" data-lfr-editable-id=\"weekendLabel\" data-lfr-editable-type=\"text\">Saturday and Sunday</p>\n\n\t\t\t\t\t<p class=\"rays-breakfast__time\" data-lfr-editable-id=\"weekendTime\" data-lfr-editable-type=\"text\">8:00 to 11:30</p>\n\t\t\t\t</div>\n\t\t\t</div>\n\n\t\t\t<span class=\"rays-breakfast__cta\">${configuration.ctaLabel}</span>\n\t\t</div>\n\t</div>\n</section>",
+      "css": ".rays-breakfast {\n\tbackground: radial-gradient(circle at 15% 20%, #3a2416 0%, #1a120d 55%, #0f0b08 100%);\n\tcolor: #f5ede6;\n\tfont-family: Georgia, serif;\n\tpadding: 32px 32px;\n}\n\n.rays-breakfast__inner {\n\talign-items: center;\n\tdisplay: flex;\n\tgap: 32px;\n\tmargin: 0 auto;\n\tmax-width: 1040px;\n}\n\n.rays-breakfast__icon {\n\tflex: 0 0 180px;\n\theight: 180px;\n\twidth: 180px;\n}\n\n.rays-breakfast__eyebrow {\n\tcolor: var(--rays-accent);\n\tfont-family: system-ui, sans-serif;\n\tfont-size: 22px;\n\tfont-weight: 700;\n\tletter-spacing: 0.16em;\n\tmargin: 0 0 8px;\n\ttext-transform: uppercase;\n}\n\n.rays-breakfast__title {\n\tcolor: #fff8f1;\n\tfont-size: 50px;\n\tline-height: 1.05;\n\tmargin: 0 0 14px;\n}\n\n.rays-breakfast__hours {\n\tdisplay: flex;\n\tflex-wrap: wrap;\n\tgap: 12px 40px;\n\tmargin: 0 0 18px;\n}\n\n.rays-breakfast__slot {\n\tborder-left: 4px solid var(--rays-accent);\n\tpadding-left: 14px;\n}\n\n.rays-breakfast__days {\n\tcolor: #d9c8b8;\n\tfont-family: system-ui, sans-serif;\n\tfont-size: 26px;\n\tline-height: 1.2;\n\tmargin: 0;\n}\n\n.rays-breakfast__time {\n\tcolor: #fff8f1;\n\tfont-size: 32px;\n\tfont-weight: 700;\n\tline-height: 1.2;\n\tmargin: 0;\n}\n\n.rays-breakfast__cta {\n\tbackground: var(--rays-accent);\n\tborder-radius: 999px;\n\tcolor: #120d09;\n\tdisplay: inline-block;\n\tfont-family: system-ui, sans-serif;\n\tfont-size: 24px;\n\tfont-weight: 700;\n\tpadding: 12px 32px;\n}\n\n@media (max-width: 640px) {\n\t.rays-breakfast__inner {\n\t\tflex-direction: column;\n\t\ttext-align: center;\n\t}\n\n\t.rays-breakfast__hours {\n\t\tjustify-content: center;\n\t}\n}",
       "configuration": {
         "fieldSets": [
           {
+            "label": "Breakfast",
             "fields": [
               {
+                "name": "accentColor",
+                "label": "Accent color",
+                "type": "colorPicker",
                 "defaultValue": {
                   "value": "#f08a3c"
-                },
-                "label": "Accent color",
-                "name": "accentColor",
-                "type": "colorPicker"
+                }
               },
               {
+                "name": "ctaLabel",
+                "label": "Button label",
+                "type": "text",
                 "defaultValue": {
                   "value": "See the menu"
-                },
-                "label": "Menu button label",
-                "name": "ctaLabel",
-                "type": "text"
+                }
               }
-            ],
-            "label": "Breakfast hours"
+            ]
           }
         ]
-      },
-      "css": ".rays-breakfast {\n\tbackground: #12100e;\n\tborder-top: 1px solid #2a221b;\n\tcolor: #ede4dc;\n\tfont-family: Georgia, serif;\n\tpadding: 28px 32px;\n}\n\n.rays-breakfast__inner {\n\talign-items: center;\n\tdisplay: flex;\n\tgap: 32px;\n\tmargin: 0 auto;\n\tmax-width: 1040px;\n}\n\n.rays-breakfast__icon {\n\tcolor: var(--rays-accent);\n\tflex: 0 0 150px;\n\theight: 150px;\n\twidth: 150px;\n}\n\n.rays-breakfast__body {\n\tflex: 1;\n}\n\n.rays-breakfast__eyebrow {\n\tcolor: var(--rays-accent);\n\tfont-family: system-ui, sans-serif;\n\tfont-size: 22px;\n\tfont-weight: 700;\n\tletter-spacing: 0.16em;\n\tmargin: 0 0 6px;\n\ttext-transform: uppercase;\n}\n\n.rays-breakfast__title {\n\tcolor: #fbf6f1;\n\tfont-size: 46px;\n\tmargin: 0 0 8px;\n}\n\n.rays-breakfast__row {\n\tborder-bottom: 1px dashed #3a3029;\n\tdisplay: flex;\n\tfont-size: 28px;\n\tjustify-content: space-between;\n\tpadding: 8px 0;\n}\n\n.rays-breakfast__day {\n\tcolor: #d6c6b8;\n\tfont-weight: 700;\n}\n\n.rays-breakfast__time {\n\tcolor: #fbf6f1;\n\tfont-family: system-ui, sans-serif;\n}\n\n.rays-breakfast__cta {\n\tbackground: transparent;\n\tborder: 2px solid var(--rays-accent);\n\tborder-radius: 999px;\n\tcolor: var(--rays-accent);\n\tdisplay: inline-block;\n\tfont-family: system-ui, sans-serif;\n\tfont-weight: 700;\n\tfont-size: 24px;\n\tmargin-top: 16px;\n\tpadding: 10px 30px;\n}\n",
-      "html": "<section class=\"rays-breakfast\" style=\"--rays-accent: ${configuration.accentColor};\">\n\t<div class=\"rays-breakfast__inner\">\n\t\t<svg aria-hidden=\"true\" class=\"rays-breakfast__icon\" viewBox=\"0 0 48 48\"><path d=\"M10 22h24v8a10 10 0 0 1-10 10h-4a10 10 0 0 1-10-10z\" fill=\"none\" stroke=\"currentColor\" stroke-linejoin=\"round\" stroke-width=\"3\" /><path d=\"M34 25h3a5 5 0 0 1 0 10h-4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" /><path d=\"M17 16c-2-3 2-4 0-8M24 16c-2-3 2-4 0-8\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-width=\"3\" /></svg>\n\n\t\t<div class=\"rays-breakfast__body\">\n\t\t\t<p class=\"rays-breakfast__eyebrow\" data-lfr-editable-id=\"eyebrow\" data-lfr-editable-type=\"text\">Good morning</p>\n\n\t\t\t<h2 class=\"rays-breakfast__title\" data-lfr-editable-id=\"title\" data-lfr-editable-type=\"text\">Breakfast</h2>\n\n\t\t\t<div class=\"rays-breakfast__row\">\n\t\t\t\t<span class=\"rays-breakfast__day\" data-lfr-editable-id=\"weekdays\" data-lfr-editable-type=\"text\">Monday to Friday</span>\n\t\t\t\t<span class=\"rays-breakfast__time\" data-lfr-editable-id=\"weekdays-hours\" data-lfr-editable-type=\"text\">7:00 - 10:30</span>\n\t\t\t</div>\n\n\t\t\t<div class=\"rays-breakfast__row\">\n\t\t\t\t<span class=\"rays-breakfast__day\" data-lfr-editable-id=\"weekend\" data-lfr-editable-type=\"text\">Saturday and Sunday</span>\n\t\t\t\t<span class=\"rays-breakfast__time\" data-lfr-editable-id=\"weekend-hours\" data-lfr-editable-type=\"text\">8:00 - 11:30</span>\n\t\t\t</div>\n\n\t\t\t<span class=\"rays-breakfast__cta\">${configuration.ctaLabel}</span>\n\t\t</div>\n\t</div>\n</section>\n",
-      "js": "",
-      "status": "Approved"
+      }
     }
   ],
-  "icon": "time",
-  "name": "Breakfast Hours",
-  "type": "BasicFragment"
+  "icon": "time"
 }
