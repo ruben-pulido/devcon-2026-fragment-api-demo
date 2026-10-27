@@ -509,6 +509,7 @@ request() {
 
 	LAST="${output%$'\n'*}"
 
+	mkdir -p "$STATE_DIR"
 	printf '%s' "$LAST" > "$STATE_DIR/$CURRENT.json"
 	echo "$CURRENT" >> "$STATE_DIR/done"
 
@@ -1257,8 +1258,28 @@ the_end() {
 	[ -n "${NO_PAUSE:-}" ] || read -rsn1 _ < /dev/tty 2> /dev/null
 }
 
+# running_elsewhere: true when demo.sh runs in another terminal (its own
+# subshells share its process group).
+running_elsewhere() {
+	local group pid
+
+	group=$(ps -o pgid= -p $$ | tr -d ' ')
+
+	for pid in $(pgrep -f '(^|/)demo\.sh( |$)'); do
+		[ "$(ps -o pgid= -p "$pid" | tr -d ' ')" = "$group" ] || return 0
+	done
+
+	return 1
+}
+
 reset() {
 	local city site
+
+	if running_elsewhere && [ -z "${FORCE:-}" ]; then
+		echo "A demo is running in another terminal: stop it first (or FORCE=1 ./demo.sh reset)." >&2
+
+		return 1
+	fi
 
 	rm -rf "$STATE_DIR"
 
@@ -1372,7 +1393,9 @@ main() {
 		marker act done
 	elif [ "${1:-}" = help ] || [ "${1:-}" = -h ] || [ "${1:-}" = --help ]; then
 		help
-	elif [[ "${1:-}" =~ ^(act[1-7]|reset)$ ]]; then
+	elif [ "${1:-}" = reset ]; then
+		reset || exit 1
+	elif [[ "${1:-}" =~ ^act[1-7]$ ]]; then
 		"$1"
 	elif [ $# -gt 0 ]; then
 		printf 'Unknown command: %s\n\n' "$1"
