@@ -17,6 +17,16 @@ MCP_API="$LIFERAY_URL/o/mcp"
 AGENT_ALLOWED_TOOLS="mcp__liferay"
 AGENT_DISALLOWED_TOOLS="Agent Bash Edit Glob Grep NotebookEdit Read Skill Task WebFetch WebSearch Write"
 
+# mcp_config [AUTHORIZATION]: the agent's MCP configuration, Liferay's MCP
+# server only, at the devcon profile. AUTHORIZATION replaces the real
+# credentials, to show it.
+mcp_config() {
+	jq -n \
+		--arg authorization "${1:-Basic $(printf '%s' "$LIFERAY_AUTH" | base64 -w0)}" \
+		--arg url "$MCP_API/$MCP_PROFILE_ERC" \
+		'{mcpServers: {liferay: {type: "http", url: $url, headers: {Authorization: $authorization}}}}'
+}
+
 # The tools of the agent's MCP profile: TOOL_SET:TOOL.
 MCP_TOOLS=(
 	headless-admin-fragment-v1.0:getDesignLibraryFragment

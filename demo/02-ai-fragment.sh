@@ -14,12 +14,9 @@ source "$(dirname "$0")/../lib.sh"
 
 PROMPT="$(cat "$ROOT_DIR/demo/02-prompt.txt")"
 
-cd "$ROOT_DIR/stage"
+MCP_CONFIG="$(mcp_config | jq -c .)"
 
-jq -n \
-	--arg authorization "Basic $(printf '%s' "$LIFERAY_AUTH" | base64 -w0)" \
-	--arg url "$LIFERAY_URL/o/mcp/devcon" \
-	'{mcpServers: {liferay: {headers: {Authorization: $authorization}, type: "http", url: $url}}}' > .mcp.json
+cd "$ROOT_DIR/stage"
 
 if [ "${1:-}" = "--rehearse" ]; then
 	transcript_dir="${TRANSCRIPT_DIR:-${TMPDIR:-/tmp}}"
@@ -31,7 +28,7 @@ if [ "${1:-}" = "--rehearse" ]; then
 	claude -p "$PROMPT" \
 		--allowedTools "$AGENT_ALLOWED_TOOLS" \
 		--disallowedTools $AGENT_DISALLOWED_TOOLS \
-		--mcp-config .mcp.json \
+		--mcp-config "$MCP_CONFIG" \
 		--output-format stream-json \
 		--strict-mcp-config \
 		--verbose > "$transcript"
@@ -43,6 +40,6 @@ else
 	exec claude "$PROMPT" \
 		--allowedTools "$AGENT_ALLOWED_TOOLS" \
 		--disallowedTools $AGENT_DISALLOWED_TOOLS \
-		--mcp-config .mcp.json \
+		--mcp-config "$MCP_CONFIG" \
 		--strict-mcp-config
 fi
