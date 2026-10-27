@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 #
 # Opens the browser for the demo: a Chrome window filling the screen to the
-# right of demo/terminal.sh's window, with one tab: the portal's sign-in. It
-# also starts the hotel grid if it is not running.
+# right of demo/terminal.sh's window, with one tab: the Sites admin (after
+# the sign-in, if needed). It also starts the hotel grid if it is not running.
 #
-#   demo/browser.sh         the sign-in
+#   demo/browser.sh         the Sites admin
 #   demo/browser.sh --all   one tab for every screen the demo shows, in order,
 #                           each once
 #
@@ -92,7 +92,7 @@ bookmarks=(
 	"7.3b|Winter|Hotel grid: all eight hotels (winter)|$GRID_URL/"
 )
 
-urls=("$LIFERAY_URL/c/portal/login")
+urls=("$LIFERAY_URL/c/portal/login?redirect=$(jq -rn --arg url "$SITES" '$url | @uri')")
 
 if [ "${1:-}" = --all ]; then
 	urls=()
