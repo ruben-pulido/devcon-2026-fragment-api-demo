@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #
 # Closes the demo, whatever of it is open: a running ./demo.sh and its
-# browser driver, the demo terminal (demo/terminal.sh), the demo browser
-# (demo/browser.sh) and the hotel grid (demo/hotel-grid.py). Your usual
-# terminal and browser are not touched.
+# browser driver, the demo terminal (demo/terminal.sh) and the demo browser
+# (demo/browser.sh). The hotel grid keeps running, and your usual terminal
+# and browser are not touched.
 #
 #   demo/close.sh             close them
 #   demo/close.sh --dry-run   only say what would be closed
@@ -59,7 +59,6 @@ stop "the running demo (./demo.sh)" $(pgrep -f '^(/usr/bin/)?bash (\S*/)?demo\.s
 stop "the browser driver" $(pgrep -f 'node \S*demo/browser-driver\.mjs')
 stop "the demo terminal" $(pids_with_env devcon-demo-terminal ptyxis)
 stop "the demo browser" $(pgrep -f -- "--user-data-dir=$HOME/\.cache/devcon-demo-browser( |$)" | head -1)
-stop "the hotel grid" $(pgrep -f 'python3 \S*demo/hotel-grid\.py')
 
 [ $closed -eq 0 ] && echo "Nothing of the demo is open."
 

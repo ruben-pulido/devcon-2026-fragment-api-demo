@@ -81,7 +81,7 @@ What it runs, step by step:
 ./demo.sh reset            # no hotel sites, no design library, no MCP profile
 ./demo/hotel-grid.py &     # the hotel grid at http://localhost:8090, for acts 3, 6 and 7
 ./demo/windows.sh          # both demo windows, side by side: the terminal and the browser
-./demo/close.sh            # closes whatever of the demo is open: a running demo.sh, the demo terminal and browser, the hotel grid (--dry-run to only list them)
+./demo/close.sh            # closes whatever of the demo is open: a running demo.sh, the demo terminal and browser; the hotel grid keeps running (--dry-run to only list them)
 ```
 
 `demo/windows.sh` runs `demo/terminal.sh` (a Ptyxis window with the demo font on the left half of the screen, 73 × 37 at 16 points; `demo/windows.sh ./demo.sh` starts the demo in it) and `demo/browser.sh` (a Chrome window on the right half, with the sign-in; it also starts the hotel grid); each also works alone. The browser's bookmarks bar has one folder per act (0. Start, 1. Madrid, 2. London, 3. Shared campaigns, 4. MCP, 5. Agent, 6. Cities, 7. Winter), holding the screen of every step that changes the browser, named after the step's number on the terminal (act.step; a, b when a step shows several screens) and a short label. `demo/browser.sh` prints this legend too. On the terminal, a progress bar at the top shows every act's steps as dots, with the same short names above the acts that have started, so the audience sees where the demo is without learning what comes next. The design library's own screens have no fixed URL, so their bookmarks open the Design Libraries list. With `AI_FALLBACK=1`, act 5 has no "Check the agent’s calls" step, so its later steps are one number lower.
