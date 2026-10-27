@@ -41,7 +41,7 @@ ACT_FOLDERS=(
 	"0. Start"
 	"1. Madrid"
 	"2. London"
-	"3. Design Library"
+	"3. Shared campaigns"
 	"4. MCP"
 	"5. Agent"
 	"6. Cities"

@@ -69,7 +69,7 @@ exec 3>&1
 
 # The acts' short names on the progress bar, the same as the browser's
 # bookmark folders.
-ACT_NAMES=(Madrid London "Design Library" MCP Agent Cities Winter)
+ACT_NAMES=(Madrid London "Shared campaigns" MCP Agent Cities Winter)
 
 # compact: a terminal with fewer than 40 rows, where the screens skip their
 # blank lines.
