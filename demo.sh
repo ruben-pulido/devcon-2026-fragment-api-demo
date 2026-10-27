@@ -1055,7 +1055,6 @@ act5() {
 	printf '     --strict-mcp-config \\\n'
 	printf '     --allowedTools %s \\\n' "$AGENT_ALLOWED_TOOLS"
 	fold -s -w "$(( $(cols) - 26 ))" <<< "$AGENT_DISALLOWED_TOOLS" | sed 's/ *$//' | awk 'NR == 1 { printf "     --disallowedTools %s", $0; next } { printf " \\\n                       %s", $0 } END { print "" }'
-	note "   (credentials hidden)"
 
 	if [ -n "${AI_FALLBACK:-}" ]; then
 		say ""
