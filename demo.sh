@@ -551,7 +551,8 @@ next() {
 # step's request has changed something; show_still shows one that needs no
 # reload (the hotel grid reloads its own tiles); show_after shows a second
 # screen a couple of seconds after that reload, such as the page just created
-# after the list of pages. The design library's screens need its id, which
+# after the list of pages, and keeps it on screen for a few seconds before
+# the step offers to continue. The design library's screens need its id, which
 # changes in every run: library_urls looks it up.
 BROWSER_RELOAD=""
 BROWSER_AFTER=""
@@ -609,6 +610,7 @@ refresh() {
 	if [ -n "$BROWSER_AFTER" ]; then
 		browser wait 2
 		browser $BROWSER_AFTER
+		browser wait 4
 		BROWSER_AFTER=""
 	fi
 }
