@@ -105,6 +105,12 @@ act() {
 	fi
 
 	marker act "$ACT"
+
+	# The act's title and story first, on their own, until a key is pressed.
+	if [ -z "$SKIPPING" ]; then
+		header
+		wait_key "start"
+	fi
 }
 
 # step_count N: the number of steps of act N.
@@ -589,7 +595,12 @@ show_still() {
 }
 
 show_after() {
-	BROWSER_AFTER="$1"
+	BROWSER_AFTER="goto $1"
+}
+
+# click_after TEXT: like show_after, but clicks the link that reads TEXT.
+click_after() {
+	BROWSER_AFTER="click $1"
 }
 
 refresh() {
@@ -597,7 +608,7 @@ refresh() {
 
 	if [ -n "$BROWSER_AFTER" ]; then
 		browser wait 2
-		browser goto "$BROWSER_AFTER"
+		browser $BROWSER_AFTER
 		BROWSER_AFTER=""
 	fi
 }
@@ -740,6 +751,7 @@ act1() {
 	# UI: Ray’s Hotel > Fragments: the Madrid Hotel Header, with its thumbnail.
 	#   /group/<madrid>/~/control_panel/manage/-/fragments/fragment_collections?_com_liferay_fragment_web_portlet_FragmentPortlet_fragmentCollectionExternalReferenceCode=rays-hotel
 	step header "Create Madrid’s Hotel Header"
+	click_after "Hotel Header"
 	show "$MADRID_ADMIN$FRAGMENTS=$HOTEL_SET_ERC"
 	request POST "$MADRID/fragment-sets/$HOTEL_SET_ERC/fragments" "$(header_payload Madrid madrid-room.svg '#f2b84b' 'Calle de Alcalá 42, Madrid')" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
 	next
