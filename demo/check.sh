@@ -112,7 +112,7 @@ leftovers() {
 	local city name site
 
 	for city in "${DEVCON_CITIES[@]}"; do
-		IFS='|' read -r _ site name _ _ <<< "$city"
+		IFS='|' read -r site name _ _ <<< "$city"
 
 		if api GET "$SITE_API/sites/$site/site-pages/hotel-home" > /dev/null 2>&1; then
 			echo "$name's hotel page|curl -u '$LIFERAY_AUTH' -X DELETE $SITE_API/sites/$site/site-pages/hotel-home"
