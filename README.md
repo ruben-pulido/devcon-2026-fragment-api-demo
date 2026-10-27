@@ -55,6 +55,7 @@ What the machine needs (`demo/check.sh` checks it and says what is missing):
 - Node.js 18 or later, for the browser to follow the demo. Without it, the demo runs and the bookmarks have every screen.
 - `wmctrl` and `xdotool` to place the windows; without them the windows open but have to be placed by hand.
 - Ptyxis for `demo/terminal.sh`, or any terminal of at least 73 × 37 with a large font.
+- `ffplay` (part of FFmpeg) for [the backup video](#the-backup-video).
 - A Linux desktop that runs X11 applications; the scripts were made on GNOME. On macOS or Windows, start Chrome by hand with a profile of its own and `--remote-debugging-port=9333`, and import the bookmarks.
 
 In short:
@@ -189,6 +190,14 @@ Gotchas:
 - If the API rejects a payload, the agent reads the error and fixes the payload. Good moment to narrate if it happens live.
 - Fallback if the network or the model misbehaves: `AI_FALLBACK=1`, or `./demo/02-fallback.sh`, creates the same kind of fragment from a cached payload (`payloads/breakfast-hours.json`).
 - Variant for a longer slot: add "Then add it to the home page of every hotel, right below the Seasonal Offer" to `demo/02-prompt.txt`. The agent then composes the pages itself with `putSiteSitePage`.
+
+### The backup video
+
+`./demo.sh video` plays a recording of the whole demo fullscreen with `ffplay`, and `./demo.sh resume video` plays it from the step the live demo stopped at, for when the portal cannot go on.
+
+- The video is `DEMO_VIDEO`, by default `~/tmp/devcon-demo.mp4`. It is not in the repository: save the video you were sent there (or set `DEMO_VIDEO` to where it is).
+- Next to it goes the file with the start time of each act and step, named like the video plus `.acts` (`devcon-demo-v14.mp4.acts`). Without it the video does not play.
+- If `~/tmp/devcon-demo.mp4` is a link, the `.acts` file goes next to the file it points to. The video recorder makes that link point to each new recording.
 
 ## Files
 
