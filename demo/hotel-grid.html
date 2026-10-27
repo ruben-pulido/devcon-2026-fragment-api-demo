@@ -78,26 +78,33 @@
 <script>
 	const PAGE_WIDTH = 1000;
 
-	const place = (tile) => {
+	// place(tile, iframe): fits the page's sections in the tile; false while
+	// the page has no sections laid out yet.
+	const place = (tile, iframe = [...tile.querySelectorAll('.frame iframe')].pop()) => {
 		const frame = tile.querySelector('.frame');
-		const iframe = frame.querySelector('iframe');
 
 		if (!iframe || !iframe.contentDocument) {
-			return;
+			return false;
 		}
 
 		const columns = getComputedStyle(document.documentElement).getPropertyValue('--columns').trim();
 		const isSection = (element) => columns === '1' ? [...element.classList].some((name) => /^rays-[a-z-]+$/.test(name)) : element.matches('.rays-header, .rays-offer');
 		const sections = [...iframe.contentDocument.querySelectorAll('[class*="rays-"]')].filter(isSection).map((section) => section.getBoundingClientRect()).filter((box) => box.width > 0 && box.height > 0);
 
-		const top = sections.length ? Math.min(...sections.map((section) => section.top)) + iframe.contentWindow.scrollY : 0;
-		const bottom = sections.length ? Math.max(...sections.map((section) => section.bottom)) + iframe.contentWindow.scrollY : frame.clientHeight;
+		if (!sections.length) {
+			return false;
+		}
+
+		const top = Math.min(...sections.map((section) => section.top)) + iframe.contentWindow.scrollY;
+		const bottom = Math.max(...sections.map((section) => section.bottom)) + iframe.contentWindow.scrollY;
 
 		const scale = Math.min(frame.clientWidth / PAGE_WIDTH, frame.clientHeight / (bottom - top));
 		const left = (frame.clientWidth - PAGE_WIDTH * scale) / 2 / scale;
 
 		iframe.style.transform = `scale(${scale}) translate(${left}px, ${-top}px)`;
 		iframe.style.clipPath = `inset(${top}px 0 calc(100% - ${bottom}px) 0)`;
+
+		return true;
 	};
 
 	const show = (tile, path) => {
@@ -109,15 +116,27 @@
 		iframe.src = `${path}?t=${Date.now()}`;
 
 		iframe.addEventListener('load', () => {
-			place(tile);
+			let tries = 0;
 
-			iframe.style.visibility = 'visible';
+			const ready = () => {
+				if (!place(tile, iframe) && ++tries < 25) {
+					setTimeout(ready, 200);
 
-			for (const old of frame.querySelectorAll('iframe, .empty')) {
-				if (old !== iframe) {
-					old.remove();
+					return;
 				}
-			}
+
+				iframe.style.visibility = 'visible';
+
+				for (const old of frame.querySelectorAll('iframe, .empty')) {
+					if (old !== iframe) {
+						old.remove();
+					}
+				}
+
+				setTimeout(() => place(tile, iframe), 1500);
+			};
+
+			ready();
 		});
 
 		frame.appendChild(iframe);
@@ -152,7 +171,7 @@
 		setTimeout(poll, 1500);
 	};
 
-	addEventListener('resize', () => document.querySelectorAll('.tile').forEach(place));
+	addEventListener('resize', () => document.querySelectorAll('.tile').forEach((tile) => place(tile)));
 
 	poll();
 </script>
