@@ -15,8 +15,8 @@
 #                        for when the portal lost or broke the demo's data
 #   ./demo.sh resume video
 #                        play the demo video (DEMO_VIDEO, default
-#                        ~/tmp/devcon-demo.mp4) fullscreen, from the start of
-#                        the act the demo stopped in
+#                        ~/tmp/devcon-demo.mp4) fullscreen, from the step
+#                        the demo stopped at
 #   ./demo.sh from act5  run from the start of an act to the end
 #   ./demo.sh reset      back to the starting point: no hotels yet
 #   ./demo.sh help       this help, every act's steps, and where resume goes on
@@ -1304,31 +1304,40 @@ the_end() {
 }
 
 # play_video LAST_STEP: plays the demo video (DEMO_VIDEO), fullscreen, from
-# the start of the act the demo stopped in: the act after LAST_STEP when it
-# was its act's last step. The act start times are in VIDEO.acts, one
-# "ACT SECONDS" per line, as the video recorder writes them.
+# the step after LAST_STEP: the first step not done. The start times are in
+# VIDEO.acts, as the video recorder writes them: "ACT SECONDS" and
+# "ACT.STEP SECONDS" lines. A step it does not list plays from its act.
 play_video() {
-	local act=1 acts second step video
+	local act=1 acts second step=1 video
 
 	video=$(readlink -f "${DEMO_VIDEO:-$HOME/tmp/devcon-demo.mp4}")
 	acts="$video.acts"
 
-	if [ -n "$1" ]; then
-		act="${1%%.*}"
-		step="${1#*.}"
-
-		[ "$step" -ge "$(step_count "$act")" ] && [ "$act" -lt ${#ACT_NAMES[@]} ] && act=$((act + 1))
-	fi
-
 	if [ ! -f "$video" ] || [ ! -f "$acts" ]; then
-		echo "No demo video: set DEMO_VIDEO to the video, with its act start times in VIDEO.acts." >&2
+		echo "No demo video: set DEMO_VIDEO to the video, with its start times in VIDEO.acts." >&2
 
 		exit 1
 	fi
 
-	second=$(awk -v act="$act" '$1 == act { print $2 }' "$acts")
+	if [ -n "$1" ]; then
+		act="${1%%.*}"
+		step=$(( ${1#*.} + 1 ))
 
-	printf 'Playing the video from act %s (%s): space pauses, ← → jump 10 s, q quits.\n' "$act" "${ACT_NAMES[act - 1]}"
+		if [ "$step" -gt "$(step_count "$act")" ] && [ "$act" -lt ${#ACT_NAMES[@]} ]; then
+			act=$((act + 1))
+			step=1
+		fi
+	fi
+
+	second=$(awk -v step="$act.$step" '$1 == step { print $2 }' "$acts")
+
+	if [ -n "$second" ]; then
+		printf 'Playing the video from step %s.%s (%s): space pauses, ← → jump 10 s, q quits.\n' "$act" "$step" "${ACT_NAMES[act - 1]}"
+	else
+		second=$(awk -v act="$act" '$1 == act { print $2 }' "$acts")
+
+		printf 'Playing the video from act %s (%s): space pauses, ← → jump 10 s, q quits.\n' "$act" "${ACT_NAMES[act - 1]}"
+	fi
 
 	ffplay -autoexit -fs -loglevel error -ss "${second:-0}" "$video" < /dev/null
 }
