@@ -90,12 +90,12 @@ marker() {
 	printf '\033]1337;devcon-%s=%s\007' "$1" "$2"
 }
 
-# act TITLE TEXT, called from actN.
+# act TITLE TEXT, called from actN. Each sentence of TEXT starts a line.
 act() {
 	step_done
 	ACT="$1"
 	ACT_NUMBER="${FUNCNAME[1]#act}"
-	ACT_TEXT="$2"
+	ACT_TEXT="${2//. /.$'\n'}"
 	STEPS=()
 
 	if [ -n "$RESUMING" ]; then
@@ -689,10 +689,8 @@ PAGE_BODY='@
 		[
 			"{",
 			" \"externalReferenceCode\": \"\(.externalReferenceCode)\",",
-			" \"pageSpecifications\": [{",
-			"  \"status\": \"\($specification.status)\",",
-			"  \"pageExperiences\": [{",
-			"   \"pageElements\": ["
+			" \"pageSpecifications\": [{\"status\": \"\($specification.status)\",",
+			"  \"pageExperiences\": [{\"pageElements\": ["
 		] +
 		([range(0; $elements | length) as $i | $elements[$i] | element($i == ($elements | length) - 1)] | add) +
 		[
@@ -722,7 +720,7 @@ hotels() {
 }
 
 act1() {
-	act "Madrid opens" "Ray’s Hotels opens its first hotel, in Madrid."$'\n'"We build it all through the headless APIs: its site, its header, its first campaign and its home page."
+	act "Madrid opens" "Ray’s Hotels opens its first hotel, in Madrid. We build it all through the headless APIs: its site, its header, its first campaign and its home page."
 
 	# UI: Applications Menu > Sites: Ray’s Hotel Madrid appears.
 	step site "Create the Madrid site"
@@ -848,7 +846,7 @@ act2() {
 }
 
 act3() {
-	act "Share the campaigns" "The campaigns move from Madrid’s site to the design library, so both hotels can use the same fragments. There is no move operation: we copy, repoint the pages and delete the originals."
+	act "Share the campaigns" "The campaigns move from Madrid to the design library, for every hotel. There is no move operation: we copy, repoint the pages and delete the originals."
 
 	step read-set "Read the fragment set from Madrid"
 	show_still "$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC"
