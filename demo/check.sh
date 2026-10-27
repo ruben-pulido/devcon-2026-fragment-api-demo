@@ -130,7 +130,9 @@ leftovers() {
 
 before=$(leftovers)
 
-./demo.sh reset > /dev/null 2>&1
+if refusal=$(./demo.sh reset 2>&1 > /dev/null); then
+	refusal=""
+fi
 
 after=$(leftovers)
 
@@ -140,7 +142,9 @@ if [ -n "$cleaned" ]; then
 	ok "Cleaned up a previous run: $(cut -d'|' -f1 <<< "$cleaned" | paste -sd, - | sed 's/,/, /g')"
 fi
 
-if [ -z "$after" ]; then
+if [ -n "$refusal" ]; then
+	fail "A demo is running in another terminal, so the starting point was not reset." "Stop it (Ctrl+C, or close its terminal), then run this again."
+elif [ -z "$after" ]; then
 	ok "Starting point: no hotel sites, no design library, no MCP profile"
 else
 	fail "./demo.sh reset could not remove all of a previous run. Delete these, then run this again:"
