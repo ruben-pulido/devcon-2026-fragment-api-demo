@@ -1329,12 +1329,12 @@ play_video() {
 		fi
 	fi
 
-	second=$(awk -v step="$act.$step" '$1 == step { print $2 }' "$acts")
+	second=$(awk -v step="$act.$step" '($1 "") == (step "") { print $2 }' "$acts")
 
 	if [ -n "$second" ]; then
 		printf 'Playing the video from step %s.%s (%s): space pauses, ← → jump 10 s, q quits.\n' "$act" "$step" "${ACT_NAMES[act - 1]}"
 	else
-		second=$(awk -v act="$act" '$1 == act { print $2 }' "$acts")
+		second=$(awk -v act="$act" '($1 "") == (act "") { print $2 }' "$acts")
 
 		printf 'Playing the video from act %s (%s): space pauses, ← → jump 10 s, q quits.\n' "$act" "${ACT_NAMES[act - 1]}"
 	fi
