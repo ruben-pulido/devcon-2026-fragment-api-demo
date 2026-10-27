@@ -996,13 +996,20 @@ act4() {
 	mcp_tool_payload "$profile_id" "${MCP_TOOLS[0]}" | sed 's/^/ /' | colorize | HIGHLIGHT='"(toolSetName|toolName)"' highlight
 	wait_key "add the seven tools"
 	say ""
-	say "${B}Each tool's tool set (a headless API) and name:${R}"
+	say "${B}The seven tools, by tool set (a headless API):${R}"
+
+	local tool_set=""
 
 	live && for tool in "${MCP_TOOLS[@]}"; do
+		if [ "${tool%%:*}" != "$tool_set" ]; then
+			tool_set="${tool%%:*}"
+			printf '  %s\n' "$tool_set"
+		fi
+
 		if api PUT "$MCP_API/server-profile-tools/by-external-reference-code/$MCP_PROFILE_ERC-${tool##*:}" "$(mcp_tool_payload "$profile_id" "$tool")" > /dev/null; then
-			printf '  %-27s %s \033[32m✓\033[0m\n' "${tool%%:*}" "${tool##*:}"
+			printf '    %s \033[32m✓\033[0m\n' "${tool##*:}"
 		else
-			printf '  %-27s %s \033[31m✗\033[0m\n' "${tool%%:*}" "${tool##*:}"
+			printf '    %s \033[31m✗\033[0m\n' "${tool##*:}"
 		fi
 	done
 
