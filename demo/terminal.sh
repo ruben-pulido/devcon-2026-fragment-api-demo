@@ -8,6 +8,8 @@
 #   demo/terminal.sh             a shell, ready for ./demo.sh
 #   demo/terminal.sh ./demo.sh   the demo, straight away
 #
+# In it, "demo" runs ./demo.sh from any folder: demo, demo resume, demo help…
+#
 # The size is for the presentation screen, zoomed to the one you rehearse on:
 # at DEMO_FONT_SIZE 16 (points, the default) a 1920 x 1080 screen at 100%
 # scaling gives 73 x 37, the smallest the demo's screens fit, and text about
@@ -57,6 +59,8 @@ export PATH="$HOME/.local/bin:$PATH"
 PROMPT=$'%~>\n'
 RPROMPT=''
 
+alias demo="$DEMO_KIT/demo.sh"
+
 if [ -n "${DEMO_COMMAND:-}" ]; then
 	command="$DEMO_COMMAND"
 	unset DEMO_COMMAND
@@ -67,7 +71,7 @@ EOF
 touch "$config/zsh/.zprofile"
 
 
-env -u TMUX -u TMUX_PANE DEMO_COMMAND="$*" GDK_BACKEND=x11 GSETTINGS_BACKEND=keyfile XDG_CONFIG_HOME="$config" ZDOTDIR="$config/zsh" \
+env -u TMUX -u TMUX_PANE DEMO_COMMAND="$*" DEMO_KIT="$ROOT_DIR" GDK_BACKEND=x11 GSETTINGS_BACKEND=keyfile XDG_CONFIG_HOME="$config" ZDOTDIR="$config/zsh" \
 	setsid ptyxis --standalone --new-window --working-directory="$ROOT_DIR" --title="Ray’s Hotels demo" > /dev/null 2>&1 &
 
 pid=$!
