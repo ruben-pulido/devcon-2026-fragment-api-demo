@@ -13,10 +13,11 @@
 #                        the demo created and runs every step done again,
 #                        without showing it (the agent from its cached run),
 #                        for when the portal lost or broke the demo's data
+#   ./demo.sh video      play the demo video (DEMO_VIDEO, default
+#                        ~/tmp/devcon-demo.mp4) fullscreen, from the start
 #   ./demo.sh resume video
-#                        play the demo video (DEMO_VIDEO, default
-#                        ~/tmp/devcon-demo.mp4) fullscreen, from the step
-#                        the demo stopped at
+#                        the same, from the step the demo stopped at (from
+#                        the start if nothing is done)
 #   ./demo.sh from act5  run from the start of an act to the end
 #   ./demo.sh reset      back to the starting point: no hotels yet
 #   ./demo.sh help       this help, every act's steps, and where resume goes on
@@ -1339,7 +1340,7 @@ play_video() {
 		printf 'Playing the video from act %s (%s): space pauses, ← → jump 10 s, q quits.\n' "$act" "${ACT_NAMES[act - 1]}"
 	fi
 
-	ffplay -autoexit -fs -loglevel error -ss "${second:-0}" "$video" < /dev/null
+	env -u GDK_BACKEND ffplay -autoexit -fs -loglevel error -ss "${second:-0}" "$video" < /dev/null
 }
 
 # running_elsewhere: true when demo.sh runs in another terminal (its own
@@ -1482,6 +1483,16 @@ main() {
 
 	set -- "${args[@]}"
 
+	last=$(sort -t. -k1,1n -k2,2n "$STATE_DIR/done" 2> /dev/null | tail -1)
+
+	if [ -n "$video" ]; then
+		[ "${1:-}" = resume ] || last=""
+
+		play_video "$last"
+
+		return
+	fi
+
 	[ -t 1 ] && tput civis 2> /dev/null
 
 	trap stopped EXIT
@@ -1491,18 +1502,8 @@ main() {
 		*) [ -t 1 ] && [ -z "${NO_PAUSE:-}" ] && log_screens ;;
 	esac
 
-	last=$(sort -t. -k1,1n -k2,2n "$STATE_DIR/done" 2> /dev/null | tail -1)
-
 	if [ "${1:-}" = resume ] && [ -z "$last" ]; then
 		set --
-	fi
-
-	if [ "${1:-}" = resume ] && [ -n "$video" ]; then
-		play_video "$last"
-
-		FINISHED=1
-
-		return
 	fi
 
 	if [ "${1:-}" = resume ]; then

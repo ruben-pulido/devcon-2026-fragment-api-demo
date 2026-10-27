@@ -143,7 +143,8 @@ One API call per step, one key press at a time:
 ./demo.sh offline         # any command plus offline: act 5 uses the cached agent run (when the agent or the network fails)
 ./demo.sh resume offline  # for example, going on from where it stopped
 ./demo.sh resume fix      # the same, after rebuilding the portal: clears what the demo created and silently runs every step done again (the agent from its cached run)
-./demo.sh resume video    # plays the demo video fullscreen from the step the demo stopped at (DEMO_VIDEO, default ~/tmp/devcon-demo.mp4, with its act and step start times in VIDEO.acts, which the video recorder writes)
+./demo.sh video           # plays the demo video fullscreen from the start (DEMO_VIDEO, default ~/tmp/devcon-demo.mp4, with its act and step start times in VIDEO.acts, which the video recorder writes)
+./demo.sh resume video    # the same, from the step the demo stopped at
 ./demo.sh help          # these commands, every act's steps, and where resume would go on
 ./demo.sh from act5     # from the start of an act to the end
 NO_PAUSE=1 ./demo.sh    # no key presses
