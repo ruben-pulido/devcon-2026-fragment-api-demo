@@ -221,7 +221,7 @@ step_done() {
 # skip_if_done KEY: skips, with no output, while the steps are done already;
 # shows the screen again from the first one that is not.
 skip_if_done() {
-	if grep -qxF "$1" "$STATE_DIR/done" 2> /dev/null; then
+	if grep -qxF "$1" "$STATE_DIR/done" 2> /dev/null || { [ -n "$REPLAYING" ] && not_after "$1" "$REPLAYING"; }; then
 		SKIPPING=1
 		exec > /dev/null
 	else
@@ -229,6 +229,11 @@ skip_if_done() {
 		RESUMING=""
 		exec >&3
 	fi
+}
+
+# not_after A.S B.S: true when step A.S comes before or is B.S.
+not_after() {
+	[ "${1%%.*}" -lt "${2%%.*}" ] || { [ "${1%%.*}" -eq "${2%%.*}" ] && [ "${1#*.}" -le "${2#*.}" ]; }
 }
 
 # forget_from ACT: a new run of an act forgets it and the acts after it.
@@ -1417,7 +1422,7 @@ main() {
 
 			reset_portal
 
-			REPLAYING=1
+			REPLAYING="$last"
 			first=1
 		fi
 
