@@ -19,7 +19,8 @@
 # Chrome's zoom; by default, pages lay out at 1000 CSS pixels or more.
 #
 # Chrome's own window, address bar and bookmarks bar are dark, like the
-# portal in dark mode.
+# portal in dark mode. The bookmarks bar is hidden: Ctrl+Shift+B shows it,
+# and DEMO_BOOKMARKS_BAR=1 starts with it shown.
 #
 # It uses its own Chrome profile (~/.cache/devcon-demo-browser), so another
 # portal's cached JavaScript never gets in the way and the sign-in is kept
@@ -142,7 +143,7 @@ if ! pgrep -f -- "--user-data-dir=$profile" > /dev/null; then
 
 	[ -s "$preferences" ] || echo '{}' > "$preferences"
 
-	jq '.bookmark_bar.show_on_all_tabs = true | .bookmark_bar.show_apps_shortcut = false | .bookmark_bar.show_tab_groups = false | .browser.theme.color_scheme = 2 | .browser.theme.color_scheme2 = 2 | .extensions.theme.system_theme = 0' "$preferences" > "$preferences.new" && mv "$preferences.new" "$preferences"
+	jq --argjson bar "$([ -n "${DEMO_BOOKMARKS_BAR:-}" ] && echo true || echo false)" '.bookmark_bar.show_on_all_tabs = $bar | .bookmark_bar.show_apps_shortcut = false | .bookmark_bar.show_tab_groups = false | .browser.theme.color_scheme = 2 | .browser.theme.color_scheme2 = 2 | .extensions.theme.system_theme = 0' "$preferences" > "$preferences.new" && mv "$preferences.new" "$preferences"
 fi
 
 if [ -z "$CHROME" ]; then
