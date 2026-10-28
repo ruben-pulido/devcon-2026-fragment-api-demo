@@ -1,0 +1,27 @@
+{
+	"fieldSets": [
+		{
+			"fields": [
+				{
+					"defaultValue": {"value": "Madrid"},
+					"label": "City",
+					"name": "city",
+					"type": "text"
+				},
+				{
+					"defaultValue": {"value": "Calle de Alcalá 42, Madrid"},
+					"label": "Address",
+					"name": "address",
+					"type": "text"
+				},
+				{
+					"defaultValue": {"value": "#f2b84b"},
+					"label": "Accent color",
+					"name": "accentColor",
+					"type": "colorPicker"
+				}
+			],
+			"label": "Hotel"
+		}
+	]
+}

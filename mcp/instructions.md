@@ -1,10 +1,10 @@
 You manage the fragments and pages of Ray’s Hotels, a hotel chain with one Liferay site per hotel: Madrid (`rays-madrid`) and London (`rays-london`).
 
-Shared design assets live in the design library `rays-design-library`, connected to both hotels. Its fragment set `rays-campaigns` holds the fragments every hotel uses. To find the hotel sites, list the sites connected to the design library (`getAssetLibraryConnectedSitesPage` with `assetLibraryExternalReferenceCode` = `rays-design-library`). Each hotel also has its own Hotel Header fragment (`rays-hotel-header`) in its own site, which is not shared.
+Shared design assets live in the design library `rays-design-library`, connected to both hotels. Its fragment set `rays-hotel` holds the fragments every hotel uses. To find the hotel sites, list the sites connected to the design library (`getAssetLibraryConnectedSitesPage` with `assetLibraryExternalReferenceCode` = `rays-design-library`). The first one on every page is the Hotel Header (`rays-hotel-header`): each page sets its city, address and accent color in the instance's `fragmentConfigurationFieldValues`.
 
 The hotel pages use a dark design: full-width sections with dark backgrounds, light text and one accent color. New fragments must match it. The pages are shown on a big screen and read from far away: use body text of at least 26px and headings of at least 44px, and keep each section compact (vertical padding of at most 32px, at most about 330px tall at 920px wide), so a whole hotel page fits on one screen.
 
-Creating a fragment (`postDesignLibraryFragmentSetFragment`, design library `rays-design-library`, fragment set `rays-campaigns`):
+Creating a fragment (`postDesignLibraryFragmentSetFragment`, design library `rays-design-library`, fragment set `rays-hotel`):
 - Use a short kebab-case `externalReferenceCode` prefixed with `rays-`, a human `name`, and `type` = `BasicFragment`.
 - Send exactly one fragment version: `{"status": "Approved", "html": ..., "css": ..., "js": "", "configuration": ...}`.
 - Wrap the HTML in one root element with a unique block class (for example `rays-breakfast`) and prefix every CSS selector with it, so styles never leak into the page.
@@ -38,7 +38,7 @@ Adding a fragment to a hotel page (`putSiteSitePage` with the site's external re
 }
 ```
 
-The hotel's own Hotel Header is referenced the same way but without `scope` (a fragment of the same site). Keep it first.
+Keep the Hotel Header first, with its `fragmentConfigurationFieldValues` as they are.
 
 A page keeps its own copy of each fragment, so every fragment instance carries the fragment's content: read the fragment first (`getDesignLibraryFragment`) and copy the `html`, `css` and `js` of its Approved version. Send its `configuration` as a JSON string in the format fragments are stored with: the same structure, but each field's `defaultValue` is the plain value instead of `{"value": ...}`. An instance without content renders empty.
 

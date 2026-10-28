@@ -4,7 +4,8 @@ LIFERAY_URL="${LIFERAY_URL:-http://localhost:8080}"
 LIFERAY_AUTH="${LIFERAY_AUTH:-test@liferay.com:test}"
 
 DESIGN_LIBRARY_ERC="${DESIGN_LIBRARY_ERC:-rays-design-library}"
-FRAGMENT_SET_ERC="${FRAGMENT_SET_ERC:-rays-campaigns}"
+FRAGMENT_SET_ERC="${FRAGMENT_SET_ERC:-rays-hotel}"
+HEADER_FRAGMENT_ERC="${HEADER_FRAGMENT_ERC:-rays-hotel-header}"
 RESOURCE_FOLDER_ERC="${RESOURCE_FOLDER_ERC:-images}"
 OFFER_FRAGMENT_ERC="${OFFER_FRAGMENT_ERC:-rays-seasonal-offer}"
 BREAKFAST_FRAGMENT_ERC="${BREAKFAST_FRAGMENT_ERC:-rays-breakfast-hours}"
@@ -273,13 +274,18 @@ fragment_instance() {
 			}'
 }
 
-# page_payload SCOPE:FRAGMENT_ERC...
-# Builds the hotel-home content page with one fragment per argument, in order,
-# in both the published specification and its draft. SCOPE is "library" for a
-# design library fragment, or the ERC of the page's own site for a fragment of
-# that site (its reference then has no scope).
+# page_payload SITE_ERC SCOPE:FRAGMENT_ERC...
+# Builds the hotel-home content page of SITE_ERC with one fragment per
+# argument, in order, in both the published specification and its draft. SCOPE
+# is "library" for a design library fragment, or the ERC of the page's own site
+# for a fragment of that site (its reference then has no scope). The Hotel
+# Header gets the hotel's city, address and accent color.
 page_payload() {
-	local erc item instances="[]" scope url
+	local accent address city erc item instances="[]" scope url
+
+	IFS='|' read -r _ city accent address <<< "$(printf '%s\n' "${DEVCON_CITIES[@]}" | grep -F "$1|")"
+
+	shift
 
 	for item in "$@"; do
 		scope="${item%%:*}"
@@ -292,6 +298,10 @@ page_payload() {
 		fi
 
 		instances=$(jq -c --arg erc "$erc" --arg scope "$scope" --argjson instance "$(fragment_instance "$url")" '. + [{erc: $erc, instance: $instance, scope: $scope}]' <<< "$instances")
+
+		if [ "$erc" = "$HEADER_FRAGMENT_ERC" ]; then
+			instances=$(jq -c --arg accent "$accent" --arg address "$address" --arg city "$city" '.[-1].instance.fragmentConfigurationFieldValues = {accentColor: {type: "ColorPicker", value: $accent}, address: {type: "Text", value: $address}, city: {type: "Text", value: $city}}' <<< "$instances")
+		fi
 	done
 
 	jq -n \
@@ -351,19 +361,23 @@ library_exists() {
 	api GET "$LIFERAY_URL/o/headless-asset-library/v1.0/asset-libraries/$DESIGN_LIBRARY_ERC" >/dev/null 2>&1
 }
 
-# header_payload CITY IMAGE ACCENT TAGLINE
-# The Hotel Header fragment of one hotel: Ray in its color (CITY-ray.png),
-# its city, the view from a room (IMAGE) and its accent color.
+# header_payload
+# The Hotel Header fragment every hotel shares: Ray in the hotel's color, its
+# city and address, and the view from a room. Each page sets the city, the
+# address and the accent color; the images are picked by city
+# (images/CITY-ray.png and images/CITY-room.svg, at their friendly URLs).
 header_payload() {
 	local dir="$ROOT_DIR/payloads/hotel-header"
 
 	jq -n \
 		--arg css "$(cat "$dir/index.css")" \
-		--arg html "$(sed -e "s|@CITY@|$1|g" -e "s|@IMAGE@|$2|g" -e "s|@RAY@|$(slug "$1")-ray.png|g" -e "s|@ACCENT@|$3|g" -e "s|@TAGLINE@|$4|g" "$dir/index.html")" \
-		--argjson thumbnail "$(thumbnail "hotel-header-$(slug "$1").jpg")" \
+		--arg erc "$HEADER_FRAGMENT_ERC" \
+		--arg html "$(cat "$dir/index.html")" \
+		--slurpfile configuration "$dir/configuration.json" \
+		--argjson thumbnail "$(thumbnail "hotel-header-madrid.jpg")" \
 		'{
-			externalReferenceCode: "rays-hotel-header",
-			fragmentVersions: [{css: $css, html: $html, js: "", status: "Approved"}],
+			externalReferenceCode: $erc,
+			fragmentVersions: [{configuration: $configuration[0], css: $css, html: $html, js: "", status: "Approved"}],
 			icon: "home",
 			name: "Hotel Header",
 			thumbnailURLReference: $thumbnail,

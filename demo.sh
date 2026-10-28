@@ -57,9 +57,6 @@ MADRID="$FRAGMENT_API/sites/$MADRID_ERC"
 LONDON="$FRAGMENT_API/sites/$LONDON_ERC"
 ASSET_LIBRARY_API="$LIFERAY_URL/o/headless-asset-library/v1.0/asset-libraries"
 
-HOTEL_SET_ERC="rays-hotel"
-HEADER_FRAGMENT_ERC="rays-hotel-header"
-
 B=$'\033[1m'
 DIM=$'\033[2m'
 R=$'\033[0m'
@@ -83,7 +80,7 @@ exec 3>&1
 
 # The acts' short names on the progress bar, the same as the browser's
 # bookmark folders.
-ACT_NAMES=(Madrid London "Shared campaigns" MCP Agent Cities Winter)
+ACT_NAMES=(Madrid "Shared fragments" London MCP Agent Cities Winter)
 
 # compact: a terminal with fewer than 40 rows, where the screens skip their
 # blank lines.
@@ -188,8 +185,14 @@ header() {
 	compact || printf '\n'
 
 	n=${#STEPS[@]}
+	i=0
 
-	for ((i = 0; i < n; i++)); do
+	if [ $n -gt 4 ]; then
+		printf ' \033[32m✓\033[0m %s%d.1–%d.%d%s\n' "$DIM" "$ACT_NUMBER" "$ACT_NUMBER" "$((n - 3))" "$R"
+		i=$((n - 3))
+	fi
+
+	for (( ; i < n; i++)); do
 		if [ $i -eq $((n - 1)) ]; then
 			printf ' \033[1;33m▶ %d.%d %s\033[0m\n' "$ACT_NUMBER" "$((i + 1))" "${STEPS[$i]}"
 		else
@@ -486,7 +489,7 @@ request() {
 
 	local used
 
-	used=$((${#STEPS[@]} + $(fold -s -w "$(($(cols) - 2))" <<< "$ACT_TEXT" | wc -l) + 14))
+	used=$(( (${#STEPS[@]} > 4 ? 4 : ${#STEPS[@]}) + $(fold -s -w "$(($(cols) - 2))" <<< "$ACT_TEXT" | wc -l) + 14))
 
 	compact && used=$((used - 4))
 
@@ -694,10 +697,15 @@ FRAGMENT_RESPONSE='{externalReferenceCode, name}'
 PAGE_BODY='@
 	def element($last):
 		.pageElementDefinition.fragmentInstance.fragmentReference as $reference |
-		[
-			"    {\"pageElementDefinition\": {\"fragmentInstance\": {",
-			"      \"fragmentReference\": {"
-		] +
+		.pageElementDefinition.fragmentInstance.fragmentConfigurationFieldValues as $values |
+		["    {\"pageElementDefinition\": {\"fragmentInstance\": {"] +
+		if $values.city then
+			[
+				"      \"fragmentConfigurationFieldValues\": {",
+				"        \"city\": {\"type\": \"Text\", \"value\": \"\($values.city.value)\"}, …},"
+			]
+		else [] end +
+		["      \"fragmentReference\": {"] +
 		if $reference.scope then
 			[
 				"        \"externalReferenceCode\": \"\($reference.externalReferenceCode)\",",
@@ -731,7 +739,7 @@ put_hotel_page() {
 
 	shift
 
-	request PUT "$SITE_API/sites/$site/site-pages/hotel-home" "$(page_payload "$@")" - "$PAGE_BODY"
+	request PUT "$SITE_API/sites/$site/site-pages/hotel-home" "$(page_payload "$site" "$@")" - "$PAGE_BODY"
 
 	note "(each element also carries its fragment’s HTML, CSS and configuration)"
 }
@@ -744,7 +752,7 @@ hotels() {
 }
 
 act1() {
-	act "Madrid opens" "Ray’s Hotels opens its first hotel, in Madrid. We build it all through the headless APIs: its site, its header, its first campaign and its home page."
+	act "Madrid opens" "Ray’s Hotels opens its first hotel, in Madrid. We build it all through the headless APIs: its site, its fragments and their images, and its home page."
 
 	# UI: Applications Menu > Sites: Ray’s Hotel Madrid appears.
 	step site "Create the Madrid site"
@@ -753,51 +761,41 @@ act1() {
 	next
 
 	# UI: Madrid > Design > Fragments: the Ray’s Hotel set appears.
-	step hotel-set "Create the Ray’s Hotel fragment set"
-	show "$MADRID_ADMIN$FRAGMENTS=$HOTEL_SET_ERC"
-	request PUT "$MADRID/fragment-sets/$HOTEL_SET_ERC" '{"name": "Ray’s Hotel"}' '{externalReferenceCode, name}'
-	next
-
-	# UI: Ray’s Hotel > Resources tab: madrid-room.svg appears.
-	step view-image "Upload the view from a Madrid room"
-	show "$MADRID_ADMIN$FRAGMENTS=$HOTEL_SET_ERC$RESOURCES"
-	request POST "$MADRID/fragment-sets/$HOTEL_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/madrid-room.svg")" '{externalReferenceCode, name}'
-	next
-
-	# UI: Ray’s Hotel > Resources tab: madrid-ray.png appears too.
-	step ray-image "Upload Ray, in Madrid’s colors"
-	show "$MADRID_ADMIN$FRAGMENTS=$HOTEL_SET_ERC$RESOURCES"
-	request POST "$MADRID/fragment-sets/$HOTEL_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/madrid-ray.png")" '{externalReferenceCode, name}'
-	next
-
-	# UI: Ray’s Hotel > Fragments: the Madrid Hotel Header, with its thumbnail.
-	#   /group/<madrid>/~/control_panel/manage/-/fragments/fragment_collections?_com_liferay_fragment_web_portlet_FragmentPortlet_fragmentCollectionExternalReferenceCode=rays-hotel
-	step header "Create Madrid’s Hotel Header"
-	click_after "Hotel Header"
-	show "$MADRID_ADMIN$FRAGMENTS=$HOTEL_SET_ERC"
-	request POST "$MADRID/fragment-sets/$HOTEL_SET_ERC/fragments" "$(header_payload Madrid madrid-room.svg '#f2b84b' 'Calle de Alcalá 42, Madrid')" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
-	next
-
-	# UI: Madrid > Design > Fragments: the Ray’s Campaigns set appears.
-	step set "Create the Ray’s Campaigns fragment set"
+	step set "Create the Ray’s Hotel fragment set"
 	show "$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC"
-	request PUT "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" '{"description": "Seasonal campaigns", "name": "Ray’s Campaigns"}' '{externalReferenceCode, name}'
+	request PUT "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" '{"name": "Ray’s Hotel"}' '{externalReferenceCode, name}'
 	next
 
-	# UI: Ray’s Campaigns > Resources tab (before the request): the images folder appears.
-	#   ...fragment_collections?..._fragmentCollectionExternalReferenceCode=rays-campaigns&_com_liferay_fragment_web_portlet_FragmentPortlet_tabs1=resources
-	step folder "Create the images resource folder"
-	show "$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES"
-	request POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/resource-folders" "{\"externalReferenceCode\": \"$RESOURCE_FOLDER_ERC\", \"name\": \"$RESOURCE_FOLDER_ERC\"}" '{externalReferenceCode, name}'
-	next
-
-	# UI: Resources > images: autumn-getaway.svg appears.
-	step file "Upload the autumn campaign image"
+	# UI: Ray’s Hotel > Resources, the images folder: the three images appear.
+	step images "Upload the images, in a resource folder"
 	show "$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES&demoOpenFolder=$RESOURCE_FOLDER_ERC"
-	HIGHLIGHT='resourceFolderExternalReferenceCode' request POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/autumn-getaway.svg" "$RESOURCE_FOLDER_ERC")" '{externalReferenceCode, name, resourceFolderExternalReferenceCode}'
+	say "${B}A resource folder, then three images in it:${R}"
+	say ""
+	image_calls "…/sites/${ERC_COLOR}$MADRID_ERC" 3
+	say ""
+	say "Madrid’s room view, Ray in Madrid’s colors and the autumn campaign."
+	wait_key "upload the images"
+	say ""
+
+	if live; then
+		printf ' '
+		api POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/resource-folders" "{\"externalReferenceCode\": \"$RESOURCE_FOLDER_ERC\", \"name\": \"$RESOURCE_FOLDER_ERC\"}" > /dev/null && tick "$RESOURCE_FOLDER_ERC/" &&
+			post_images "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" madrid-room.svg madrid-ray.png autumn-getaway.svg
+		printf '\n'
+	fi
+
+	refresh
+	marker done images
 	next
 
-	# UI: Ray’s Campaigns > Fragments: Seasonal Offer appears, with its thumbnail.
+	# UI: Ray’s Hotel > Fragments: the Hotel Header, with its thumbnail; then it opens in the fragment editor.
+	step header "Create the Hotel Header"
+	click_after "Hotel Header"
+	show "$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC"
+	request POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$(header_payload)" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
+	next
+
+	# UI: Ray’s Hotel > Fragments: Seasonal Offer appears, with its thumbnail.
 	step offer "Create the Seasonal Offer fragment"
 	show "$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC"
 	request POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$(fragment_payload autumn configuration.json)" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
@@ -814,38 +812,33 @@ act1() {
 	next
 }
 
-# site_calls: the calls that open a hotel's site, as for Madrid.
-site_calls() {
+tick() {
+	printf ' %s \033[32m✓\033[0m' "$1"
+}
+
+# post_images SET_URL FILE...: uploads the images of assets/ into the set's
+# images folder, with a tick for each.
+post_images() {
+	local file set="$1"
+
+	shift
+
+	for file in "$@"; do
+		api POST "$set/resource-files" "$(resource_payload "$DIR/assets/$file" "$RESOURCE_FOLDER_ERC")" > /dev/null && tick "$file" || { printf ' \033[31m✗\033[0m'; return 1; }
+	done
+}
+
+# image_calls SCOPE COUNT: the calls that upload images into the images
+# folder of the Ray’s Hotel set of SCOPE (a site or the design library).
+image_calls() {
 	local e="$ERC_COLOR" p="$PATH_COLOR"
 
-	printf ' %s\n' "  ${B}PUT${R}  ${p}…/headless-admin-site/v1.0/sites/${e}{city}${R}"
-	printf ' %s\n' "  ${B}PUT${R}  ${p}…/sites/${e}{city}${p}/fragment-sets/${e}rays-hotel${R}"
-	printf ' %s\n' "  ${B}POST${R} ${p}…/fragment-sets/${e}rays-hotel${p}/resource-files${R} ×2"
-	printf ' %s\n' "  ${B}POST${R} ${p}…/fragment-sets/${e}rays-hotel${p}/fragments${R}"
+	[ "$2" = 3 ] && printf ' %s\n' "  ${B}POST${R} ${p}$1${p}/fragment-sets/${e}$FRAGMENT_SET_ERC${p}/resource-folders${R}" "         {\"externalReferenceCode\": \"${e}$RESOURCE_FOLDER_ERC${R}\"}"
+	printf ' %s\n' "  ${B}POST${R} ${p}$1${p}/fragment-sets/${e}$FRAGMENT_SET_ERC${p}/resource-files${R} ×$2" "         {\"resourceFolderExternalReferenceCode\": \"${e}$RESOURCE_FOLDER_ERC${R}\"}"
 }
 
 act2() {
-	act "London opens" "A second hotel opens in London. Campaigns must launch in every hotel at the same time, so we create a design library and connect both sites to it."
-
-	local site name accent address
-
-	IFS="|" read -r site name accent address <<< "$(printf '%s\n' "${DEVCON_CITIES[@]}" | grep -F "$LONDON_ERC|")"
-
-	# UI: Applications Menu > Sites: Ray’s Hotel London appears. Then London > Design > Fragments > Ray’s Hotel: the London Hotel Header.
-	step london "Open the London site, the same way as Madrid"
-	show "$SITES"
-	show_after "$LONDON_ADMIN$FRAGMENTS=$HOTEL_SET_ERC"
-	say "${B}The same calls as for Madrid, with London’s header:${R}"
-	say ""
-	site_calls
-	wait_key "open the London site"
-	say ""
-
-	live && open_site "$site" "$name" "$accent" "$address" && printf '\n'
-	refresh
-
-	marker done london
-	next
+	act "Shared fragments" "Ray wants more hotels, all sharing the same fragments. We create a design library, connect Madrid, and move its fragments. No move operation: we copy, repoint the page and delete the originals."
 
 	# UI: Applications Menu > Design Libraries: Ray’s Design Library appears.
 	#   /group/control_panel/manage?p_p_id=com_liferay_design_library_web_internal_portlet_DesignLibraryAdminPortlet
@@ -861,106 +854,149 @@ act2() {
 	request PUT "$ASSET_LIBRARY_API/$DESIGN_LIBRARY_ERC/connected-sites/$MADRID_ERC" '{"searchable": true}' '{externalReferenceCode, name}'
 	next
 
-	# UI: Ray’s Design Library: its Connected Sites card, with Madrid and London.
-	step connect-london "Connect London to the design library"
-	library_urls
-	show "$LIBRARY_VIEW"
-	request PUT "$ASSET_LIBRARY_API/$DESIGN_LIBRARY_ERC/connected-sites/$LONDON_ERC" '{"searchable": true}' '{externalReferenceCode, name}'
-	next
-}
-
-act3() {
-	act "Share the campaigns" "The campaigns move from Madrid to the design library, for every hotel. There is no move operation: we copy, repoint the pages and delete the originals."
-
 	step read-set "Read the fragment set from Madrid"
 	show_still "$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC"
-	request GET "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" "" '{externalReferenceCode, name, description}'
+	request GET "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" "" '{externalReferenceCode, name}'
 	local set="$LAST"
 	next
 
 	# UI: before the request, Design Libraries > Ray’s Design Library: no design resources yet.
-	# After it, the library's fragment sets: Ray’s Campaigns.
+	# After it, the library's fragment sets: Ray’s Hotel.
 	step put-set "Create it in the design library"
 	library_urls
 	show "$LIBRARY_VIEW"
 	show_after "$LIBRARY_SET"
-	request PUT "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC" "$(jq -c '{description, name}' <<< "$set")" '{externalReferenceCode, name}'
+	request PUT "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC" "$(jq -c '{name}' <<< "$set")" '{externalReferenceCode, name}'
 	next
 
 	step read-folders "Read its resource folders"
 	show_still "$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES"
 	request GET "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/resource-folders" "" "$ITEMS"
-	local folders="$LAST" folder
+	local folder
+
+	folder=$(jq -c '.items[0] // {} | {externalReferenceCode, name}' <<< "$LAST")
 	next
 
-	# UI: the library's Ray’s Campaigns > Resources tab: the images folder appears.
-	while read -r folder; do
-		step post-folder "Create the $(jq -r .name <<< "$folder") folder in the library"
-		library_urls
-		show "$LIBRARY_SET$RESOURCES"
-		request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-folders" "$folder" '{externalReferenceCode, name}'
-		next
-	done < <(jq -c '.items[] | {externalReferenceCode, name}' <<< "$folders")
+	# UI: the library's Ray’s Hotel > Resources tab: the images folder appears.
+	step post-folder "Create the images folder in the library"
+	library_urls
+	show "$LIBRARY_SET$RESOURCES"
+	request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-folders" "$folder" '{externalReferenceCode, name}'
+	next
 
-	local file files
+	step read-files "Read the images in it"
+	show_still "$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES&demoOpenFolder=$RESOURCE_FOLDER_ERC"
+	request GET "$FRAGMENT_API/sites/$MADRID_ERC/resource-folders/$RESOURCE_FOLDER_ERC/resource-files?nestedFields=fileURLReference.fileBase64" "" '[.items[] | {externalReferenceCode, fileURLReference: {fileBase64: .fileURLReference.fileBase64}}]'
+	local files="$LAST"
+	next
 
-	while read -r folder; do
-		step read-files "Read the files in $folder"
-		show_still "$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES&demoOpenFolder=$folder"
-		request GET "$FRAGMENT_API/sites/$MADRID_ERC/resource-folders/$folder/resource-files?nestedFields=fileURLReference.fileBase64" "" '[.items[] | {externalReferenceCode, fileURLReference: {fileBase64: .fileURLReference.fileBase64}}]'
-		files="$LAST"
-		next
+	# UI: the library's Ray’s Hotel > Resources > images: the three images appear.
+	step post-files "Copy the images to the library"
+	library_urls
+	show "$LIBRARY_SET$RESOURCES&demoOpenFolder=$RESOURCE_FOLDER_ERC"
+	say "${B}Each image as it was read, into the library’s images folder:${R}"
+	say ""
+	image_calls "…/design-libraries/${ERC_COLOR}$DESIGN_LIBRARY_ERC" "$(jq '.items | length' <<< "$files" 2> /dev/null || echo 3)"
+	wait_key "copy the images"
+	say ""
+
+	if live; then
+		printf ' '
+
+		local file
 
 		while read -r file; do
-			step post-file "Copy $(jq -r .name <<< "$file") to the library"
-			library_urls
-			show "$LIBRARY_SET$RESOURCES&demoOpenFolder=$folder"
-			request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$file" '{externalReferenceCode, resourceFolderExternalReferenceCode}'
-			next
-		done < <(jq -c --arg folder "$folder" '.items[] | {externalReferenceCode, fileURLReference: {fileBase64: .fileURLReference.fileBase64}, name, resourceFolderExternalReferenceCode: $folder}' <<< "$files")
-	done < <(jq -r '.items[].externalReferenceCode' <<< "$folders")
+			api POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$file" > /dev/null && tick "$(jq -r .name <<< "$file")" || printf ' \033[31m✗\033[0m'
+		done < <(jq -c --arg folder "$RESOURCE_FOLDER_ERC" '.items[] | {externalReferenceCode, fileURLReference: {fileBase64: .fileURLReference.fileBase64}, name, resourceFolderExternalReferenceCode: $folder}' <<< "$files")
+
+		printf '\n'
+	fi
+
+	refresh
+	marker done post-files
+	next
 
 	step read-fragments "Read its fragments"
 	show_still "$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC"
 	request GET "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/fragments" "" "$ITEMS"
-	local fragments="$LAST" fragment erc thumbnail
-
-	thumbnail=$(mktemp)
+	local fragments="$LAST"
 	next
 
-	# UI: the library's Ray’s Campaigns > Fragments: Seasonal Offer, with its thumbnail.
-	while read -r erc; do
-		thumbnail_file "$MADRID/fragments/$erc" "$thumbnail" || : > "$thumbnail"
-		fragment=$(jq -c --arg erc "$erc" --rawfile thumbnail <(base64 -w0 "$thumbnail") '.items[] | select(.externalReferenceCode == $erc) | {externalReferenceCode, fragmentVersions: [.fragmentVersions[] | select(.status == "Approved") | {configuration, css, html, js, status}], icon, name, type} + (if $thumbnail != "" then {thumbnailURLReference: {fileBase64: $thumbnail}} else {} end)' <<< "$fragments")
+	# UI: the library's Ray’s Hotel > Fragments: the Hotel Header, then Seasonal Offer, with their thumbnails.
+	step post-fragments "Copy both fragments to the library"
+	library_urls
+	show "$LIBRARY_SET"
+	note "(the Hotel Header, with its thumbnail; the offer follows the same way)"
+	request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$(library_fragment "$fragments" "$HEADER_FRAGMENT_ERC")" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
 
-		step post-fragment "Copy $(jq -r .name <<< "$fragment") to the library"
-		library_urls
-		show "$LIBRARY_SET"
-		request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$fragment" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
-		next
-	done < <(jq -r '.items[].externalReferenceCode' <<< "$fragments")
+	if live; then
+		api POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$(library_fragment "$fragments" "$OFFER_FRAGMENT_ERC")" > /dev/null && tick "Seasonal Offer, the same way" || printf ' \033[31m✗\033[0m'
+		printf '\n'
+		browser reload
+	fi
 
-	rm -f "$thumbnail"
+	next
 
 	# UI: the Madrid hotel page, unchanged.
-	step madrid-page "Point Madrid’s page to the library’s offer"
+	step madrid-page "Point Madrid’s page to the library’s fragments"
 	show "$MADRID_PAGE"
-	HIGHLIGHT='rays-design-library' put_hotel_page "$MADRID_ERC" "$MADRID_ERC:$HEADER_FRAGMENT_ERC" "library:$OFFER_FRAGMENT_ERC"
+	HIGHLIGHT='rays-design-library' put_hotel_page "$MADRID_ERC" "library:$HEADER_FRAGMENT_ERC" "library:$OFFER_FRAGMENT_ERC"
 	next
 
-	# UI: before the request, London > Site Builder > Pages: no pages yet. After it, the same list with Hotel Home, then the London hotel page.
-	step london-page "Create London’s hotel page"
-	show "$LONDON_ADMIN$PAGES"
-	show_after "$LONDON_PAGE"
-	put_hotel_page "$LONDON_ERC" "$LONDON_ERC:$HEADER_FRAGMENT_ERC" "library:$OFFER_FRAGMENT_ERC"
-	next
-
-	# UI: Madrid > Design > Fragments: only Ray’s Hotel is left. Then Madrid and London (?cities=Madrid,London).
+	# UI: Madrid > Design > Fragments: no fragment sets left. Then the Madrid hotel page, still the same.
 	step delete-set "Delete the fragment set from Madrid"
-	show "$MADRID_ADMIN$FRAGMENTS=$HOTEL_SET_ERC"
-	show_after "$GRID_URL/?cities=Madrid,London"
+	show "$MADRID_ADMIN$FRAGMENTS="
+	show_after "$MADRID_PAGE"
 	request DELETE "$MADRID/fragment-sets/$FRAGMENT_SET_ERC"
 	hotels
+	next
+}
+
+# library_fragment FRAGMENTS ERC: the fragment ERC of FRAGMENTS (a page of
+# Madrid's fragments), with its thumbnail, as the library receives it.
+library_fragment() {
+	local thumbnail
+
+	thumbnail=$(mktemp)
+
+	thumbnail_file "$MADRID/fragments/$2" "$thumbnail" || : > "$thumbnail"
+
+	jq -c --arg erc "$2" --rawfile thumbnail <(base64 -w0 "$thumbnail") '.items[] | select(.externalReferenceCode == $erc) | {externalReferenceCode, fragmentVersions: [.fragmentVersions[] | select(.status == "Approved") | {configuration, css, html, js, status}], icon, name, type} + (if $thumbnail != "" then {thumbnailURLReference: {fileBase64: $thumbnail}} else {} end)' <<< "$1"
+
+	rm -f "$thumbnail"
+}
+
+# hotel_calls: the calls that open a hotel once the fragments are shared.
+hotel_calls() {
+	local e="$ERC_COLOR" p="$PATH_COLOR"
+
+	printf ' %s\n' "  ${B}PUT${R}  ${p}…/headless-admin-site/v1.0/sites/${e}{city}${R}"
+	printf ' %s\n' "  ${B}PUT${R}  ${p}…/asset-libraries/${e}$DESIGN_LIBRARY_ERC${p}/${R}"
+	printf ' %s\n' "         ${p}connected-sites/${e}{city}${R}"
+	printf ' %s\n' "  ${B}POST${R} ${p}…/design-libraries/${e}$DESIGN_LIBRARY_ERC${p}/${R}"
+	printf ' %s\n' "         ${p}fragment-sets/${e}$FRAGMENT_SET_ERC${p}/resource-files${R} ×2"
+	printf ' %s\n' "  ${B}PUT${R}  ${p}…/sites/${e}{city}${p}/site-pages/${e}hotel-home${R}"
+}
+
+act3() {
+	act "London opens" "A second hotel opens in London, where DevCon is today. With the fragments in the design library, a new hotel needs no fragments of its own: one step opens it."
+
+	# UI: Applications Menu > Sites: Ray’s Hotel London appears. Then the London hotel page.
+	step london "Open the London hotel"
+	show "$SITES"
+	show_after "$LONDON_PAGE"
+	say "${B}The site, its connection to the library, its two images and its page:${R}"
+	say ""
+	hotel_calls
+	say ""
+	say "Its page uses the library’s Hotel Header with London’s city, address and color."
+	wait_key "open London"
+	say ""
+
+	live && open_hotel "$LONDON_ERC" London
+	refresh
+
+	marker done london
 	next
 }
 
@@ -1114,7 +1150,7 @@ act5() {
 
 	trap - INT
 
-	# UI: the library's Ray’s Campaigns > Fragments: Breakfast Hours, still without a thumbnail.
+	# UI: the library's Ray’s Hotel > Fragments: Breakfast Hours, still without a thumbnail.
 	step read-breakfast "Read what the agent created"
 	library_urls
 	show_still "$LIBRARY_SET"
@@ -1128,7 +1164,7 @@ act5() {
 
 	if [ -n "$CHROME" ] && { ! live || render_thumbnail "$hours" "$thumbnail_file"; }; then
 
-		# UI: the library's Ray’s Campaigns > Fragments: Breakfast Hours with its thumbnail; then open it in the fragment editor.
+		# UI: the library's Ray’s Hotel > Fragments: Breakfast Hours with its thumbnail; then open it in the fragment editor.
 		step breakfast-thumbnail "Give Breakfast Hours a thumbnail"
 		library_urls
 		show "$LIBRARY_SET"
@@ -1142,77 +1178,59 @@ act5() {
 	if library_fragment_exists "$BREAKFAST_FRAGMENT_ERC"; then
 		step breakfast-madrid "Add Breakfast Hours to Madrid’s page"
 		show "$MADRID_PAGE"
-		HIGHLIGHT='rays-breakfast-hours' put_hotel_page "$MADRID_ERC" "$MADRID_ERC:$HEADER_FRAGMENT_ERC" "library:$OFFER_FRAGMENT_ERC" "library:$BREAKFAST_FRAGMENT_ERC"
+		HIGHLIGHT='rays-breakfast-hours' put_hotel_page "$MADRID_ERC" "library:$HEADER_FRAGMENT_ERC" "library:$OFFER_FRAGMENT_ERC" "library:$BREAKFAST_FRAGMENT_ERC"
 		next
 
 		# UI: the London hotel page, reloaded with Breakfast Hours.
 		step breakfast-london "Add Breakfast Hours to London’s page"
 		show "$LONDON_PAGE"
-		put_hotel_page "$LONDON_ERC" "$LONDON_ERC:$HEADER_FRAGMENT_ERC" "library:$OFFER_FRAGMENT_ERC" "library:$BREAKFAST_FRAGMENT_ERC"
+		put_hotel_page "$LONDON_ERC" "library:$HEADER_FRAGMENT_ERC" "library:$OFFER_FRAGMENT_ERC" "library:$BREAKFAST_FRAGMENT_ERC"
 		next
 	fi
 }
 
-# open_hotel SITE_ERC CITY ACCENT ADDRESS: a new hotel, the way London
-# opened, on one line of the screen.
-# open_site SITE_ERC CITY ACCENT ADDRESS: a hotel's site, fragment set,
-# header image and Hotel Header, on one line of ticks.
-open_site() {
-	local site="$1" city="$2" accent="$3" address="$4" image="$(slug "$2")-room.svg"
+# open_hotel SITE_ERC CITY: a new hotel, the way London opened, on one line
+# of the screen: its site, its connection to the design library, its images in
+# the library and its page, with the library's fragments.
+open_hotel() {
+	local site="$1" city="$2"
+	local fragments=("library:$HEADER_FRAGMENT_ERC" "library:$OFFER_FRAGMENT_ERC")
 
 	printf "  %-15s" "$city"
 
-	api PUT "$SITE_API/sites/$site" "{\"externalReferenceCode\": \"$site\", \"name\": \"Ray’s Hotel $city\"}" > /dev/null &&
-		printf ' site \033[32m✓\033[0m' &&
-		api PUT "$FRAGMENT_API/sites/$site/fragment-sets/$HOTEL_SET_ERC" '{"name": "Ray’s Hotel"}' > /dev/null &&
-		api POST "$FRAGMENT_API/sites/$site/fragment-sets/$HOTEL_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/$image")" > /dev/null &&
-		api POST "$FRAGMENT_API/sites/$site/fragment-sets/$HOTEL_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/$(slug "$city")-ray.png")" > /dev/null &&
-		api POST "$FRAGMENT_API/sites/$site/fragment-sets/$HOTEL_SET_ERC/fragments" "$(header_payload "$city" "$image" "$accent" "$address")" > /dev/null &&
-		printf '  header \033[32m✓\033[0m' || { printf '  \033[31m✗\033[0m\n'; return 1; }
-}
-
-open_hotel() {
-	local site="$1" city="$2" accent="$3" address="$4"
-	local fragments=("$site:$HEADER_FRAGMENT_ERC" "library:$OFFER_FRAGMENT_ERC")
-
-	open_site "$@" || return 1
-
-	api PUT "$ASSET_LIBRARY_API/$DESIGN_LIBRARY_ERC/connected-sites/$site" '{"searchable": true}' > /dev/null &&
-		printf '  library \033[32m✓\033[0m' || { printf '  \033[31m✗\033[0m\n'; return 1; }
+	api PUT "$SITE_API/sites/$site" "{\"externalReferenceCode\": \"$site\", \"name\": \"Ray’s Hotel $city\"}" > /dev/null && tick site &&
+		api PUT "$ASSET_LIBRARY_API/$DESIGN_LIBRARY_ERC/connected-sites/$site" '{"searchable": true}' > /dev/null && tick library &&
+		api POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/$(slug "$city")-room.svg" "$RESOURCE_FOLDER_ERC")" > /dev/null &&
+		api POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/$(slug "$city")-ray.png" "$RESOURCE_FOLDER_ERC")" > /dev/null && tick images ||
+		{ printf ' \033[31m✗\033[0m\n'; return 1; }
 
 	library_fragment_exists "$BREAKFAST_FRAGMENT_ERC" && fragments+=("library:$BREAKFAST_FRAGMENT_ERC")
 
-	api PUT "$SITE_API/sites/$site/site-pages/hotel-home" "$(page_payload "${fragments[@]}")" > /dev/null &&
-		printf '  page \033[32m✓\033[0m\n' || printf '  \033[31m✗\033[0m\n'
+	api PUT "$SITE_API/sites/$site/site-pages/hotel-home" "$(page_payload "$site" "${fragments[@]}")" > /dev/null && tick page && printf '\n' || printf ' \033[31m✗\033[0m\n'
 
 	marker hotel "$site"
 }
 
 act6() {
-	act "The next DevCon cities" "Ray’s Hotels follows DevCon: Madrid hosted it in 2025 and London hosts it now. Which city could host it next? Tenerife, Mykonos, Taormina, Sydney, Rio de Janeiro and Honolulu are candidates, and Ray opens a hotel in each, with its own site and header, all sharing the design library."
+	act "The next DevCon cities" "Ray’s Hotels follows DevCon: Madrid hosted it in 2025 and London hosts it now. Which city could host it next? Tenerife, Mykonos, Taormina, Sydney, Rio de Janeiro and Honolulu are candidates, and Ray opens a hotel in each, the way London opened."
 
 	# UI: the hotel grid (demo/hotel-grid.py, http://localhost:8090): one tile per city, filled as each hotel opens.
 	step hotels "Open the hotels of six possible future DevCon cities"
 	show_still "$GRID_URL/"
 	say "${B}For each city, the same calls as for London:${R}"
 	say ""
-	local e="$ERC_COLOR" p="$PATH_COLOR"
-
-	site_calls
-	printf ' %s\n' "  ${B}PUT${R}  ${p}…/asset-libraries/${e}rays-design-library${p}/${R}"
-	printf ' %s\n' "         ${p}connected-sites/${e}{city}${R}"
-	printf ' %s\n' "  ${B}PUT${R}  ${p}…/sites/${e}{city}${p}/site-pages/${e}hotel-home${R}"
+	hotel_calls
 	wait_key "open the hotels"
 	say ""
 
-	local city site name accent address
+	local city site name
 
 	for city in "${DEVCON_CITIES[@]}"; do
-		IFS='|' read -r site name accent address <<< "$city"
+		IFS='|' read -r site name _ _ <<< "$city"
 
 		[ "$site" = "$MADRID_ERC" ] || [ "$site" = "$LONDON_ERC" ] && continue
 
-		live && open_hotel "$site" "$name" "$accent" "$address"
+		live && open_hotel "$site" "$name"
 	done
 
 	marker done hotels
@@ -1246,7 +1264,7 @@ act7() {
 	show_sites
 	next
 
-	# UI: the library's Ray’s Campaigns: Seasonal Offer > ⋮ > View Site Usages, select Madrid and London, Propagate.
+	# UI: the library's Ray’s Hotel: Seasonal Offer > ⋮ > View Site Usages, select Madrid and London, Propagate.
 	# Then both hotel pages.
 	step propagate "Propagate to every hotel, from the UI"
 	library_urls

@@ -1,15 +1,25 @@
-<header class="rays-header" style="--rays-accent: @ACCENT@;">
+[#assign hotel = configuration.city?lower_case?replace(" ", "-") /]
+[#assign folder = "[resources:images/autumn-getaway.svg]" /]
+[#if folder?starts_with("/")]
+	[#assign ray = folder?keep_before_last("/") + "/" + hotel + "-ray-png" /]
+	[#assign room = folder?keep_before_last("/") + "/" + hotel + "-room-svg" /]
+[#else]
+	[#assign ray = "[resources:images/${hotel}-ray.png]" /]
+	[#assign room = "[resources:images/${hotel}-room.svg]" /]
+[/#if]
+
+<header class="rays-header" style="--rays-accent: ${configuration.accentColor};">
 	<div class="rays-header__inner">
-		<img alt="Ray" class="rays-header__ray" src="[resources:@RAY@]" />
+		<img alt="Ray" class="rays-header__ray" src="${ray}" />
 
 		<div class="rays-header__body">
 			<p class="rays-header__brand">Ray’s Hotels</p>
 
-			<h1 class="rays-header__city" data-lfr-editable-id="city" data-lfr-editable-type="text">@CITY@</h1>
+			<h1 class="rays-header__city">${configuration.city}</h1>
 
-			<p class="rays-header__tagline" data-lfr-editable-id="tagline" data-lfr-editable-type="text">@TAGLINE@</p>
+			<p class="rays-header__tagline">${configuration.address}</p>
 		</div>
 
-		<img alt="@CITY@" class="rays-header__skyline" src="[resources:@IMAGE@]" />
+		<img alt="${configuration.city}" class="rays-header__skyline" src="${room}" />
 	</div>
 </header>
