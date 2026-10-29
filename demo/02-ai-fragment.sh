@@ -26,6 +26,8 @@ if [ "${1:-}" = "--rehearse" ]; then
 	transcript="$transcript_dir/devcon-rehearsal-$(date +%Y%m%d-%H%M%S).jsonl"
 
 	claude -p "$PROMPT" \
+		--model "$AGENT_MODEL" \
+		--effort "$AGENT_EFFORT" \
 		--allowedTools "$AGENT_ALLOWED_TOOLS" \
 		--disallowedTools $AGENT_DISALLOWED_TOOLS \
 		--mcp-config "$MCP_CONFIG" \
@@ -38,6 +40,8 @@ if [ "${1:-}" = "--rehearse" ]; then
 	echo "  transcript: $transcript"
 else
 	exec claude "$PROMPT" \
+		--model "$AGENT_MODEL" \
+		--effort "$AGENT_EFFORT" \
 		--allowedTools "$AGENT_ALLOWED_TOOLS" \
 		--disallowedTools $AGENT_DISALLOWED_TOOLS \
 		--mcp-config "$MCP_CONFIG" \

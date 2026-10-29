@@ -16,6 +16,8 @@ MCP_API="$LIFERAY_URL/o/mcp"
 
 # The agent's Claude Code tools: only the MCP server's, none of its own.
 AGENT_ALLOWED_TOOLS="mcp__liferay"
+AGENT_MODEL="${AGENT_MODEL:-sonnet}"
+AGENT_EFFORT="${AGENT_EFFORT:-low}"
 AGENT_DISALLOWED_TOOLS="Agent Bash Edit Glob Grep NotebookEdit Read Skill Task WebFetch WebSearch Write"
 
 # mcp_config [AUTHORIZATION]: the agent's MCP configuration, Liferay's MCP

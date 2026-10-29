@@ -1105,6 +1105,7 @@ act5() {
 	printf '   %sclaude%s "<the prompt>" \\\n' "$B" "$R"
 	mcp_config "Basic …" | perl -0pe 's/\{\n\s*("Authorization": [^\n]*)\n\s*\}/{$1}/' | sed "1s/^/     --mcp-config '/; 2,\$s/^/       /; \$s/\$/' \\\\/" | colorize
 	printf '     --strict-mcp-config \\\n'
+	printf '     --model %s --effort %s \\\n' "$AGENT_MODEL" "$AGENT_EFFORT"
 	printf '     --allowedTools %s \\\n' "$AGENT_ALLOWED_TOOLS"
 	fold -s -w "$(( $(cols) - 26 ))" <<< "$AGENT_DISALLOWED_TOOLS" | sed 's/ *$//' | awk 'NR == 1 { printf "     --disallowedTools %s", $0; next } { printf " \\\n                       %s", $0 } END { print "" }'
 
