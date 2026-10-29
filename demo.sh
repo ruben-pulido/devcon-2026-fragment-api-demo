@@ -629,6 +629,13 @@ click_after() {
 	BROWSER_AFTER="click $1"
 }
 
+# reveal_after [TEXT]: like show_after, but scrolls the page until its last
+# fragment is fully in view, or until the item that reads TEXT is in the middle
+# of the screen.
+reveal_after() {
+	BROWSER_AFTER="reveal${1:+ $1}"
+}
+
 refresh() {
 	[ -n "$BROWSER_RELOAD" ] && browser reload
 
@@ -1179,12 +1186,14 @@ act5() {
 	if library_fragment_exists "$BREAKFAST_FRAGMENT_ERC"; then
 		step breakfast-madrid "Add Breakfast Hours to Madrid’s page"
 		show "$MADRID_PAGE"
+		reveal_after
 		HIGHLIGHT='rays-breakfast-hours' put_hotel_page "$MADRID_ERC" "library:$HEADER_FRAGMENT_ERC" "library:$OFFER_FRAGMENT_ERC" "library:$BREAKFAST_FRAGMENT_ERC"
 		next
 
 		# UI: the London hotel page, reloaded with Breakfast Hours.
 		step breakfast-london "Add Breakfast Hours to London’s page"
 		show "$LONDON_PAGE"
+		reveal_after
 		put_hotel_page "$LONDON_ERC" "library:$HEADER_FRAGMENT_ERC" "library:$OFFER_FRAGMENT_ERC" "library:$BREAKFAST_FRAGMENT_ERC"
 		next
 	fi
@@ -1251,6 +1260,7 @@ act7() {
 	step winter-file "Upload the winter image to the library"
 	library_urls
 	show "$LIBRARY_SET$RESOURCES&demoOpenFolder=$RESOURCE_FOLDER_ERC"
+	reveal_after winter-getaway.svg
 	request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/winter-getaway.svg" "$RESOURCE_FOLDER_ERC")" '{externalReferenceCode, resourceFolderExternalReferenceCode}'
 	next
 

@@ -197,6 +197,34 @@ function send(method, params = {}) {
 	socket.write(Buffer.concat([header, mask, payload]));
 }
 
+const REVEAL = `(() => {
+	const fragments = [...document.querySelectorAll('[class*="rays-"]')].filter((element) => [...element.classList].some((name) => /^rays-[a-z-]+$/.test(name)));
+	const last = fragments[fragments.length - 1];
+
+	if (last) {
+		last.scrollIntoView({behavior: 'smooth', block: 'end'});
+	}
+	else {
+		window.scrollTo({behavior: 'smooth', top: document.body.scrollHeight});
+	}
+})()`;
+
+const revealText = (text) => `(() => {
+	const start = Date.now();
+	const find = () => {
+		const element = [...document.querySelectorAll('body *')].find((candidate) => candidate.children.length === 0 && candidate.textContent.trim() === ${JSON.stringify(text)});
+
+		if (element) {
+			(element.closest('.card') || element).scrollIntoView({behavior: 'smooth', block: 'center'});
+		}
+		else if (Date.now() - start < 10000) {
+			setTimeout(find, 300);
+		}
+	};
+
+	find();
+})()`;
+
 for await (const line of createInterface({input: process.stdin})) {
 	const [command, ...rest] = line.trim().split(' ');
 
@@ -221,6 +249,9 @@ for await (const line of createInterface({input: process.stdin})) {
 		}
 		else if (command === 'reload') {
 			send('Page.reload', {ignoreCache: false});
+		}
+		else if (command === 'reveal') {
+			send('Runtime.evaluate', {expression: rest.length ? revealText(rest.join(' ')) : REVEAL});
 		}
 		else if (command in CLICK) {
 			send('Runtime.evaluate', {expression: click(command, rest.join(' '))});
