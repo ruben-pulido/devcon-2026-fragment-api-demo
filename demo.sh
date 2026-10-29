@@ -187,9 +187,9 @@ header() {
 	n=${#STEPS[@]}
 	i=0
 
-	if [ $n -gt 4 ]; then
-		printf ' \033[32m✓\033[0m %s%d.1–%d.%d%s\n' "$DIM" "$ACT_NUMBER" "$ACT_NUMBER" "$((n - 3))" "$R"
-		i=$((n - 3))
+	if [ $n -gt 3 ]; then
+		printf ' \033[32m✓\033[0m %s%d.1–%d.%d%s\n' "$DIM" "$ACT_NUMBER" "$ACT_NUMBER" "$((n - 1))" "$R"
+		i=$((n - 1))
 	fi
 
 	for (( ; i < n; i++)); do
@@ -489,7 +489,7 @@ request() {
 
 	local used
 
-	used=$(( (${#STEPS[@]} > 4 ? 4 : ${#STEPS[@]}) + $(fold -s -w "$(($(cols) - 2))" <<< "$ACT_TEXT" | wc -l) + 14))
+	used=$(( (${#STEPS[@]} > 3 ? 2 : ${#STEPS[@]}) + $(fold -s -w "$(($(cols) - 2))" <<< "$ACT_TEXT" | wc -l) + 14))
 
 	compact && used=$((used - 4))
 
@@ -728,8 +728,10 @@ PAGE_BODY='@
 		[
 			"{",
 			" \"externalReferenceCode\": \"\(.externalReferenceCode)\",",
-			" \"pageSpecifications\": [{\"status\": \"\($specification.status)\",",
-			"  \"pageExperiences\": [{\"pageElements\": ["
+			" \"pageSpecifications\": [{",
+			"  \"status\": \"\($specification.status)\",",
+			"  \"pageExperiences\": [{",
+			"   \"pageElements\": ["
 		] +
 		([range(0; $elements | length) as $i | $elements[$i] | element($i == ($elements | length) - 1)] | add) +
 		[
@@ -777,10 +779,7 @@ act1() {
 	step images "Upload the images, in a resource folder"
 	show "$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES&demoOpenFolder=$RESOURCE_FOLDER_ERC"
 	say "${B}A resource folder, then three images in it:${R}"
-	say ""
-	image_calls "…/sites/${ERC_COLOR}$MADRID_ERC" 3
-	say ""
-	say "Madrid’s room view, Ray in Madrid’s colors and the autumn campaign."
+	image_calls "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" folder madrid-room.svg madrid-ray.png autumn-getaway.svg
 	wait_key "upload the images"
 	say ""
 
@@ -835,13 +834,33 @@ post_images() {
 	done
 }
 
-# image_calls SCOPE COUNT: the calls that upload images into the images
-# folder of the Ray’s Hotel set of SCOPE (a site or the design library).
-image_calls() {
-	local e="$ERC_COLOR" p="$PATH_COLOR"
+# call METHOD URL [BODY]: one call of a step that makes several, shown like a
+# request: its endpoint, then its body.
+call() {
+	show_path "$1" "${2#$LIFERAY_URL}"
 
-	[ "$2" = 3 ] && printf ' %s\n' "  ${B}POST${R} ${p}$1${p}/fragment-sets/${e}$FRAGMENT_SET_ERC${p}/resource-folders${R}" "         {\"externalReferenceCode\": \"${e}$RESOURCE_FOLDER_ERC${R}\"}"
-	printf ' %s\n' "  ${B}POST${R} ${p}$1${p}/fragment-sets/${e}$FRAGMENT_SET_ERC${p}/resource-files${R} ×$2" "         {\"resourceFolderExternalReferenceCode\": \"${e}$RESOURCE_FOLDER_ERC${R}\"}"
+	[ -n "${3:-}" ] && show_json "$3" . 20 | colorize
+
+	return 0
+}
+
+# image_calls SET_URL FOLDER FILE...: the calls that upload FILEs into the
+# images folder of the set at SET_URL, creating the folder first when FOLDER
+# is not empty.
+image_calls() {
+	local set="$1" folder="$2" first="$3"
+
+	shift 2
+
+	[ -n "$folder" ] && call POST "$set/resource-folders" "{\"externalReferenceCode\": \"$RESOURCE_FOLDER_ERC\", \"name\": \"$RESOURCE_FOLDER_ERC\"}" && printf '\n'
+
+	call POST "$set/resource-files" "$(resource_payload "$DIR/assets/$first" "$RESOURCE_FOLDER_ERC")"
+
+	shift
+
+	[ $# -gt 0 ] && note "…and the same for $(sed -E 's/ ([^ ]+)$/ and \1/' <<< "$*")"
+
+	return 0
 }
 
 act2() {
@@ -902,8 +921,7 @@ act2() {
 	library_urls
 	show "$LIBRARY_SET$RESOURCES&demoOpenFolder=$RESOURCE_FOLDER_ERC"
 	say "${B}Each image as it was read, into the library’s images folder:${R}"
-	say ""
-	image_calls "…/design-libraries/${ERC_COLOR}$DESIGN_LIBRARY_ERC" "$(jq '.items | length' <<< "$files" 2> /dev/null || echo 3)"
+	image_calls "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC" "" $(jq -r '.items[].name' <<< "$files" 2> /dev/null)
 	wait_key "copy the images"
 	say ""
 
@@ -975,14 +993,11 @@ library_fragment() {
 
 # hotel_calls: the calls that open a hotel once the fragments are shared.
 hotel_calls() {
-	local e="$ERC_COLOR" p="$PATH_COLOR"
-
-	printf ' %s\n' "  ${B}PUT${R}  ${p}…/headless-admin-site/v1.0/sites/${e}{city}${R}"
-	printf ' %s\n' "  ${B}PUT${R}  ${p}…/asset-libraries/${e}$DESIGN_LIBRARY_ERC${p}/${R}"
-	printf ' %s\n' "         ${p}connected-sites/${e}{city}${R}"
-	printf ' %s\n' "  ${B}POST${R} ${p}…/design-libraries/${e}$DESIGN_LIBRARY_ERC${p}/${R}"
-	printf ' %s\n' "         ${p}fragment-sets/${e}$FRAGMENT_SET_ERC${p}/resource-files${R} ×2"
-	printf ' %s\n' "  ${B}PUT${R}  ${p}…/sites/${e}{city}${p}/site-pages/${e}hotel-home${R}"
+	call PUT "$SITE_API/sites/{city}"
+	call PUT "$ASSET_LIBRARY_API/$DESIGN_LIBRARY_ERC/connected-sites/{city}"
+	call POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-files"
+	note "(twice: {city}-room.svg and {city}-ray.png, into the images folder)"
+	call PUT "$SITE_API/sites/{city}/site-pages/hotel-home"
 }
 
 act3() {
