@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 200" width="480" height="200">
 <defs><clipPath id="c"><rect width="480" height="200" rx="18"/></clipPath></defs>
 <g clip-path="url(#c)">
-<rect width="480" height="200" fill="#20150f"/>
+<rect width="480" height="200" fill="#000823"/>
 <svg x="44" y="10" width="392" height="163" viewBox="0 0 480 200" preserveAspectRatio="xMidYMax slice">
   <defs>
     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#052a3a"/>
-      <stop offset="1" stop-color="#e8742f"/>
+      <stop offset="0" stop-color="#04082e"/>
+      <stop offset="1" stop-color="#8200de"/>
     </linearGradient>
   </defs>
   <rect width="480" height="200" fill="url(#sky)"/>
-  <circle cx="90" cy="64" r="20" fill="#ffc56a"/>
-  <g fill="#04140f">
+  <circle cx="90" cy="64" r="20" fill="#f54dd7"/>
+  <g fill="#00071d">
     <path d="M150 170 Q150 70 230 70 Q300 70 300 170 Z"/>
     <path d="M320 170 Q330 46 372 46 Q424 46 436 170 Z"/>
     <rect x="368" y="14" width="6" height="30"/>
@@ -20,16 +20,16 @@
     <path d="M10 170 Q30 140 70 150 Q100 154 120 170 Z"/>
     <path d="M444 170 Q456 134 480 130 L480 170 Z"/>
   </g>
-  <rect x="0" y="170" width="480" height="30" fill="#0a3a4a"/>
-  <path d="M0 182 q20 -6 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" stroke="#1d6a7e" stroke-width="3" fill="none"/>
+  <rect x="0" y="170" width="480" height="30" fill="#0e0739"/>
+  <path d="M0 182 q20 -6 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" stroke="#3c0186" stroke-width="3" fill="none"/>
 </svg>
-<rect x="44" y="10" width="392" height="163" fill="none" stroke="#3a2618" stroke-width="6"/>
+<rect x="44" y="10" width="392" height="163" fill="none" stroke="#080833" stroke-width="6"/>
 <path d="M0 0h52c-8 50-10 110 4 173H0z" fill="#1fd18a"/>
 <path d="M480 0h-52c8 50 10 110-4 173h56z" fill="#1fd18a"/>
-<path d="M14 0c-4 60-2 120 6 173M30 0c-6 60-6 120 6 173M466 0c4 60 2 120-6 173M450 0c6 60 6 120-6 173" stroke="#00000030" stroke-width="3" fill="none"/>
-<rect x="0" y="173" width="480" height="27" fill="#2c1d14"/>
-<rect x="36" y="168" width="408" height="8" rx="3" fill="#4a3322"/>
-<rect x="150" y="160" width="180" height="20" rx="8" fill="#f4f1ec"/>
+<path d="M14 0c-4 60-2 120 6 173M30 0c-6 60-6 120 6 173M466 0c4 60 2 120-6 173M450 0c6 60 6 120-6 173" stroke="#00040f30" stroke-width="3" fill="none"/>
+<rect x="0" y="173" width="480" height="27" fill="#01092b"/>
+<rect x="36" y="168" width="408" height="8" rx="3" fill="#13063e"/>
+<rect x="150" y="160" width="180" height="20" rx="8" fill="#ffcff6"/>
 <rect x="130" y="172" width="220" height="28" rx="8" fill="#1fd18a" opacity=".85"/>
-<path d="M66 160h20l-4-16h-12z" fill="#f6e7a8"/><rect x="74" y="160" width="4" height="14" fill="#f6e7a8"/>
+<path d="M66 160h20l-4-16h-12z" fill="#ffa7ee"/><rect x="74" y="160" width="4" height="14" fill="#ffa7ee"/>
 </g></svg>

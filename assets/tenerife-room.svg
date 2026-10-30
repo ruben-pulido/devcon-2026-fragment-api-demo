@@ -1,34 +1,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 200" width="480" height="200">
 <defs><clipPath id="c"><rect width="480" height="200" rx="18"/></clipPath></defs>
 <g clip-path="url(#c)">
-<rect width="480" height="200" fill="#20150f"/>
+<rect width="480" height="200" fill="#000823"/>
 <svg x="44" y="10" width="392" height="163" viewBox="0 0 480 200" preserveAspectRatio="xMidYMax slice">
   <defs>
     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#1a1033"/>
-      <stop offset="1" stop-color="#b85a2e"/>
+      <stop offset="0" stop-color="#000721"/>
+      <stop offset="1" stop-color="#5200a9"/>
     </linearGradient>
   </defs>
   <rect width="480" height="200" fill="url(#sky)"/>
-  <circle cx="130" cy="60" r="22" fill="#ffb25a"/>
-  <g fill="#12070a">
+  <circle cx="130" cy="60" r="22" fill="#eb1ec7"/>
+  <g fill="#000617">
     <path d="M60 170 L190 96 L226 58 L262 96 L330 70 L420 170 Z"/>
-    <path d="M226 58 L216 72 L236 72 Z" fill="#f3ece2"/>
+    <path d="M226 58 L216 72 L236 72 Z" fill="#ffc0f3"/>
     <rect x="404" y="112" width="5" height="58"/>
-    <path d="M406 112 Q380 96 366 108 M406 112 Q430 94 446 106 M406 112 Q404 90 392 82 M406 112 Q412 92 424 84" stroke="#12070a" stroke-width="4" fill="none"/>
+    <path d="M406 112 Q380 96 366 108 M406 112 Q430 94 446 106 M406 112 Q404 90 392 82 M406 112 Q412 92 424 84" stroke="#000617" stroke-width="4" fill="none"/>
     <rect x="40" y="134" width="4" height="36"/>
-    <path d="M42 134 Q22 122 10 132 M42 134 Q60 120 74 130 M42 134 Q40 114 30 108" stroke="#12070a" stroke-width="4" fill="none"/>
+    <path d="M42 134 Q22 122 10 132 M42 134 Q60 120 74 130 M42 134 Q40 114 30 108" stroke="#000617" stroke-width="4" fill="none"/>
   </g>
-  <rect x="0" y="170" width="480" height="30" fill="#1c2a44"/>
-  <path d="M0 182 q20 -6 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" stroke="#37507c" stroke-width="3" fill="none"/>
+  <rect x="0" y="170" width="480" height="30" fill="#080832"/>
+  <path d="M0 182 q20 -6 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" stroke="#2c0367" stroke-width="3" fill="none"/>
 </svg>
-<rect x="44" y="10" width="392" height="163" fill="none" stroke="#3a2618" stroke-width="6"/>
+<rect x="44" y="10" width="392" height="163" fill="none" stroke="#080833" stroke-width="6"/>
 <path d="M0 0h52c-8 50-10 110 4 173H0z" fill="#ff8c42"/>
 <path d="M480 0h-52c8 50 10 110-4 173h56z" fill="#ff8c42"/>
-<path d="M14 0c-4 60-2 120 6 173M30 0c-6 60-6 120 6 173M466 0c4 60 2 120-6 173M450 0c6 60 6 120-6 173" stroke="#00000030" stroke-width="3" fill="none"/>
-<rect x="0" y="173" width="480" height="27" fill="#2c1d14"/>
-<rect x="36" y="168" width="408" height="8" rx="3" fill="#4a3322"/>
-<rect x="150" y="160" width="180" height="20" rx="8" fill="#f4f1ec"/>
+<path d="M14 0c-4 60-2 120 6 173M30 0c-6 60-6 120 6 173M466 0c4 60 2 120-6 173M450 0c6 60 6 120-6 173" stroke="#00040f30" stroke-width="3" fill="none"/>
+<rect x="0" y="173" width="480" height="27" fill="#01092b"/>
+<rect x="36" y="168" width="408" height="8" rx="3" fill="#13063e"/>
+<rect x="150" y="160" width="180" height="20" rx="8" fill="#ffcff6"/>
 <rect x="130" y="172" width="220" height="28" rx="8" fill="#ff8c42" opacity=".85"/>
-<path d="M66 160h20l-4-16h-12z" fill="#f6e7a8"/><rect x="74" y="160" width="4" height="14" fill="#f6e7a8"/>
+<path d="M66 160h20l-4-16h-12z" fill="#ffa7ee"/><rect x="74" y="160" width="4" height="14" fill="#ffa7ee"/>
 </g></svg>
