@@ -80,7 +80,7 @@ exec 3>&1
 
 # The acts' short names on the progress bar, the same as the browser's
 # bookmark folders.
-ACT_NAMES=(Madrid "Shared fragments" London MCP Agent Cities Winter)
+ACT_NAMES=(Madrid "Shared fragments" London MCP Agent Cities "Early bird")
 
 # compact: a terminal with fewer than 40 rows, where the screens skip their
 # blank lines.
@@ -1270,21 +1270,21 @@ act6() {
 }
 
 act7() {
-	act "Winter campaign" "Winter arrives. Marketing updates the Seasonal Offer once, in the design library, and all eight hotels get it with one propagation."
+	act "Early bird campaign" "The early bird season opens for the next DevCon. Marketing updates the Seasonal Offer once, in the design library, and the six new hotels get it with one propagation. Madrid and London, DevCon cities already, keep their DevCon guest rate."
 
-	step winter-file "Upload the winter image to the library"
+	step early-bird-file "Upload the early bird image to the library"
 	library_urls
 	show "$LIBRARY_SET$RESOURCES&demoOpenFolder=$RESOURCE_FOLDER_ERC"
-	reveal_after winter-getaway.svg
-	request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/winter-getaway.svg" "$RESOURCE_FOLDER_ERC")" '{externalReferenceCode, resourceFolderExternalReferenceCode}'
+	reveal_after early-bird.svg
+	request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/early-bird.svg" "$RESOURCE_FOLDER_ERC")" '{externalReferenceCode, resourceFolderExternalReferenceCode}'
 	next
 
-	# UI: the Madrid hotel page: still autumn.
-	step winter-offer "Update the Seasonal Offer in the library"
+	# UI: the Madrid hotel page: still the DevCon guest rate.
+	step early-bird-offer "Update the Seasonal Offer in the library"
 	library_urls
 	show "$LIBRARY_SET"
 	show_after "$GRID_URL/"
-	request PUT "$LIBRARY/fragments/$OFFER_FRAGMENT_ERC" "$(fragment_payload winter winter-configuration.json)" - "$FRAGMENT_BODY"
+	request PUT "$LIBRARY/fragments/$OFFER_FRAGMENT_ERC" "$(fragment_payload early-bird early-bird-configuration.json)" - "$FRAGMENT_BODY"
 	compact || say ""
 	say "Pages keep their copy of each fragment: the hotels still show the DevCon guest rate, until we propagate."
 	show_sites
@@ -1314,7 +1314,7 @@ act7() {
 propagate_in_browser() {
 	local title
 
-	title=$(sed -nE 's/.*rays-offer__title"[^>]*>([^<]*)<.*/\1/p' "$DIR/payloads/seasonal-offer/winter/index.html")
+	title=$(sed -nE 's/.*rays-offer__title"[^>]*>([^<]*)<.*/\1/p' "$DIR/payloads/seasonal-offer/early-bird/index.html")
 
 	browser menu Seasonal Offer
 	browser wait 2

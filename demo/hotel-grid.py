@@ -3,7 +3,7 @@
 # http://localhost:8090 (GRID_PORT), or only some of them, one under another, as in
 # http://localhost:8090/?cities=Madrid,London. A tile shows up as soon as its
 # hotel page exists and reloads when the page changes, so act 6 fills the
-# grid and the propagation in act 7 turns every tile to winter.
+# grid and the propagation in act 7 turns every tile to the early bird offer.
 #
 #   demo/hotel-grid.py
 #

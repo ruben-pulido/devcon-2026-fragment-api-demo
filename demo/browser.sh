@@ -49,7 +49,7 @@ ACT_FOLDERS=(
 	"4. MCP"
 	"5. Agent"
 	"6. Cities"
-	"7. Winter"
+	"7. Early bird"
 )
 
 bookmarks=(
