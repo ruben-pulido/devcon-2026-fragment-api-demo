@@ -1,8 +1,8 @@
 .rays-header {
-	background: #0b0d12;
+	background: radial-gradient(circle at 88% 40%, #4a0090 0%, #29004c 28%, #00072b 62%, #000d30 100%);
 	border-bottom: 4px solid var(--rays-accent);
-	color: #f4f1ec;
-	font-family: system-ui, sans-serif;
+	color: #ffffff;
+	font-family: 'Source Sans Pro', system-ui, sans-serif;
 	padding: 28px 32px;
 }
 
@@ -13,6 +13,7 @@
 	justify-content: space-between;
 	margin: 0 auto;
 	max-width: 1040px;
+	min-height: 250px;
 }
 
 .rays-header__ray {
@@ -27,6 +28,7 @@
 
 .rays-header__brand {
 	color: var(--rays-accent);
+	font-family: 'Source Code Pro', ui-monospace, monospace;
 	font-size: 22px;
 	font-weight: 700;
 	letter-spacing: 0.25em;
@@ -43,7 +45,7 @@
 }
 
 .rays-header__tagline {
-	color: #b9b3ab;
+	color: #d6d9f2;
 	font-size: 26px;
 	margin: 0;
 }
