@@ -1237,7 +1237,7 @@ open_hotel() {
 }
 
 act6() {
-	act "The next DevCon cities" "Ray’s Hotels follows DevCon: Madrid hosted it in 2025 and London hosts it now. Which city could host it next? Tenerife, Mykonos, Taormina, Sydney, Rio de Janeiro and Honolulu are candidates, and Ray opens a hotel in each, the way London opened."
+	act "The next DevCon cities" "Ray’s Hotels follows DevCon: Madrid hosted it in 2025 and London hosts it now. Which city could host it next? Tenerife, Mykonos, Polignano a Mare, Sydney, Rio de Janeiro and Honolulu are candidates, and Ray opens a hotel in each, the way London opened."
 
 	# UI: the hotel grid (demo/hotel-grid.py, http://localhost:8090): one tile per city, filled as each hotel opens.
 	step hotels "Open the hotels of six possible future DevCon cities"
