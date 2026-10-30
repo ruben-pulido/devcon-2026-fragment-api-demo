@@ -59,6 +59,9 @@ export PATH="$HOME/.local/bin:$PATH"
 PROMPT=$'%~>\n'
 RPROMPT=''
 
+# The colors of the DevCon 2026 site: navy background, white text, magenta cursor.
+printf '\033]11;#00072b\033\\\033]10;#ffffff\033\\\033]12;#e500bd\033\\'
+
 alias demo="$DEMO_KIT/demo.sh"
 
 if [ -n "${DEMO_COMMAND:-}" ]; then

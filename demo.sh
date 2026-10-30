@@ -61,6 +61,12 @@ B=$'\033[1m'
 DIM=$'\033[2m'
 R=$'\033[0m'
 
+# The colors of the DevCon 2026 site: magenta for the current act and step
+# (bold, lighter than the site's #e500bd to read on its navy background), and a
+# #e500bd bar for the act's title.
+ACCENT=$'\033[1;38;2;255;77;224m'
+HEADER=$'\033[1;97;48;2;229;0;189m'
+
 ACT=""
 ACT_NUMBER=0
 ACT_TEXT=""
@@ -142,7 +148,7 @@ progress() {
 		if [ "$a" -lt "$ACT_NUMBER" ]; then
 			color=$'\033[32m'
 		elif [ "$a" -eq "$ACT_NUMBER" ]; then
-			color=$'\033[1;33m'
+			color=$ACCENT
 		else
 			color=$DIM
 		fi
@@ -159,7 +165,7 @@ progress() {
 			if [ "$a" -lt "$ACT_NUMBER" ] || { [ "$a" -eq "$ACT_NUMBER" ] && [ $i -lt ${#STEPS[@]} ]; }; then
 				dots+=$'\033[32m●'
 			elif [ "$a" -eq "$ACT_NUMBER" ] && [ $i -eq ${#STEPS[@]} ]; then
-				dots+=$'\033[1;33m◉'
+				dots+="$ACCENT◉"
 			else
 				dots+="$R$DIM○"
 			fi
@@ -180,7 +186,7 @@ header() {
 
 	printf '\033[2J\033[3J\033[H'
 	progress
-	printf '\033[1;97;44m %-*s\033[0m\n' "$((width - 1))" "Ray’s Hotels · $ACT_NUMBER. $ACT"
+	printf '%s %-*s\033[0m\n' "$HEADER" "$((width - 1))" "Ray’s Hotels · $ACT_NUMBER. $ACT"
 	fold -s -w "$((width - 2))" <<< "$ACT_TEXT" | sed "s/^/ ${B}/; s/\$/${R}/"
 	compact || printf '\n'
 
@@ -194,7 +200,7 @@ header() {
 
 	for (( ; i < n; i++)); do
 		if [ $i -eq $((n - 1)) ]; then
-			printf ' \033[1;33m▶ %d.%d %s\033[0m\n' "$ACT_NUMBER" "$((i + 1))" "${STEPS[$i]}"
+			printf ' %s▶ %d.%d %s\033[0m\n' "$ACCENT" "$ACT_NUMBER" "$((i + 1))" "${STEPS[$i]}"
 		else
 			printf ' \033[32m✓\033[0m %s%d.%d %s%s\n' "$DIM" "$ACT_NUMBER" "$((i + 1))" "${STEPS[$i]}" "$R"
 		fi
