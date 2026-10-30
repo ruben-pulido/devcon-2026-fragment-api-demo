@@ -116,10 +116,10 @@ What it runs, step by step:
 | 5.5 Madrid hotel | Madrid hotel page (Breakfast Hours appears) |
 | 5.6 London hotel | London hotel page (Breakfast Hours appears) |
 | 6.1 All hotels | Hotel grid: all eight hotels (they appear as they open) |
-| 7.2a Offer | Design Libraries > Ray’s Design Library > Ray’s Hotel fragments (Seasonal Offer turns winter) |
-| 7.2b Autumn | Hotel grid: all eight hotels (still autumn) |
-| 7.3a Propagate | Design Libraries > Ray’s Design Library > Ray’s Hotel: Seasonal Offer > View Site Usages > select all > Propagate |
-| 7.3b Winter | Hotel grid: all eight hotels (winter) |
+| 7.2a Offer | Design Libraries > Ray’s Design Library > Ray’s Hotel fragments (Seasonal Offer turns early bird) |
+| 7.2b DevCon | Hotel grid: all eight hotels (still the DevCon guest rate) |
+| 7.3a Propagate | Design Libraries > Ray’s Design Library > Ray’s Hotel: Seasonal Offer > View Site Usages > select all, untick Madrid and London > Propagate |
+| 7.3b Early bird | Hotel grid: the six new hotels with the early bird offer, Madrid and London with the guest rate |
 
 The two windows are laid out for the presentation screen, 1920 x 1080 like the slides (`DEMO_SCREEN`), and zoomed to fit the screen you rehearse on (`demo/layout.sh`): on a bigger or HiDPI screen the terminal font, the window sizes and the browser zoom grow together, so the terminal keeps at least 73 x 37 and the pages keep their width in CSS pixels.
 
@@ -156,7 +156,7 @@ Every screen is built to be read from far away, at any terminal size (it needs a
 
 | Act | Use case | Steps |
 | --- | --- | --- |
-| 1. Madrid opens | Ray’s Hotels opens its first hotel, from an empty portal | Create the Madrid site, its Ray’s Hotel fragment set, its `images` resource folder with three images in one step (the view from a room, Ray in Madrid's colors and the autumn campaign), the Hotel Header and the Seasonal Offer fragments (with thumbnails and settings), and Madrid's hotel page |
+| 1. Madrid opens | Ray’s Hotels opens its first hotel, from an empty portal | Create the Madrid site, its Ray’s Hotel fragment set, its `images` resource folder with three images in one step (the view from a room, Ray in Madrid's colors and the DevCon guest rate), the Hotel Header and the Seasonal Offer fragments (with thumbnails and settings), and Madrid's hotel page |
 | 2. Shared fragments | Move Madrid's fragments to a design library, for every hotel to come: copy, repoint, delete | Create the design library and connect Madrid; read and create the fragment set, its folder and its images (one step) in the library; copy both fragments with their thumbnails (one step, showing the Hotel Header's call); point Madrid's page to the library's fragments; delete Madrid's set |
 | 3. London opens | A second hotel, in one step | Create the London site, connect it to the library, upload its two images to the library and create its page with the library's fragments, the Hotel Header set to London |
 | 4. The agent’s toolbox | Before an AI agent can help, it needs a profile on Liferay’s MCP server: a briefing and the only tools it may use | Create the `devcon` profile with its instructions, give it seven tools from three headless APIs, activate it, list what the agent sees |

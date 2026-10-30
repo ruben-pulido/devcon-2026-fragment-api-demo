@@ -779,14 +779,14 @@ act1() {
 	step images "Upload the images, in a resource folder"
 	show "$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES&demoOpenFolder=$RESOURCE_FOLDER_ERC"
 	say "${B}A resource folder, then three images in it:${R}"
-	image_calls "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" folder madrid-room.svg madrid-ray.png autumn-getaway.svg
+	image_calls "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" folder madrid-room.svg madrid-ray.png devcon-guest.svg
 	wait_key "upload the images"
 	say ""
 
 	if live; then
 		printf ' '
 		api POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/resource-folders" "{\"externalReferenceCode\": \"$RESOURCE_FOLDER_ERC\", \"name\": \"$RESOURCE_FOLDER_ERC\"}" > /dev/null && tick "$RESOURCE_FOLDER_ERC/" &&
-			post_images "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" madrid-room.svg madrid-ray.png autumn-getaway.svg
+			post_images "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" madrid-room.svg madrid-ray.png devcon-guest.svg
 		printf '\n'
 	fi
 
@@ -804,7 +804,7 @@ act1() {
 	# UI: Ray’s Hotel > Fragments: Seasonal Offer appears, with its thumbnail.
 	step offer "Create the Seasonal Offer fragment"
 	show "$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC"
-	request POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$(fragment_payload autumn configuration.json)" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
+	request POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$(fragment_payload devcon configuration.json)" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
 	next
 
 	# UI: before the request, Madrid > Site Builder > Pages: no pages yet.
@@ -1286,7 +1286,7 @@ act7() {
 	show_after "$GRID_URL/"
 	request PUT "$LIBRARY/fragments/$OFFER_FRAGMENT_ERC" "$(fragment_payload winter winter-configuration.json)" - "$FRAGMENT_BODY"
 	compact || say ""
-	say "Pages keep their copy of each fragment: the hotels still show autumn."
+	say "Pages keep their copy of each fragment: the hotels still show the DevCon guest rate, until we propagate."
 	show_sites
 	next
 

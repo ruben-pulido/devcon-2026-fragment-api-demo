@@ -1,7 +1,8 @@
 .rays-offer {
-	background: radial-gradient(circle at 15% 20%, #3a2416 0%, #1a120d 55%, #0f0b08 100%);
-	color: #f5ede6;
-	font-family: Georgia, serif;
+	background: linear-gradient(110deg, #000d30 0%, #00072b 45%, #29004c 75%, #7a00e6 100%);
+	border-bottom: 4px solid var(--rays-accent);
+	color: #ffffff;
+	font-family: 'Source Sans Pro', system-ui, sans-serif;
 	padding: 32px 32px;
 }
 
@@ -21,7 +22,7 @@
 
 .rays-offer__eyebrow {
 	color: var(--rays-accent);
-	font-family: system-ui, sans-serif;
+	font-family: 'Source Code Pro', ui-monospace, monospace;
 	font-size: 22px;
 	font-weight: 700;
 	letter-spacing: 0.16em;
@@ -30,14 +31,16 @@
 }
 
 .rays-offer__title {
-	color: #fff8f1;
-	font-size: 50px;
-	line-height: 1.05;
+	color: #ffffff;
+	font-family: 'Source Code Pro', ui-monospace, monospace;
+	font-size: 36px;
+	font-weight: 700;
+	line-height: 1.1;
 	margin: 0 0 12px;
 }
 
 .rays-offer__text {
-	color: #d9c8b8;
+	color: #d6d9f2;
 	font-size: 28px;
 	line-height: 1.25;
 	margin: 0 0 18px;
@@ -46,9 +49,8 @@
 .rays-offer__cta {
 	background: var(--rays-accent);
 	border-radius: 999px;
-	color: #120d09;
+	color: #ffffff;
 	display: inline-block;
-	font-family: system-ui, sans-serif;
 	font-size: 24px;
 	font-weight: 700;
 	padding: 12px 32px;
