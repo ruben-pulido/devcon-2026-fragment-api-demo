@@ -1290,12 +1290,12 @@ act7() {
 	show_sites
 	next
 
-	# UI: the library's Ray’s Hotel: Seasonal Offer > ⋮ > View Site Usages, select Madrid and London, Propagate.
-	# Then both hotel pages.
-	step propagate "Propagate to every hotel, from the UI"
+	# UI: the library's Ray’s Hotel: Seasonal Offer > ⋮ > View Site Usages, select all, untick Madrid and London, Propagate.
+	# Then the hotel grid: six hotels with the early bird offer, Madrid and London still with the guest rate.
+	step propagate "Propagate to the six new hotels, from the UI"
 	library_urls
 	show_still "$LIBRARY_SET"
-	say "Seasonal Offer > ⋮ > View Site Usages: select all the hotels, then Propagate."
+	say "Seasonal Offer > ⋮ > View Site Usages: select the six new hotels, not Madrid or London, then Propagate."
 
 	if browser_on; then
 		wait_key "propagate in the browser"
@@ -1309,8 +1309,8 @@ act7() {
 }
 
 # propagate_in_browser: the propagation of act 7, clicked in the browser at a
-# pace the audience can follow, then the hotel grid once the hotel pages have
-# the winter offer (or after 60 seconds).
+# pace the audience can follow, then the hotel grid once the first of the six
+# new hotels has the early bird offer (or after 60 seconds).
 propagate_in_browser() {
 	local title
 
@@ -1322,12 +1322,16 @@ propagate_in_browser() {
 	browser wait 3
 	browser check-all
 	browser wait 2
+	browser uncheck London
+	browser wait 1
+	browser uncheck Madrid
+	browser wait 2
 	browser click Propagate
 	browser wait 3
 	browser goto "$GRID_URL/"
 
 	for _ in $(seq 1 60); do
-		[ "$(page_offer "$MADRID_ERC")" = "$title" ] && break
+		[ "$(page_offer "${DEVCON_CITIES[0]%%|*}")" = "$title" ] && break
 
 		sleep 1
 	done

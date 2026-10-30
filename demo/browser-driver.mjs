@@ -10,8 +10,9 @@
 //   menu NAME  open the actions menu of the card named NAME
 //   click TEXT click the visible link or button that reads TEXT
 //   check-all  tick the checkbox that selects every item on the page
+//   uncheck NAME  untick the checkbox of the item whose row mentions NAME
 //
-// The last three click in the page the way a presenter would, waiting up to
+// The last four click in the page the way a presenter would, waiting up to
 // five seconds for what they click to appear.
 //
 // Each change waits DEMO_BROWSER_DELAY seconds (default 1) first, so the
@@ -97,6 +98,21 @@ const CLOSE_PRODUCT_MENU = `
 const CLICK = {
 	'check-all': () => document.querySelector('.management-bar input[type="checkbox"]:not([name])'),
 	click: (text) => [...document.querySelectorAll('a, button')].find((element) => element.offsetParent !== null && element.textContent.trim() === text),
+	uncheck: (name) => [...document.querySelectorAll('input[type="checkbox"]')].find((checkbox) => {
+		if (!checkbox.checked) {
+			return false;
+		}
+
+		let row = checkbox.parentElement;
+
+		for (let level = 0; row && level < 8; level++, row = row.parentElement) {
+			if (row.querySelectorAll('input[type="checkbox"]').length === 1 && row.textContent.includes(name)) {
+				return true;
+			}
+		}
+
+		return false;
+	}),
 	menu: (name) => [...document.querySelectorAll('.card')].find((card) => card.querySelector('.card-title')?.textContent.trim() === name)?.querySelector('button[aria-label="More actions"]'),
 };
 
