@@ -1276,7 +1276,7 @@ act6() {
 }
 
 act7() {
-	act "Early bird campaign" "The early bird season opens for the next DevCon. Marketing updates the Seasonal Offer once, in the design library, and the six new hotels get it with one propagation. Madrid and London, DevCon cities already, keep their DevCon guest rate."
+	act "Early bird campaign" "The early bird season opens for the next DevCon. Marketing updates the Seasonal Offer once, in the design library. One propagation takes it to the six new hotels. Madrid and London keep their DevCon guest rate."
 
 	step early-bird-file "Upload the early bird image to the library"
 	library_urls
@@ -1292,7 +1292,7 @@ act7() {
 	show_after "$GRID_URL/"
 	request PUT "$LIBRARY/fragments/$OFFER_FRAGMENT_ERC" "$(fragment_payload early-bird early-bird-configuration.json)" - "$FRAGMENT_BODY"
 	compact || say ""
-	say "Pages keep their copy of each fragment: the hotels still show the DevCon guest rate, until we propagate."
+	say "Pages keep their copy of each fragment until we propagate."
 	show_sites
 	next
 
