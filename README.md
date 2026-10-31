@@ -2,7 +2,7 @@
 
 Scripts and payloads for the Devcon 2026 session "One API, Thousands of Sites: Unleashing the Fragment Headless API".
 
-The story: Ray’s Hotels opens its first hotel, in Madrid (DevCon 2025). We build its Liferay site, its fragments and its hotel page from an empty portal, with the headless APIs alone. To share them with every hotel to come, Madrid's fragments move to a design library. Then a second hotel opens in London (DevCon 2026) in one step, with the library's fragments, and an AI agent adds a fragment to the library. Ray’s then opens a hotel in six cities that could host DevCon next (Tenerife, Mykonos, Taormina, Sydney, Rio de Janeiro and Honolulu), and a new campaign reaches all eight hotels with one propagation from the UI. Every hotel shares one Hotel Header: each page sets the hotel's city, address and color, and the header shows Ray, Liferay's mascot, in those colors next to the city's name, and the city's skyline seen from a room, so the hotels are easy to tell apart.
+The story: Ray’s Hotels opens its first hotel, in Madrid (DevCon 2025). We build its Liferay site, its fragments and its hotel page from an empty portal, with the headless APIs alone. To share them with every hotel to come, Madrid's fragments move to a design library. Then a second hotel opens in London (DevCon 2026) in one step, with the library's fragments, and an AI agent adds a fragment to the library. Ray’s then opens a hotel in six cities that could host DevCon next (Tenerife, Mykonos, Polignano a Mare, Sydney, Rio de Janeiro and Honolulu), and an early bird campaign reaches the six new hotels with one propagation from the UI, while Madrid and London keep their DevCon guest rate. Every hotel shares one Hotel Header: each page sets the hotel's city, address and color, and the header shows Ray, Liferay's mascot, in those colors next to the city's name, and the city's skyline seen from a room, so the hotels are easy to tell apart.
 
 ## Requirements
 
@@ -86,7 +86,7 @@ What it runs, step by step:
 ./demo/close.sh            # closes whatever of the demo is open: a running demo.sh, the demo terminal and browser; the hotel grid keeps running (--dry-run to only list them)
 ```
 
-`demo/windows.sh` runs `demo/terminal.sh` (a Ptyxis window with the demo font on the left half of the screen, 73 × 37 at 16 points; `demo/windows.sh ./demo.sh` starts the demo in it, and in it `demo` runs `./demo.sh` from any folder: `demo`, `demo resume`, `demo help`…) and `demo/browser.sh` (a Chrome window on the right half, with the sign-in; it also starts the hotel grid); each also works alone. The browser's bookmarks bar has one folder per act (0. Start, 1. Madrid, 2. Shared fragments, 3. London, 4. MCP, 5. Agent, 6. Cities, 7. Winter), holding the screen of every step that changes the browser, named after the step's number on the terminal (act.step; a, b when a step shows several screens) and a short label. `demo/browser.sh` prints this legend too. On the terminal, a progress bar at the top shows every act's steps as dots, with the same short names above the acts that have started, so the audience sees where the demo is without learning what comes next. The design library's own screens have no fixed URL, so their bookmarks open the Design Libraries list. With `AI_FALLBACK=1` (or `offline`), "Check the agent’s calls" shows the calls and the start of the answer of the rehearsal run the cached fragment comes from (`payloads/breakfast-hours-run.json`).
+`demo/windows.sh` runs `demo/terminal.sh` (a Ptyxis window with the demo font on the left half of the screen, 73 × 37 at 16 points; `demo/windows.sh ./demo.sh` starts the demo in it, and in it `demo` runs `./demo.sh` from any folder: `demo`, `demo resume`, `demo help`…) and `demo/browser.sh` (a Chrome window on the right half, with the sign-in; it also starts the hotel grid); each also works alone. The browser's bookmarks bar has one folder per act (0. Start, 1. Madrid, 2. Shared fragments, 3. London, 4. MCP, 5. Agent, 6. Cities, 7. Early bird), holding the screen of every step that changes the browser, named after the step's number on the terminal (act.step; a, b when a step shows several screens) and a short label. `demo/browser.sh` prints this legend too. On the terminal, a progress bar at the top shows every act's steps as dots, with the same short names above the acts that have started, so the audience sees where the demo is without learning what comes next. The design library's own screens have no fixed URL, so their bookmarks open the Design Libraries list. With `AI_FALLBACK=1` (or `offline`), "Check the agent’s calls" shows the calls and the start of the answer of the rehearsal run the cached fragment comes from (`payloads/breakfast-hours-run.json`).
 
 | Bookmark | Screen |
 | --- | --- |
@@ -116,10 +116,10 @@ What it runs, step by step:
 | 5.5 Madrid hotel | Madrid hotel page (Breakfast Hours appears) |
 | 5.6 London hotel | London hotel page (Breakfast Hours appears) |
 | 6.1 All hotels | Hotel grid: all eight hotels (they appear as they open) |
-| 7.2a Offer | Design Libraries > Ray’s Design Library > Ray’s Hotel fragments (Seasonal Offer turns winter) |
-| 7.2b Autumn | Hotel grid: all eight hotels (still autumn) |
-| 7.3a Propagate | Design Libraries > Ray’s Design Library > Ray’s Hotel: Seasonal Offer > View Site Usages > select all > Propagate |
-| 7.3b Winter | Hotel grid: all eight hotels (winter) |
+| 7.2a Offer | Design Libraries > Ray’s Design Library > Ray’s Hotel fragments (Seasonal Offer turns early bird) |
+| 7.2b DevCon | Hotel grid: all eight hotels (still the DevCon guest rate) |
+| 7.3a Propagate | Design Libraries > Ray’s Design Library > Ray’s Hotel: Seasonal Offer > View Site Usages > select all, untick Madrid and London > Propagate |
+| 7.3b Early bird | Hotel grid: the six new hotels with the early bird offer, Madrid and London with the guest rate |
 
 The two windows are laid out for the presentation screen, 1920 x 1080 like the slides (`DEMO_SCREEN`), and zoomed to fit the screen you rehearse on (`demo/layout.sh`): on a bigger or HiDPI screen the terminal font, the window sizes and the browser zoom grow together, so the terminal keeps at least 73 x 37 and the pages keep their width in CSS pixels.
 
@@ -156,19 +156,19 @@ Every screen is built to be read from far away, at any terminal size (it needs a
 
 | Act | Use case | Steps |
 | --- | --- | --- |
-| 1. Madrid opens | Ray’s Hotels opens its first hotel, from an empty portal | Create the Madrid site, its Ray’s Hotel fragment set, its `images` resource folder with three images in one step (the view from a room, Ray in Madrid's colors and the autumn campaign), the Hotel Header and the Seasonal Offer fragments (with thumbnails and settings), and Madrid's hotel page |
+| 1. Madrid opens | Ray’s Hotels opens its first hotel, from an empty portal | Create the Madrid site, its Ray’s Hotel fragment set, its `images` resource folder with three images in one step (the view from a room, Ray in Madrid's colors and the DevCon guest rate), the Hotel Header and the Seasonal Offer fragments (with thumbnails and settings), and Madrid's hotel page |
 | 2. Shared fragments | Move Madrid's fragments to a design library, for every hotel to come: copy, repoint, delete | Create the design library and connect Madrid; read and create the fragment set, its folder and its images (one step) in the library; copy both fragments with their thumbnails (one step, showing the Hotel Header's call); point Madrid's page to the library's fragments; delete Madrid's set |
 | 3. London opens | A second hotel, in one step | Create the London site, connect it to the library, upload its two images to the library and create its page with the library's fragments, the Hotel Header set to London |
 | 4. The agent’s toolbox | Before an AI agent can help, it needs a profile on Liferay’s MCP server: a briefing and the only tools it may use | Create the `devcon` profile with its instructions, give it seven tools from three headless APIs, activate it, list what the agent sees |
 | 5. An AI agent builds the next fragment | Claude Code, with only its MCP profile's tools, creates Breakfast Hours | Run the agent, list the calls it made, read its fragment, give it a thumbnail (a headless Chrome screenshot of its HTML and CSS), add it to both hotel pages |
-| 6. The next DevCon cities | Ray opens hotels in six cities that could host DevCon next: Tenerife, Mykonos, Taormina, Sydney, Rio de Janeiro and Honolulu | The same calls as for London, one line per city on the screen, then list the design library's eight connected sites |
-| 7. Winter campaign | One change in the library reaches all eight hotels | Upload the winter image, update the Seasonal Offer, propagate from the UI (Seasonal Offer > ⋮ > View Site Usages, select all, Propagate): with the browser following the demo, one key press makes the browser do those clicks at a pace the audience can follow, then shows the hotel grid; without it, do them by hand |
+| 6. The next DevCon cities | Ray opens hotels in six cities that could host DevCon next: Tenerife, Mykonos, Polignano a Mare, Sydney, Rio de Janeiro and Honolulu | The same calls as for London, one line per city on the screen, then list the design library's eight connected sites |
+| 7. Early bird campaign | One change in the library reaches the six new hotels, and Madrid and London, DevCon cities already, keep their guest rate | Upload the early bird image, update the Seasonal Offer, propagate from the UI (Seasonal Offer > ⋮ > View Site Usages, select all, untick Madrid and London, Propagate): with the browser following the demo, one key press makes the browser do those clicks at a pace the audience can follow, then shows the hotel grid; without it, do them by hand |
 
 Act 5 adds Breakfast Hours to the pages only if it exists, so a failed agent run does not break the rest of the demo.
 
 ### The hotel grid
 
-`demo/hotel-grid.py` serves every hotel page in a 2 × 4 grid at http://localhost:8090 (`GRID_PORT`). Start it before the show and keep it open in a browser window for acts 5 and 6: a tile appears as soon as its hotel page exists, and reloads when the page changes, so the grid fills while the hotels open and turns to winter after the propagation. `?cities=Madrid,London` shows only those hotels, one under the other, each page whole. It proxies the portal so the hotel pages can be framed (Liferay sends `X-Frame-Options: SAMEORIGIN`).
+`demo/hotel-grid.py` serves every hotel page in a 2 × 4 grid at http://localhost:8090 (`GRID_PORT`). Start it before the show and keep it open in a browser window for acts 5 and 6: a tile appears as soon as its hotel page exists, and reloads when the page changes, so the grid fills while the hotels open and turns to the early bird offer after the propagation. `?cities=Madrid,London` shows only those hotels, one under the other, each page whole. It proxies the portal so the hotel pages can be framed (Liferay sends `X-Frame-Options: SAMEORIGIN`).
 
 Gotchas:
 
@@ -200,7 +200,7 @@ Gotchas:
 | `setup/` | The MCP profile, to rehearse the agent alone, and the portal configuration |
 | `setup/portal/` | Feature flags and MCP server configuration for the portal |
 | `demo/` | The agent runner (`02-ai-fragment.sh`), its prompt and its fallback, and the hotel grid (`hotel-grid.py`) |
-| `payloads/seasonal-offer/` | HTML, CSS and configuration of the Seasonal Offer fragment, autumn and winter |
+| `payloads/seasonal-offer/` | HTML, CSS and configuration of the Seasonal Offer fragment, the DevCon guest rate and the early bird offer |
 | `payloads/hotel-header/` | The Hotel Header every hotel shares: its HTML, CSS and settings (city, address, accent color); it picks the hotel's images by city |
 | `payloads/breakfast-hours/`, `payloads/breakfast-hours.json` | The cached Breakfast Hours fragment for the AI fallback |
 | `assets/` | Campaign images, each hotel's room view (the city's skyline seen from a room) and Ray in each hotel's colors, uploaded as fragment resources |

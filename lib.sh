@@ -84,7 +84,7 @@ slug() {
 DEVCON_CITIES=(
 	"rays-tenerife|Tenerife|#ff8c42|Avenida de Las Américas 8, Tenerife"
 	"rays-mykonos|Mykonos|#4f8dff|Matoyianni 14, Mykonos Town"
-	"rays-taormina|Taormina|#d4e157|Corso Umberto 54, Taormina"
+	"rays-polignano|Polignano a Mare|#d4e157|Via Roma 12, Polignano a Mare"
 	"rays-sydney|Sydney|#b07cff|Circular Quay 1, Sydney"
 	"rays-rio|Rio de Janeiro|#1fd18a|Avenida Atlântica 1702, Rio de Janeiro"
 	"rays-honolulu|Honolulu|#ff5d73|Kalakaua Avenue 2005, Honolulu"

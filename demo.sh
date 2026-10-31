@@ -61,6 +61,12 @@ B=$'\033[1m'
 DIM=$'\033[2m'
 R=$'\033[0m'
 
+# The colors of the DevCon 2026 site: magenta for the current act and step
+# (bold, lighter than the site's #e500bd to read on its navy background), and a
+# #e500bd bar for the act's title.
+ACCENT=$'\033[1;38;2;255;77;224m'
+HEADER=$'\033[1;97;48;2;229;0;189m'
+
 ACT=""
 ACT_NUMBER=0
 ACT_TEXT=""
@@ -80,7 +86,7 @@ exec 3>&1
 
 # The acts' short names on the progress bar, the same as the browser's
 # bookmark folders.
-ACT_NAMES=(Madrid "Shared fragments" London MCP Agent Cities Winter)
+ACT_NAMES=(Madrid "Shared fragments" London MCP Agent Cities "Early bird")
 
 # compact: a terminal with fewer than 40 rows, where the screens skip their
 # blank lines.
@@ -142,7 +148,7 @@ progress() {
 		if [ "$a" -lt "$ACT_NUMBER" ]; then
 			color=$'\033[32m'
 		elif [ "$a" -eq "$ACT_NUMBER" ]; then
-			color=$'\033[1;33m'
+			color=$ACCENT
 		else
 			color=$DIM
 		fi
@@ -159,7 +165,7 @@ progress() {
 			if [ "$a" -lt "$ACT_NUMBER" ] || { [ "$a" -eq "$ACT_NUMBER" ] && [ $i -lt ${#STEPS[@]} ]; }; then
 				dots+=$'\033[32m●'
 			elif [ "$a" -eq "$ACT_NUMBER" ] && [ $i -eq ${#STEPS[@]} ]; then
-				dots+=$'\033[1;33m◉'
+				dots+="$ACCENT◉"
 			else
 				dots+="$R$DIM○"
 			fi
@@ -180,7 +186,7 @@ header() {
 
 	printf '\033[2J\033[3J\033[H'
 	progress
-	printf '\033[1;97;44m %-*s\033[0m\n' "$((width - 1))" "Ray’s Hotels · $ACT_NUMBER. $ACT"
+	printf '%s %-*s\033[0m\n' "$HEADER" "$((width - 1))" "Ray’s Hotels · $ACT_NUMBER. $ACT"
 	fold -s -w "$((width - 2))" <<< "$ACT_TEXT" | sed "s/^/ ${B}/; s/\$/${R}/"
 	compact || printf '\n'
 
@@ -194,7 +200,7 @@ header() {
 
 	for (( ; i < n; i++)); do
 		if [ $i -eq $((n - 1)) ]; then
-			printf ' \033[1;33m▶ %d.%d %s\033[0m\n' "$ACT_NUMBER" "$((i + 1))" "${STEPS[$i]}"
+			printf ' %s▶ %d.%d %s\033[0m\n' "$ACCENT" "$ACT_NUMBER" "$((i + 1))" "${STEPS[$i]}"
 		else
 			printf ' \033[32m✓\033[0m %s%d.%d %s%s\n' "$DIM" "$ACT_NUMBER" "$((i + 1))" "${STEPS[$i]}" "$R"
 		fi
@@ -779,14 +785,14 @@ act1() {
 	step images "Upload the images, in a resource folder"
 	show "$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC$RESOURCES&demoOpenFolder=$RESOURCE_FOLDER_ERC"
 	say "${B}A resource folder, then three images in it:${R}"
-	image_calls "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" folder madrid-room.svg madrid-ray.png autumn-getaway.svg
+	image_calls "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" folder madrid-room.svg madrid-ray.png devcon-guest.svg
 	wait_key "upload the images"
 	say ""
 
 	if live; then
 		printf ' '
 		api POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/resource-folders" "{\"externalReferenceCode\": \"$RESOURCE_FOLDER_ERC\", \"name\": \"$RESOURCE_FOLDER_ERC\"}" > /dev/null && tick "$RESOURCE_FOLDER_ERC/" &&
-			post_images "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" madrid-room.svg madrid-ray.png autumn-getaway.svg
+			post_images "$MADRID/fragment-sets/$FRAGMENT_SET_ERC" madrid-room.svg madrid-ray.png devcon-guest.svg
 		printf '\n'
 	fi
 
@@ -804,7 +810,7 @@ act1() {
 	# UI: Ray’s Hotel > Fragments: Seasonal Offer appears, with its thumbnail.
 	step offer "Create the Seasonal Offer fragment"
 	show "$MADRID_ADMIN$FRAGMENTS=$FRAGMENT_SET_ERC"
-	request POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$(fragment_payload autumn configuration.json)" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
+	request POST "$MADRID/fragment-sets/$FRAGMENT_SET_ERC/fragments" "$(fragment_payload devcon configuration.json)" "$FRAGMENT_RESPONSE" "$FRAGMENT_BODY"
 	next
 
 	# UI: before the request, Madrid > Site Builder > Pages: no pages yet.
@@ -1237,7 +1243,7 @@ open_hotel() {
 }
 
 act6() {
-	act "The next DevCon cities" "Ray’s Hotels follows DevCon: Madrid hosted it in 2025 and London hosts it now. Which city could host it next? Tenerife, Mykonos, Taormina, Sydney, Rio de Janeiro and Honolulu are candidates, and Ray opens a hotel in each, the way London opened."
+	act "The next DevCon cities" "Ray’s Hotels follows DevCon: Madrid hosted it in 2025 and London hosts it now. Which city could host it next? Tenerife, Mykonos, Polignano a Mare, Sydney, Rio de Janeiro and Honolulu are candidates, and Ray opens a hotel in each, the way London opened."
 
 	# UI: the hotel grid (demo/hotel-grid.py, http://localhost:8090): one tile per city, filled as each hotel opens.
 	step hotels "Open the hotels of six possible future DevCon cities"
@@ -1270,32 +1276,32 @@ act6() {
 }
 
 act7() {
-	act "Winter campaign" "Winter arrives. Marketing updates the Seasonal Offer once, in the design library, and all eight hotels get it with one propagation."
+	act "Early bird campaign" "The early bird season opens for the next DevCon. Marketing updates the Seasonal Offer once, in the design library, and the six new hotels get it with one propagation. Madrid and London, DevCon cities already, keep their DevCon guest rate."
 
-	step winter-file "Upload the winter image to the library"
+	step early-bird-file "Upload the early bird image to the library"
 	library_urls
 	show "$LIBRARY_SET$RESOURCES&demoOpenFolder=$RESOURCE_FOLDER_ERC"
-	reveal_after winter-getaway.svg
-	request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/winter-getaway.svg" "$RESOURCE_FOLDER_ERC")" '{externalReferenceCode, resourceFolderExternalReferenceCode}'
+	reveal_after early-bird.svg
+	request POST "$LIBRARY/fragment-sets/$FRAGMENT_SET_ERC/resource-files" "$(resource_payload "$DIR/assets/early-bird.svg" "$RESOURCE_FOLDER_ERC")" '{externalReferenceCode, resourceFolderExternalReferenceCode}'
 	next
 
-	# UI: the Madrid hotel page: still autumn.
-	step winter-offer "Update the Seasonal Offer in the library"
+	# UI: the Madrid hotel page: still the DevCon guest rate.
+	step early-bird-offer "Update the Seasonal Offer in the library"
 	library_urls
 	show "$LIBRARY_SET"
 	show_after "$GRID_URL/"
-	request PUT "$LIBRARY/fragments/$OFFER_FRAGMENT_ERC" "$(fragment_payload winter winter-configuration.json)" - "$FRAGMENT_BODY"
+	request PUT "$LIBRARY/fragments/$OFFER_FRAGMENT_ERC" "$(fragment_payload early-bird early-bird-configuration.json)" - "$FRAGMENT_BODY"
 	compact || say ""
-	say "Pages keep their copy of each fragment: the hotels still show autumn."
+	say "Pages keep their copy of each fragment: the hotels still show the DevCon guest rate, until we propagate."
 	show_sites
 	next
 
-	# UI: the library's Ray’s Hotel: Seasonal Offer > ⋮ > View Site Usages, select Madrid and London, Propagate.
-	# Then both hotel pages.
-	step propagate "Propagate to every hotel, from the UI"
+	# UI: the library's Ray’s Hotel: Seasonal Offer > ⋮ > View Site Usages, select all, untick Madrid and London, Propagate.
+	# Then the hotel grid: six hotels with the early bird offer, Madrid and London still with the guest rate.
+	step propagate "Propagate to the six new hotels, from the UI"
 	library_urls
 	show_still "$LIBRARY_SET"
-	say "Seasonal Offer > ⋮ > View Site Usages: select all the hotels, then Propagate."
+	say "Seasonal Offer > ⋮ > View Site Usages: select the six new hotels, not Madrid or London, then Propagate."
 
 	if browser_on; then
 		wait_key "propagate in the browser"
@@ -1309,12 +1315,12 @@ act7() {
 }
 
 # propagate_in_browser: the propagation of act 7, clicked in the browser at a
-# pace the audience can follow, then the hotel grid once the hotel pages have
-# the winter offer (or after 60 seconds).
+# pace the audience can follow, then the hotel grid once the first of the six
+# new hotels has the early bird offer (or after 60 seconds).
 propagate_in_browser() {
 	local title
 
-	title=$(sed -nE 's/.*rays-offer__title"[^>]*>([^<]*)<.*/\1/p' "$DIR/payloads/seasonal-offer/winter/index.html")
+	title=$(sed -nE 's/.*rays-offer__title"[^>]*>([^<]*)<.*/\1/p' "$DIR/payloads/seasonal-offer/early-bird/index.html")
 
 	browser menu Seasonal Offer
 	browser wait 2
@@ -1322,12 +1328,16 @@ propagate_in_browser() {
 	browser wait 3
 	browser check-all
 	browser wait 2
+	browser uncheck London
+	browser wait 1
+	browser uncheck Madrid
+	browser wait 2
 	browser click Propagate
 	browser wait 3
 	browser goto "$GRID_URL/"
 
 	for _ in $(seq 1 60); do
-		[ "$(page_offer "$MADRID_ERC")" = "$title" ] && break
+		[ "$(page_offer "${DEVCON_CITIES[0]%%|*}")" = "$title" ] && break
 
 		sleep 1
 	done

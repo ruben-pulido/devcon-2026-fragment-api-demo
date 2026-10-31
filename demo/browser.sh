@@ -49,7 +49,7 @@ ACT_FOLDERS=(
 	"4. MCP"
 	"5. Agent"
 	"6. Cities"
-	"7. Winter"
+	"7. Early bird"
 )
 
 bookmarks=(
@@ -79,10 +79,10 @@ bookmarks=(
 	"5.5|Madrid hotel|Madrid hotel page (Breakfast Hours appears)|$MADRID_PAGE"
 	"5.6|London hotel|London hotel page (Breakfast Hours appears)|$LONDON_PAGE"
 	"6.1|All hotels|Hotel grid: all eight hotels (they appear as they open)|$GRID_URL/"
-	"7.2a|Offer|Design Libraries > Ray’s Design Library > Ray’s Hotel fragments (Seasonal Offer turns winter)|$LIBRARIES"
-	"7.2b|Autumn|Hotel grid: all eight hotels (still autumn)|$GRID_URL/"
-	"7.3a|Propagate|Design Libraries > Ray’s Design Library > Ray’s Hotel: Seasonal Offer > View Site Usages > select all > Propagate|$LIBRARIES"
-	"7.3b|Winter|Hotel grid: all eight hotels (winter)|$GRID_URL/"
+	"7.2a|Offer|Design Libraries > Ray’s Design Library > Ray’s Hotel fragments (Seasonal Offer turns early bird)|$LIBRARIES"
+	"7.2b|DevCon|Hotel grid: all eight hotels (still the DevCon guest rate)|$GRID_URL/"
+	"7.3a|Propagate|Design Libraries > Ray’s Design Library > Ray’s Hotel: Seasonal Offer > View Site Usages > select all, untick Madrid and London > Propagate|$LIBRARIES"
+	"7.3b|Early bird|Hotel grid: the six new hotels with the early bird offer, Madrid and London with the guest rate|$GRID_URL/"
 )
 
 urls=("$LIFERAY_URL/c/portal/login?redirect=$(jq -rn --arg url "$SITES" '$url | @uri')")

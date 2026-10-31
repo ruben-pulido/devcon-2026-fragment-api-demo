@@ -1,5 +1,5 @@
 [#assign hotel = configuration.city?lower_case?replace(" ", "-") /]
-[#assign folder = "[resources:images/autumn-getaway.svg]" /]
+[#assign folder = "[resources:images/devcon-guest.svg]" /]
 [#if folder?starts_with("/")]
 	[#assign ray = folder?keep_before_last("/") + "/" + hotel + "-ray-png" /]
 	[#assign room = folder?keep_before_last("/") + "/" + hotel + "-room-svg" /]

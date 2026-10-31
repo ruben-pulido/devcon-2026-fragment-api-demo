@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 200" width="480" height="200">
 <defs><clipPath id="c"><rect width="480" height="200" rx="18"/></clipPath></defs>
 <g clip-path="url(#c)">
-<rect width="480" height="200" fill="#20150f"/>
+<rect width="480" height="200" fill="#000823"/>
 <svg x="44" y="10" width="392" height="163" viewBox="0 0 480 200" preserveAspectRatio="xMidYMax slice">
   <defs>
     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#0d1a33"/>
-      <stop offset="1" stop-color="#2c4d7a"/>
+      <stop offset="0" stop-color="#000825"/>
+      <stop offset="1" stop-color="#26045c"/>
     </linearGradient>
   </defs>
   <rect width="480" height="200" fill="url(#sky)"/>
-  <circle cx="245" cy="40" r="18" fill="#dfe9f5"/>
-  <g fill="#081020">
+  <circle cx="245" cy="40" r="18" fill="#ffaef0"/>
+  <g fill="#00071d">
     <rect x="52" y="60" width="36" height="140"/>
     <path d="M48 60 L70 18 L92 60 Z"/>
     <rect x="66" y="6" width="8" height="16"/>
@@ -23,18 +23,18 @@
     <rect x="160" y="96" width="170" height="8"/>
     <rect x="380" y="120" width="70" height="80"/>
   </g>
-  <circle cx="70" cy="86" r="11" fill="#f2d27a"/>
-  <path d="M190 150 Q245 120 300 150" stroke="#081020" stroke-width="5" fill="none"/>
-  <rect x="0" y="176" width="480" height="24" fill="#1d3557" opacity="0.8"/>
+  <circle cx="70" cy="86" r="11" fill="#fb66df"/>
+  <path d="M190 150 Q245 120 300 150" stroke="#00071d" stroke-width="5" fill="none"/>
+  <rect x="0" y="176" width="480" height="24" fill="#0f073a" opacity="0.8"/>
 
 </svg>
-<rect x="44" y="10" width="392" height="163" fill="none" stroke="#3a2618" stroke-width="6"/>
+<rect x="44" y="10" width="392" height="163" fill="none" stroke="#080833" stroke-width="6"/>
 <path d="M0 0h52c-8 50-10 110 4 173H0z" fill="#7cc4ff"/>
 <path d="M480 0h-52c8 50 10 110-4 173h56z" fill="#7cc4ff"/>
-<path d="M14 0c-4 60-2 120 6 173M30 0c-6 60-6 120 6 173M466 0c4 60 2 120-6 173M450 0c6 60 6 120-6 173" stroke="#00000030" stroke-width="3" fill="none"/>
-<rect x="0" y="173" width="480" height="27" fill="#2c1d14"/>
-<rect x="36" y="168" width="408" height="8" rx="3" fill="#4a3322"/>
-<rect x="150" y="160" width="180" height="20" rx="8" fill="#f4f1ec"/>
+<path d="M14 0c-4 60-2 120 6 173M30 0c-6 60-6 120 6 173M466 0c4 60 2 120-6 173M450 0c6 60 6 120-6 173" stroke="#00040f30" stroke-width="3" fill="none"/>
+<rect x="0" y="173" width="480" height="27" fill="#01092b"/>
+<rect x="36" y="168" width="408" height="8" rx="3" fill="#13063e"/>
+<rect x="150" y="160" width="180" height="20" rx="8" fill="#ffcff6"/>
 <rect x="130" y="172" width="220" height="28" rx="8" fill="#7cc4ff" opacity=".85"/>
-<path d="M66 160h20l-4-16h-12z" fill="#f6e7a8"/><rect x="74" y="160" width="4" height="14" fill="#f6e7a8"/>
+<path d="M66 160h20l-4-16h-12z" fill="#ffa7ee"/><rect x="74" y="160" width="4" height="14" fill="#ffa7ee"/>
 </g></svg>

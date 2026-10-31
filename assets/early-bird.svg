@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <linearGradient id="ticket" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3a8bff"/>
+      <stop offset="1" stop-color="#7a00e6"/>
+    </linearGradient>
+  </defs>
+  <circle cx="120" cy="120" r="116" fill="#00072b"/>
+  <g transform="rotate(-12 120 120)">
+    <path d="M40 78h160a8 8 0 0 1 8 8v22a14 14 0 0 0 0 28v22a8 8 0 0 1-8 8H40a8 8 0 0 1-8-8v-22a14 14 0 0 0 0-28V86a8 8 0 0 1 8-8z" fill="url(#ticket)"/>
+    <path d="M160 86v70" stroke="#ffffff" stroke-width="4" stroke-dasharray="6 6" opacity=".7"/>
+    <ellipse cx="98" cy="124" rx="30" ry="22" fill="#ffffff"/>
+    <circle cx="124" cy="108" r="14" fill="#ffffff"/>
+    <path d="M136 106l16 5-16 6z" fill="#e500bd"/>
+    <circle cx="127" cy="105" r="3" fill="#00072b"/>
+    <path d="M78 124c10-18 28-18 34 0-12 8-26 8-34 0z" fill="#3a8bff"/>
+    <path d="M68 126l-14 8 16 2z" fill="#ffffff"/>
+    <path d="M178 112v24" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+  </g>
+</svg>
